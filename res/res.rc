@@ -1,0 +1,24 @@
+IDI_ICON              ICON    DISCARDABLE     "app.ico"
+1 VERSIONINFO
+FILEVERSION 4,4,29,360
+PRODUCTVERSION 4,4,29,360
+FILEFLAGSMASK 0x3fL
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "FileVersion", "4,4,29,360"
+            VALUE "FileDescription", "Cafe control programm\0"
+            VALUE "LegalCopyright", "(C)2014-2018, JAZZVE LLC\0"
+            VALUE "Email", "it@jazzve.am\0"
+            VALUE "OriginalFilename", "FastF.exe\0"
+            VALUE "ProductName", "Cafe4\0"
+            VALUE "ProductVersion", "4.4\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END

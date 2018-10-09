@@ -1,0 +1,12 @@
+#ifndef J6_SPECIAL_GLOBAL_H
+#define J6_SPECIAL_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(J6_SPECIAL_LIBRARY)
+#  define J6_SPECIALSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define J6_SPECIALSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // J6_SPECIAL_GLOBAL_H

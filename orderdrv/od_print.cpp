@@ -1,0 +1,502 @@
+#include "od_print.h"
+#include <QProcess>
+#include "../printing.h"
+#include "../qsystem.h"
+#include "../genqrcode.h"
+#include <math.h>
+#include <QHostInfo>
+#include "od_drv.h"
+#include "ff_settingsdrv.h"
+
+QFont OD_Print::mfFont;
+QMap<int, QStringList> OD_Print::m_printSchema;
+
+OD_Print::OD_Print()
+{
+}
+
+OD_Print::~OD_Print()
+{
+
+}
+
+void OD_Print::getPrinterSchema(OD_Base *db)
+{   m_printSchema.clear();
+    /* Database must be opened */
+    if (db->prepare("select schema_id, name from me_printers")) {
+        if (db->execSQL()) {
+            while (db->next()) {
+                if (!m_printSchema.contains(db->v_int(0))) {
+                    m_printSchema.insert(db->v_int(0), QStringList());
+                }
+                m_printSchema[db->v_int(0)].append(db->v_str(1));
+            }
+        }
+    }
+}
+
+bool OD_Print::printService(int remind, const QString &objName, QList<OD_Dish *> &dishes, OD_Header &header, DbDriver &db)
+{
+    QMap<int, float> list;
+    QMap<QString, QList<int> > printSchema;
+
+    if (!db.openDB())
+        return false;
+
+    for (int i = 0; i < dishes.count(); i++) {
+        if (dishes.at(i)->f_stateId != DISH_STATE_NORMAL)
+            continue;
+        if (dishes.at(i)->f_totalQty > dishes.at(i)->f_printedQty) {
+            list[i] = dishes.at(i)->f_totalQty - dishes.at(i)->f_printedQty;
+            dishes.at(i)->f_printedQty = dishes.at(i)->f_totalQty;
+            dishes.at(i)->m_saved = false;
+        }
+    }
+
+    for (int i = 0; i < dishes.count(); i++)
+        if (!dishes.at(i)->saveToDB(db))
+            return false;
+
+    if (remind) {
+        if (!db.prepare("insert into o_dishes_reminder (staff_id, table_id, dish_id, qty) values (:staff_id, :table_id, :dish_id, :qty)"))
+            return false;
+        for (QMap<int, float>::const_iterator i = list.begin(); i != list.end(); i++) {
+            if (dishes[i.key()]->f_remind) {
+                db.bindValue(":staff_id", header.f_currStaffId);
+                db.bindValue(":table_id", header.f_tableId);
+                db.bindValue(":dish_id", dishes.at(i.key())->f_dishId);
+                db.bindValue(":qty", i.value());
+                if (!db.execSQL())
+                    return false;
+            }
+        }
+    }
+    db.closeDB();
+
+    for (QMap<int, float>::const_iterator it = list.begin(); it != list.end(); it++) {
+        QStringList prn;
+        if (!dishes[it.key()]->f_print1.isEmpty()) {
+            prn << dishes[it.key()]->f_print1;
+        }
+        if (!dishes[it.key()]->f_print2.isEmpty()) {
+            prn << dishes[it.key()]->f_print2;
+        }
+        for (QStringList::const_iterator p = prn.begin(); p != prn.end(); p++) {
+            if (!printSchema.contains(*p))
+                printSchema.insert(*p, QList<int>());
+            printSchema[*p].append(it.key());
+        }
+    }
+
+    for (QMap<QString, QList<int> >::const_iterator it = printSchema.begin(); it != printSchema.end(); it++) {
+        if (!___printerInfo->printerExists(it.key())) {
+            LOG("Printer " + it.key()  + " not exists");
+            foreach (QPrinterInfo pi, ___printerInfo->m_printers) {
+                LOG(pi.printerName());
+            }
+            continue;
+        }
+
+        LOG("Printing on " + it.key());
+
+        SizeMetrics sm(___printerInfo->resolution(it.key()));
+        XmlPrintMaker pm(&sm);
+
+        pm.setFontName(mfFont.family());
+        pm.setFontSize(10);
+        pm.setFontBold(true);
+        int top = 0;
+
+        pm.text(tr("New order"), 0, top);
+        top += pm.lastTextHeight();
+        pm.text(tr("Order number"), 0, top);
+        pm.textRightAlign(header.f_id, page_width, top);
+        top += pm.lastTextHeight() + 1;
+        pm.text(tr("Table"), 0, top);
+        pm.textRightAlign(objName + " / " + header.f_tableName, page_width, top);
+        top += pm.lastTextHeight() + 1;
+        pm.text(tr("Staff"), 0, top);
+        pm.textRightAlign(header.f_currStaffName, page_width, top);
+        top += pm.lastTextHeight() + 1;
+        pm.text(tr("Date"), 0, top);
+        pm.textRightAlign(QDateTime::currentDateTime().toString("ddb->MM.yyyy HH:mm:ss"), page_width, top);
+        top += pm.lastTextHeight() + 2;
+        pm.line(0, top, page_width, top);
+        top++;
+        pm.line(0, top, page_width, top);
+
+        pm.setFontSize(12);
+        top++;
+        for (QList<int>::const_iterator dish = it.value().begin(); dish != it.value().end(); dish++) {
+            pm.text(dishes[*dish]->f_dishName, 0, top, page_width);
+            top += pm.lastTextHeight() + 3;
+            if (dishes[*dish]->f_comments.length()) {
+                top += 2;
+                pm.text(dishes[*dish]->f_comments, 0, top, page_width);
+                top += pm.lastTextHeight() + 1;
+            }
+            pm.text(QString("%1").arg(list[*dish]), 30, top);
+            top += pm.lastTextHeight() + 4;
+            pm.line(0, top, page_width, top);
+            top++;
+            pm.checkForNewPage(top);
+        }
+        top += 5;
+        pm.line(0, top, page_width, top);
+        pm.finishPage();
+
+        ThreadPrinter *tp = new ThreadPrinter(it.key(), sm, pm);
+        tp->start();
+    }
+    return true;
+}
+
+void OD_Print::printCheckout(const QString &prnName, OD_Drv *d)
+{
+    if (d->m_header.f_printQty < 0)
+        d->m_header.f_printQty *= -1;
+    d->m_header.f_printQty++;
+
+    SizeMetrics sm(___printerInfo->resolution(prnName));
+    XmlPrintMaker pm(&sm);
+
+    pm.setFontName(mfFont.family());
+    pm.setFontSize(10);
+    int top = 5;
+
+    QString logoFile = QSystem::appPath() + "\\logo.png";
+    if (QFile::exists(logoFile))
+        top += pm.imageCenter(logoFile, top, page_width) + 1;
+    pm.text(tr("Order number"), 1, top);
+    pm.textRightAlign(d->m_header.f_id, page_width, top);
+    top += pm.lastTextHeight() + 1;
+    pm.text(tr("Table"), 1, top);
+    pm.textRightAlign(d->mfObjectName + " / " + d->m_header.f_tableName, page_width, top);
+    top += pm.lastTextHeight() + 1;
+    pm.text(tr("Staff"), 1, top);
+    pm.textRightAlign(d->m_header.f_currStaffName, page_width, top);
+    top += pm.lastTextHeight() + 1;
+    pm.text(tr("Date"), 1, top);
+    pm.textRightAlign(datets(d->m_header.f_dateCash), page_width, top);
+    top += pm.lastTextHeight() + 2;
+    pm.line(0, top, page_width, top);
+    top++;
+    pm.line(0, top, page_width, top);
+    float otherDisc = 0;
+
+    for (int i = 0; i <d->m_dishes.count(); i++) {
+        if (d->m_dishes[i]->f_stateId != DISH_STATE_NORMAL)
+            continue;
+        if (d->m_dishes[i]->f_paymentMod != DISH_MOD_NORMAL)
+            continue;
+        top++;
+        QString dishName = d->m_dishes[i]->f_dishName;
+        if (d->m_dishes[i]->f_amountDec > 0)
+            if (d->m_dishes[i]->f_priceDec != d->m_header.f_amount_dec_value) {
+                dishName += "*";
+                float cnt = d->m_dishes[i]->f_totalQty * d->m_dishes[i]->f_price;
+                cnt += (cnt * d->m_dishes[i]->f_priceInc);
+                cnt *= d->m_dishes[i]->f_priceDec;
+                otherDisc += cnt;
+            }
+        pm.text(dishName, 1, top, page_width);
+        top += pm.lastTextHeight() + 1;
+        pm.text(dts(d->m_dishes[i]->f_totalQty), 10, top);
+        pm.text(dts(d->m_dishes[i]->f_price), 20, top);
+        pm.textRightAlign(dts(d->m_dishes[i]->f_amount), page_width, top);
+        top += pm.lastTextHeight() + 2;
+        pm.line(0, top, page_width, top);
+        pm.checkForNewPage(top);
+    }
+    /* Without service */
+    for (int i = 0; i <d->m_dishes.count(); i++) {
+        if (d->m_dishes[i]->f_stateId != DISH_STATE_NORMAL)
+            continue;
+        if (d->m_dishes[i]->f_paymentMod != DISH_MOD_NOINCDEC)
+            continue;
+        top++;
+        pm.text(d->m_dishes[i]->f_dishName, 1, top, page_width);
+        top += pm.lastTextHeight() + 1;
+        pm.text(dts(d->m_dishes[i]->f_totalQty), 10, top);
+        pm.text(dts(d->m_dishes[i]->f_price), 20, top);
+        pm.textRightAlign(dts(d->m_dishes[i]->f_amount), page_width, top);
+        top += pm.lastTextHeight() + 2;
+        pm.line(0, top, page_width, top);
+        pm.checkForNewPage(top);
+    }
+    /* And without service */
+    top += 2;
+    pm.line(0, top, page_width, top);
+    top++;
+    pm.checkForNewPage(top);
+    pm.text(tr("Counted"), 1, top);
+    pm.textRightAlign(dts(d->m_header.f_amount + d->m_header.f_amount_dec - d->m_header.f_amount_inc), page_width, top);
+    top += pm.lastTextHeight() + 1;
+
+    if (d->m_header.f_amount_inc > 0) {
+        pm.text(QString("%1 %2%").arg(tr("Service")).arg(d->m_header.f_amount_inc_value * 100), 1, top);
+        pm.textRightAlign(dts(d->m_header.f_amount_inc), page_width, top);
+        top += pm.lastTextHeight() + 1;
+        pm.checkForNewPage(top);
+    }
+
+    if (d->m_header.f_amount_dec_value > 0) {
+        pm.text(QString("%1 %2%").arg(tr("Discount")).arg(d->m_header.f_amount_dec_value * 100), 1, top);
+        pm.textRightAlign(dts(d->m_header.f_amount_dec - otherDisc), page_width, top);
+        top += pm.lastTextHeight() + 1;
+        pm.checkForNewPage(top);
+    }
+
+    if (otherDisc > 0.01) {
+        pm.text(tr("* Partial discount"), 1, top);
+        pm.textRightAlign(dts(otherDisc), page_width, top);
+        top += pm.lastTextHeight() + 1;
+        pm.checkForNewPage(top);
+    }
+
+    top++;
+    pm.line(0, top, page_width, top);
+    top++;
+    pm.line(0, top, page_width, top);
+    pm.checkForNewPage(top);
+    pm.setFontBold(true);
+    pm.setFontSize(12);
+    top += 2;
+    pm.text(tr("Total"), 1, top);
+    pm.textRightAlign(dts(d->m_header.f_amount), page_width, top);
+
+    top += pm.lastTextHeight() + 1;
+    pm.checkForNewPage(top);
+    pm.setFontBold(false);
+    pm.setFontItalic(true);
+    pm.setFontSize(6);
+    pm.text(tr("Thank you for visit"), 1, top);
+
+    top += pm.lastTextHeight() + 10;
+    pm.checkForNewPage(top);
+    pm.setFontItalic(false);
+    pm.text(QString("%1: %2, %3: %4").arg(tr("Printed"))
+            .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss"))
+            .arg(tr("Smpl."))
+            .arg(d->m_header.f_printQty), 1, top);
+    top += pm.lastTextHeight() + 1;
+    pm.checkForNewPage(top);
+    QHostInfo h;
+    pm.text(h.hostName() + "/" + prnName, 1, top);
+
+    pm.checkForNewPage(top);
+    /* QRCode */
+    top += pm.lastTextHeight() + 3;
+    pm.text(tr("Payment avaiable with IDram"), 10, top);
+    top += pm.lastTextHeight() + 1;
+    QString qrCodeFile = QString("%1%2%3.bmp").arg(QSystem::homePath()).arg(d->m_header.f_id).arg(d->m_header.f_printQty);
+    qrcodeToFile(qrCodeFile.toLatin1().data(),
+                 QString("%1;%2;%3;%4|%5;%6;")
+               .arg("Jazzve")
+               .arg(FF_SettingsDrv::value(SD_IDRAM_ID).toString()) //IDram ID
+               .arg(d->m_header.f_amount)
+               .arg(d->m_header.f_id)
+               .arg(FF_SettingsDrv::value(SD_IDRAM_PHONE).toString())
+               .arg("1").toLatin1().data());
+
+    top += pm.imageCenter(qrCodeFile, top + 5, page_width, true);
+    /* End QRCode */
+
+    top += 5;
+    pm.text(".", 1, top);
+
+    pm.finishPage();
+
+    ThreadPrinter *tp = new ThreadPrinter(prnName, sm, pm);
+    tp->start();
+
+}
+
+void OD_Print::printRemoved(int index, float qty, OD_Drv *d, const QString &reason)
+{
+    QStringList prn;
+    if (!d->m_dishes[index]->f_print1.isEmpty()) {
+        prn << d->m_dishes[index]->f_print1;
+    }
+    if (!d->m_dishes[index]->f_print2.isEmpty()) {
+        prn << d->m_dishes[index]->f_print2;
+    }
+    for (QStringList::const_iterator it = prn.begin(); it != prn.end(); it++) {
+        if (!___printerInfo->printerExists(*it))
+            continue;
+        SizeMetrics sm(___printerInfo->resolution(*it));
+        XmlPrintMaker xp(&sm);
+        int top = 3;
+
+        xp.setFontName(mfFont.family());
+        xp.setFontSize(8);
+
+        xp.text(tr("Removed from order"), 1, top);
+        top += xp.lastTextHeight() + 1;
+        xp.text(tr("Order number"), 1, top);
+        xp.textRightAlign(d->m_header.f_id, page_width, top);
+        top += xp.lastTextHeight() + 1;
+        xp.text(tr("Table"), 1, top);
+        xp.textRightAlign(d->m_header.f_tableName, page_width, top);
+        top += xp.lastTextHeight() + 1;
+        xp.text(tr("Staff"), 1, top);
+        xp.textRightAlign(d->m_header.f_currStaffName, page_width, top);
+        top += xp.lastTextHeight() + 1;
+        xp.text(tr("Date"), 1, top);
+        xp.textRightAlign(QDateTime::currentDateTime().toString(DATETIME_FORMAT), page_width, top);
+        top += xp.lastTextHeight() + 1;
+        top ++;
+        xp.line(1, top, page_width, top);
+        top ++;
+        xp.text(d->m_dishes[index]->f_dishName, 1, top);
+        top += xp.lastTextHeight() + 1;
+        xp.textRightAlign(QString("%1").arg(qty), page_width, top);
+        top += xp.lastTextHeight() + 2;
+        xp.text(reason, 1, top);
+        top += xp.lastTextHeight() + 1;
+        top ++;
+        xp.line(1, top, page_width, top);
+        top ++;
+        top ++;
+        xp.text(".", 1, top);
+        xp.finishPage();
+
+        ThreadPrinter *tp = new ThreadPrinter(*it, sm, xp);
+        tp->start();
+    }
+}
+
+void OD_Print::printTax(const QString &ip, const QString &port, const QString &pass, OD_Drv *d, bool print)
+{
+    if (!port.toInt()) {
+        if (!d->m_header.f_taxPrint)
+            d->m_header.f_taxPrint = FF_SettingsDrv::value(SD_DEFAULT_HALL_ID).toInt();
+        d->m_saved = false;
+        d->saveAll();
+        return;
+    }
+
+    QString fileName = QString("tax_%1.json")
+            .arg(d->m_header.f_id);
+
+    QFile f(QSystem::appPath() + "\\" + fileName);
+    if (f.open(QIODevice::WriteOnly)) {
+        float amount = d->m_header.f_amount - d->m_header.f_amountCard ;
+        float amountCard = d->m_header.f_amountCard;
+        f.write((QString("{\"seq\":1,\"paidAmount\":%1, \"paidAmountCard\":%2, \"useExtPOS\":true, \"mode\":2,\"items\":[")
+                 .arg(QString::number(amount, 'f', 2))
+                 .arg(QString::number(amountCard, 'f', 2))).toUtf8());
+        bool first = true;
+        for (int i = 0; i < d->m_dishes.count(); i++) {
+            if (d->m_dishes[i]->f_stateId != DISH_STATE_NORMAL)
+                continue;
+            if (d->m_dishes[i]->f_price < 0.01)
+                continue;
+            if (!first)
+                f.write(",");
+            else
+                first = false;
+            float price = d->m_dishes[i]->f_price;
+            price += (price * d->m_dishes[i]->f_priceInc);
+            price -= (price * d->m_dishes[i]->f_priceDec);
+            f.write(QString("{\"dep\":%1,\"qty\":%2,\"price\":%3,\"productCode\":\"%4\",\"productName\":\"%5\",\"adgCode\":\"%6\", \"unit\":\"%7\"}")
+                    .arg(FF_SettingsDrv::value(SD_TAX_PRINT_TERMINAL_DEP).toString())
+                    .arg(d->m_dishes[i]->f_totalQty)
+                    .arg(QString::number(price, 'f', 2))
+                    .arg(d->m_dishes[i]->f_dishId)
+                    .arg(d->m_dishes[i]->f_dishName)
+                    .arg(d->m_dishes[i]->f_adgCode)
+                    .arg(QString::fromUtf8("հատ"))
+                    .toUtf8());
+        }
+        f.write("]}");
+        f.close();
+        if (print) {
+            QStringList args;
+            args << ip << port << pass << fileName;
+            QProcess *p = new QProcess();
+            p->start(QSystem::appPath() + "\\printtax.exe", args);
+        }
+    }
+}
+
+void OD_Print::printTax(const QString &orderId, DbDriver &db)
+{
+    if (!db.openDB())
+        return;
+    if (!db.prepare("select payment from o_order where id=:id"))
+        return;
+    db.bindValue(":id", orderId);
+    if (!db.execSQL())
+        return;
+    db.next();
+    int payMethod = db.v_int(0);
+    if (!db.prepare("select od.dish_id, d.name, od.qty, od.price, od.price_inc, od.price_dec, mt.adgcode "
+                    "from o_dishes od, me_dishes d, me_types mt "
+                    "where od.dish_id=d.id and d.type_id=mt.id and od.order_id=:order_id and od.state_id=1 and price > 0.01"))
+        return;
+    db.bindValue(":order_id", orderId);
+    if (!db.execSQL())
+        return;
+    float amount = 0, amountCard = 0;
+    QStringList codeList;
+    QStringList nameList;
+    QStringList qtyList;
+    QStringList priceList;
+    QStringList adgCode;
+    while (db.next()) {
+        float qty = db.v_dbl(2);
+        float price = db.v_dbl(3);
+        float priceInc = db.v_dbl(4);
+        float priceDec = db.v_dbl(5);
+        price += (price * priceInc);
+        price -= (price * priceDec);
+        amount += price * qty;
+        codeList.append(db.v_str(0));
+        nameList.append(db.v_str(1));
+        adgCode.append(db.v_str(6));
+        qtyList.append(QString::number(db.v_dbl(2), 'f', 2));
+        priceList.append(QString::number(price, 'f', 2));
+    }
+    if (!db.prepare("update o_order set taxprint = 0 where id=:id"))
+        return;
+    db.bindValue(":id", orderId);
+    if (!db.execSQL())
+        return;
+    db.closeDB();
+    if (payMethod == 2) {
+        amountCard = amount;
+        amount = 0;
+    }
+
+    QString fileName = QString("tax_%1.json").arg(orderId);
+    QFile f(QSystem::appPath() + "\\" + fileName);
+    if (f.open(QIODevice::WriteOnly)) {
+        f.write((QString("{\"seq\":1,\"paidAmount\":%1, \"paidAmountCard\":%2, \"useExtPOS\":true, \"mode\":2,\"items\":[")
+                 .arg(QString::number(amount, 'f', 2))
+                 .arg(QString::number(amountCard, 'f', 2))).toUtf8());
+        bool first = true;
+        for (int i = 0; i < codeList.count(); i++) {
+            if (!first)
+                f.write(",");
+            else
+                first = false;
+            f.write(QString("{\"dep\":%1,\"qty\":%2,\"price\":%3,\"productCode\":\"%4\",\"productName\":\"%5\",\"adgCode\":\"%6\", \"unit\":\"%7\"}")
+                    .arg(FF_SettingsDrv::value(SD_TAX_PRINT_TERMINAL_DEP).toString())
+                    .arg(qtyList.at(i))
+                    .arg(priceList.at(i))
+                    .arg(codeList.at(i))
+                    .arg(nameList.at(i))
+                    .arg(adgCode.at(i))
+                    .arg(QString::fromUtf8("հատ"))
+                    .toUtf8());
+        }
+        f.write("]}");
+        f.close();
+        QStringList args;
+        args << FF_SettingsDrv::value(SD_TAX_PRINT_IP).toString() << FF_SettingsDrv::value(SD_TAX_PRINT_PORT).toString() << FF_SettingsDrv::value(SD_TAX_PRINT_PASS).toString() << fileName;
+        QProcess *p = new QProcess();
+        p->start(QSystem::appPath() + "\\printtax.exe", args);
+    }
+}
+

@@ -22,6 +22,7 @@ public:
     static QString taxIP();
     static int taxPort();
     static QString taxPassword();
+    static QString taxDept();
     static QString onlineReportAddress();
     static QString onlineReportPassword();
     static QString onlineReportCafeId();

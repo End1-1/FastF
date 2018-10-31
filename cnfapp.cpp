@@ -6,6 +6,7 @@
 #define TaxIP "tax_ip_address"
 #define TaxPort "tax_port"
 #define TaxPassword "tax_password"
+#define TaxDept "tax_dept"
 
 #define OnlineReportAddress "online_report_address"
 #define OnlineReportPassword "online_report_password"
@@ -32,6 +33,11 @@ int CnfApp::taxPort()
 QString CnfApp::taxPassword()
 {
     return fData[TaxPassword];
+}
+
+QString CnfApp::taxDept()
+{
+    return fData[TaxDept];
 }
 
 QString CnfApp::onlineReportAddress()
@@ -69,7 +75,7 @@ void CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &d
     }
     if (!fData.contains(TaxIP)) {
         QStringList v;
-        v << TaxIP << TaxPort << TaxPassword;
+        v << TaxIP << TaxPort << TaxPassword << TaxDept;
         foreach (QString s, v) {
             q.prepare("insert into sys_cnfapp (fhost, fkey) values (:fhost, :fkey)");
             q.bindValue(":fhost", settingsName);

@@ -648,19 +648,19 @@
     </message>
     <message>
         <source>Cannot connect to database</source>
-        <translation type="unfinished">Հնարավոր չէ հաստատել կապ տվյալների պահոցների հետ</translation>
+        <translation>Հնարավոր չէ հաստատել կապ տվյալների պահոցների հետ</translation>
     </message>
     <message>
         <source>Order is empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Պատվերը դատարկ է</translation>
     </message>
     <message>
         <source>Order is incomplete</source>
-        <translation type="unfinished"></translation>
+        <translation>Պատվերը վերջացված չէ</translation>
     </message>
     <message>
         <source>Order is not opened</source>
-        <translation type="unfinished"></translation>
+        <translation>Պատվերը բաց չէ</translation>
     </message>
     <message>
         <source>Receipt wasnt printed</source>
@@ -672,7 +672,7 @@
     </message>
     <message>
         <source>Incorrect dish record id</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Cannot print multiple receipt
@@ -684,11 +684,19 @@
         <translation>Հետվերադարձ կտրոնի համար</translation>
     </message>
     <message>
-        <source>Cannot print multiple receipt for this order by you</source>
-        <translation type="unfinished"></translation>
+        <source>Firm address is empty</source>
+        <translation></translation>
     </message>
     <message>
-        <source>Firm address is empty</source>
+        <source>Cannot print receipt, becouse date is not equal current date</source>
+        <translation>Դուք չէկ կարող տպել կրկօրինակ, քանի որ փիղ չկա մեր անտառում</translation>
+    </message>
+    <message>
+        <source>Cannot print receipt, becouse time up</source>
+        <translation>Դուք չէկ կարող տպել կրկօրինակ, քանի որ ժամը անցել է</translation>
+    </message>
+    <message>
+        <source>Cannot print multiple receipt for this order by you</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -740,7 +748,7 @@
     </message>
     <message>
         <source>Counted</source>
-        <translation type="unfinished">Ընդամենը</translation>
+        <translation>Ընդամենը</translation>
     </message>
     <message>
         <source>Service </source>
@@ -800,7 +808,19 @@
     </message>
     <message>
         <source>Tax SN</source>
-        <translation type="unfinished">ԱՀ</translation>
+        <translation>ԱՀ</translation>
+    </message>
+    <message>
+        <source>Department</source>
+        <translation>Բաժին</translation>
+    </message>
+    <message>
+        <source>GH</source>
+        <translation>ԳՀ</translation>
+    </message>
+    <message>
+        <source>(F)</source>
+        <translation>(Ֆ)</translation>
     </message>
 </context>
 <context>
@@ -923,7 +943,7 @@
     <name>QLogWindow</name>
     <message>
         <source>Log window</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>

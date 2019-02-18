@@ -39,11 +39,17 @@
 #define RTotal 6
 #define RComment 7
 
+QStringList fGiftCards;
+
 dlgorder::dlgorder(QWidget *parent) :
     QDialog(parent, Qt::FramelessWindowHint),
     ui(new Ui::dlgorder)
 {
     ui->setupUi(this);
+
+    if (fGiftCards.count() == 0) {
+        fGiftCards << "549874523124";
+    }
 
     ui->tblTotal->setColumnWidth(0, 150);
     ui->tblTotal->setRowCount(total_row_count);
@@ -163,7 +169,8 @@ bool dlgorder::setData(FF_User *user, FF_HallDrv *hallDrv, int tableId, QString 
     m_ord->countAmounts();
 
     if (m_user->id != m_ord->m_header.f_staffId)
-        DlgMessage::Msg(tr("The order opened by") + "\n" + m_ord->m_header.f_staffName);
+        DlgMessage::Msg(tr("The order opened by") + "\n" + m_ord->m_header.f_staffName + "\n"
+                        + QString("%1:%2").arg(m_user->id).arg(m_ord->m_header.f_staffId));
     m_ord->m_header.f_currStaffId = m_user->id;
     m_ord->m_header.f_currStaffName = m_user->fullName;
 
@@ -621,6 +628,10 @@ void dlgorder::insertDiscount()
     QString cardCode;
     if (!DlgInput::getString(cardCode, tr("Enter card code"), this))
         return;
+    if (fGiftCards.contains(cardCode)) {
+        giftCard(cardCode);
+        return;
+    }
     QMap<QString, QVariant> output;
     FF_DiscountDrv *d = new FF_DiscountDrv();
     bool ok = false;
@@ -739,6 +750,43 @@ void dlgorder::beforeClose()
     }
     m_ord->closeTable();
     delete m_ord;
+}
+
+void dlgorder::giftCard(const QString &code)
+{
+    if (!fGiftCards.contains(code)) {
+        message(tr("Invalid gift card"));
+        return;
+    }
+    DbDriver db;
+    db.configureDb("10.1.0.2", "maindb", "SYSDBA", "masterkey");
+    if (!db.openDB()) {
+        message("Cannot connect to main server!");
+        return;
+    }
+    db.prepare("select sum(f_amount) from o_gift_card where f_code=:f_code");
+    db.bindValue(":f_code", code);
+    db.execSQL();
+    if (!db.next()) {
+        message(tr("Invalid gift card"));
+        return;
+    }
+    double total = db.v_dbl(0);
+    m_ord->prepare("select * from o_gift_card where f_order=:f_order");
+    m_ord->bindValue(":f_order", m_ord->m_header.f_id);
+    m_ord->execSQL();
+    if (m_ord->next()) {
+        m_ord->prepare("delete from o_gift_card where f_order=:f_order");
+        m_ord->bindValue(":f_order", m_ord->m_header.f_id);
+        m_ord->execSQL();
+    }
+    m_ord->prepare("insert into o_gift_card (f_code, f_order, f_amount) values (:f_code, :f_order, :f_amount)");
+    m_ord->bindValue(":f_code", code);
+    m_ord->bindValue(":f_order", m_ord->m_header.f_id);
+    m_ord->bindValue(":f_amount", total);
+    m_ord->execSQL();
+
+    message(QString("%1<br>%2: %3").arg(tr("Gift card")).arg(tr("Available amount")).arg(float_str(total, 2)));
 }
 
 void dlgorder::buildDishesView()
@@ -1659,4 +1707,29 @@ void dlgorder::on_btnCandyCotton_clicked()
 
     ThreadPrinter *tp = new ThreadPrinter("local", sm, pm);
     tp->start();
+}
+
+void dlgorder::on_btnDiscount_2_clicked()
+{
+    QString cardCode;
+    if (!DlgInput::getString(cardCode, tr("Enter card code"), this))
+        return;
+    if (!fGiftCards.contains(cardCode)) {
+        message(tr("Invalid gift card"));
+        return;
+    }
+    DbDriver db;
+    db.configureDb("10.1.0.2", "maindb", "SYSDBA", "masterkey");
+    if (!db.openDB()) {
+        message("Cannot connect to main server!");
+        return;
+    }
+    db.prepare("select sum(f_amount) from o_gift_card where f_code=:f_code");
+    db.bindValue(":f_code", cardCode);
+    db.execSQL();
+    if (!db.next()) {
+        message(tr("Invalid gift card"));
+        return;
+    }
+    message(tr("Balance:") + "<br>" + db.v_str(0));
 }

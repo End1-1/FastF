@@ -2,6 +2,8 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QHostInfo>
+#include <QMessageBox>
+#include <QSqlError>
 
 #define TaxIP "tax_ip_address"
 #define TaxPort "tax_port"
@@ -63,6 +65,7 @@ void CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &d
     db.setUserName(dbUser);
     db.setPassword(dbPass);
     if (!db.open()) {
+        QMessageBox::critical(0, "Db error", db.lastError().databaseText());
         return;
     }
     QString settingsName = prefix.toUpper() + "-" + QHostInfo::localHostName().toUpper();

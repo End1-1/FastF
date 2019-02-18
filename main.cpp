@@ -24,6 +24,14 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+#ifndef QT_DEBUG
+    QStringList libPath;
+    libPath << "./";
+    libPath << "./platforms";
+    libPath << "./sqldrivers";
+    QCoreApplication::setLibraryPaths(libPath);
+#endif
+
     QFont f = a.font();
     QFontDatabase fdb;
     int fontId = fdb.addApplicationFont("./ahuni.ttf");

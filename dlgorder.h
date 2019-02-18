@@ -104,6 +104,8 @@ private slots:
     void on_btnOrange_clicked();
     void on_btnCandyCotton_clicked();
 
+    void on_btnDiscount_2_clicked();
+
 private:
     OD_Drv *m_ord;
     Ui::dlgorder *ui;
@@ -127,6 +129,7 @@ private:
     void insertDiscount();
     void moveDish();
     void beforeClose();
+    void giftCard(const QString &code);
 
 signals:
     void qtyClick(float qty);

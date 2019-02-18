@@ -14,6 +14,7 @@ DlgPayment::DlgPayment(OD_Drv *drv, QWidget *parent) :
 {
     ui->setupUi(this);
     fDrv = drv;
+    fGift = 0;
     fTcpSocket.setServerIP(__cnfmaindb.fServerIP);
     ui->leTable->setText(fDrv->m_header.f_tableName);
     ui->leStaff->setText(fDrv->m_header.f_currStaffName);
@@ -26,6 +27,36 @@ DlgPayment::DlgPayment(OD_Drv *drv, QWidget *parent) :
         ui->leCard->setText(fDrv->m_dbDrv.v_str(1));
     } else {
         on_leCash_textChanged(ui->leAmount->text());
+    }
+
+    fDrv->prepare("select f_code from o_gift_card where f_order=:f_order");
+    fDrv->bindValue(":f_order", fDrv->m_header.f_id);
+    fDrv->execSQL();
+    if (fDrv->next()) {
+        DbDriver db;
+        db.configureDb("10.1.0.2", "maindb", "SYSDBA", "masterkey");
+        if (!db.openDB()) {
+            DlgMessage::Msg("Cannot connect to main server!");
+            return;
+        }
+        db.prepare("select sum(f_amount) from o_gift_card where f_code=:f_code");
+        db.bindValue(":f_code", fDrv->v_str(0));
+        db.execSQL();
+        if (!db.next()) {
+            DlgMessage::Msg(tr("Invalid gift card"));
+            return;
+        }
+        fGift = db.v_dbl(0);
+        ui->leGift->setText(db.v_str(0));
+        if (fGift > ui->leAmount->text().toDouble()) {
+            ui->leToPay->setText("0");
+        } else {
+            ui->leToPay->setText(QString::number(ui->leAmount->text().toDouble() - fGift));
+        }
+        ui->btnCash->setEnabled(false);
+        ui->btnIDRAM->setEnabled(false);
+    } else {
+        ui->wGift->setVisible(false);
     }
 }
 

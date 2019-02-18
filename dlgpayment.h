@@ -15,8 +15,11 @@ class DlgPayment : public QDialog
 
 public:
     explicit DlgPayment(OD_Drv *drv, QWidget *parent = 0);
+
     ~DlgPayment();
+
     static bool payment(OD_Drv *drv, QWidget *parent);
+
 private slots:
     void on_btnPrepayment_clicked();
 
@@ -56,6 +59,7 @@ private:
     Ui::DlgPayment *ui;
     OD_Drv *fDrv;
     MPTcpSocket fTcpSocket;
+    double fGift;
     void payment(quint8 mode);
     void receipt(int mode);
 };

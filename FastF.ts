@@ -170,7 +170,7 @@
     </message>
     <message>
         <source>Tax department</source>
-        <translation type="unfinished"></translation>
+        <translation>ՀԴՄ Բաժին</translation>
     </message>
 </context>
 <context>
@@ -254,11 +254,11 @@
     <name>DlgGetPassword</name>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>TextLabel</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -289,7 +289,7 @@
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -422,6 +422,18 @@
     <message>
         <source>CLOSE ORDER WITH IDRAM</source>
         <translation>Փակել IDRAM համակարգով</translation>
+    </message>
+    <message>
+        <source>Gift</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>To pay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid gift card</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -624,23 +636,23 @@
     </message>
     <message>
         <source>Only close order is available</source>
-        <translation type="unfinished"></translation>
+        <translation>Պատվերը կարելի է միայն փակել</translation>
     </message>
     <message>
         <source>Order cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Պատվերը դատարկ է</translation>
     </message>
     <message>
         <source>Incorrect printer name</source>
-        <translation type="unfinished"></translation>
+        <translation>Նշված տպիչը բացակայում է</translation>
     </message>
     <message>
         <source>Incorrect order number</source>
-        <translation type="unfinished"></translation>
+        <translation>Պատվերի համարը սխալ է</translation>
     </message>
     <message>
         <source>Incomplete order</source>
-        <translation type="unfinished"></translation>
+        <translation>Պատվերը անավարտ է</translation>
     </message>
     <message>
         <source>Tax print error</source>
@@ -696,8 +708,12 @@
         <translation>Դուք չէկ կարող տպել կրկօրինակ, քանի որ ժամը անցել է</translation>
     </message>
     <message>
-        <source>Cannot print multiple receipt for this order by you</source>
-        <translation type="unfinished"></translation>
+        <source>Cannot process gift card, cannot connect to main server</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Cannot process gift card, incorrect code</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -821,6 +837,22 @@
     <message>
         <source>(F)</source>
         <translation>(Ֆ)</translation>
+    </message>
+    <message>
+        <source>Present</source>
+        <translation>Հյուրասիրություն</translation>
+    </message>
+    <message>
+        <source>Gift balance before</source>
+        <translation>Նվեր քարտ, բալանս</translation>
+    </message>
+    <message>
+        <source>Gift balance used</source>
+        <translation>Նվերը քարտ, օգտագործված է</translation>
+    </message>
+    <message>
+        <source>Gift balance after</source>
+        <translation>Նվեր քարդ, նոր բալանս</translation>
     </message>
 </context>
 <context>
@@ -1212,7 +1244,7 @@
     </message>
     <message>
         <source>Merci</source>
-        <translation type="unfinished"></translation>
+        <translation>Մերսի</translation>
     </message>
 </context>
 <context>
@@ -1620,7 +1652,23 @@
     </message>
     <message>
         <source>CANDY COTTON</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Invalid gift card</source>
+        <translation>Անհայտ նվեր քարտ</translation>
+    </message>
+    <message>
+        <source>Gift card</source>
+        <translation>Նվեր քարտ</translation>
+    </message>
+    <message>
+        <source>Available amount</source>
+        <translation>Բալանս</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Բալանս՝</translation>
     </message>
 </context>
 <context>

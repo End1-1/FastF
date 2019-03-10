@@ -433,7 +433,7 @@
     </message>
     <message>
         <source>Invalid gift card</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Անհայտ նվեր քարտ</translation>
     </message>
 </context>
 <context>
@@ -714,6 +714,14 @@
     <message>
         <source>Cannot process gift card, incorrect code</source>
         <translation></translation>
+    </message>
+    <message>
+        <source>Invalid gift card</source>
+        <translation>Անհայտ նվեր քարտ</translation>
+    </message>
+    <message>
+        <source>Cannot print multiple receipt for this order by you</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -628,6 +628,7 @@ void dlgorder::insertDiscount()
     QString cardCode;
     if (!DlgInput::getString(cardCode, tr("Enter card code"), this))
         return;
+    cardCode.replace(";", "").replace("?", "");
     if (fGiftCards.contains(cardCode)) {
         giftCard(cardCode);
         return;
@@ -647,39 +648,6 @@ void dlgorder::insertDiscount()
                                   .arg(output["VALUE_DATA"].toString()));
         ok = true;
     }
-    /*else {
-        if (cardCode.length() == 14) {
-            //QString date = cardCode.mid(1, 6);
-            QString value = cardCode.mid(7, 2);
-            QString number = cardCode.mid(9, 5);
-            DbDriver db;
-            db.configureDb(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
-            db.openDB();
-            db.prepare("select code from costumers_names where id=:id");
-            db.bindValue(":id", number.toInt());
-            db.execSQL();
-            if (db.next()) {
-                QString codeAtt = db.v_str(0);
-                db.prepare("insert into customers_attention (id, code, comment) values (:id, :code, :comment)");
-                db.bindValue(":id", number.toInt());
-                db.bindValue(":code", codeAtt);
-                db.bindValue(":comment", "New value: " + cardCode);
-                db.execSQL();
-                db.closeDB();
-            }
-            if (!m_ord->discount(number.toInt(), value.toFloat() / 100))
-                DlgMessage::Msg(tr("Discount failed due program error"));
-            m_ord->mfDefaultPriceDec = m_ord->m_header.f_amount_dec_value;
-            for (int i = 0; i < m_ord->m_dishes.count(); i++)
-                m_ord->m_dishes[i]->setPriceMod(m_ord->mfDefaultPriceInc, m_ord->mfDefaultPriceDec);
-            m_ord->countAmounts();
-            LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, "Discount", QString("%1, %2%%")
-                                      .arg(output["ID"].toString())
-                                      .arg(output["VALUE_DATA"].toString()));
-            ok = true;
-        }
-    }
-    */
     if (!ok) {
         DlgMessage::Msg(tr("Discount failed"));
     }
@@ -1714,6 +1682,7 @@ void dlgorder::on_btnDiscount_2_clicked()
     QString cardCode;
     if (!DlgInput::getString(cardCode, tr("Enter card code"), this))
         return;
+    cardCode.replace(";", "").replace("?", "");
     if (!fGiftCards.contains(cardCode)) {
         message(tr("Invalid gift card"));
         return;

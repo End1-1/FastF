@@ -107,6 +107,8 @@ void DlgPayment::payment(quint8 mode)
 
 void DlgPayment::receipt(int mode)
 {
+    ui->btnCash->setEnabled(false);
+    ui->btnCard->setEnabled(false);
     fTcpSocket.setValue("session", SESSIONID);
     fTcpSocket.setValue("query", "printreceipt");
     fTcpSocket.setValue("staff", fDrv->m_header.f_currStaffId);
@@ -116,6 +118,8 @@ void DlgPayment::receipt(int mode)
     fTcpSocket.setValue("cash", ui->leCash->text().toDouble());
     fTcpSocket.setValue("card", ui->leCard->text().toDouble());
     QJsonObject o = fTcpSocket.sendData();
+    ui->btnCash->setEnabled(true);
+    ui->btnCard->setEnabled(true);
     if (!o.contains("reply")) {
         msg(tr("Unknown error"));
         return;

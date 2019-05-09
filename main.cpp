@@ -82,9 +82,9 @@ int main(int argc, char *argv[])
     MJsonHandler::fServerIp = __cnfmaindb.fServerIP;
     if (__cnfmaindb.fServerMode.toInt() > 0) {
         MSqlDatabase::setConnectionParams(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
-        MTcpServer *s = new MTcpServer(0);
+        MTcpServer *s = new MTcpServer(nullptr);
         s->start();
-        MUdpServer *su = new MUdpServer(0);
+        MUdpServer *su = new MUdpServer(nullptr);
         su->start();
     }
 

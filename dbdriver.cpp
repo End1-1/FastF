@@ -163,9 +163,9 @@ int DbDriver::v_int(int index)
     return m_query->value(index).toInt();
 }
 
-float DbDriver::v_dbl(int index)
+double DbDriver::v_dbl(int index)
 {
-    return m_query->value(index).toFloat();
+    return m_query->value(index).toDouble();
 }
 
 QDateTime DbDriver::v_dateTime(int index)

@@ -1,7 +1,7 @@
 #include "dlgsplash.h"
 #include "ui_dlgsplash.h"
 #include <QMovie>
-#include "../../common/qsystem.h"
+#include "qsystem.h"
 
 DlgSplash::DlgSplash(QWidget *parent) :
     QDialog(parent, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint),

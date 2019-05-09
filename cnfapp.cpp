@@ -65,7 +65,7 @@ void CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &d
     db.setUserName(dbUser);
     db.setPassword(dbPass);
     if (!db.open()) {
-        QMessageBox::critical(0, "Db error", db.lastError().databaseText());
+        QMessageBox::critical(nullptr, "Db error", db.lastError().databaseText());
         return;
     }
     QString settingsName = prefix.toUpper() + "-" + QHostInfo::localHostName().toUpper();

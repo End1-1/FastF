@@ -34,7 +34,7 @@ CnfMainDb::CnfMainDb()
     }
     QList<QByteArray> params = buf.split('\r');
     if (params.count() < 9) {
-        QMessageBox::critical(0, "", "Invalid params count");
+        //QMessageBox::critical(0, "", "Invalid params count");
         return;
     }
     fHost = params.at(0);

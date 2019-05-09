@@ -11,11 +11,11 @@ TEMPLATE = app
 
 RC_FILE = res/res.rc
 
-INCLUDEPATH += C:/Qt/projects/MobilePointServer
-INCLUDEPATH += C:/Qt/projects/NewTax
-INCLUDEPATH += C:/OpenSSL-Win32.0/include
-INCLUDEPATH += C:/OpenSSL-Win32.0/include/openssl
-INCLUDEPATH += C:/Qt/projects/MobilePoint
+INCLUDEPATH += C:/projects/MobilePointServer
+INCLUDEPATH += C:/projects/NewTax/Src
+INCLUDEPATH += C:/OpenSSL-Win32/include
+INCLUDEPATH += C:/OpenSSL-Win32/include/openssl
+INCLUDEPATH += C:/projects/common
 
 SOURCES += main.cpp\
     qelineedit.cpp \
@@ -87,7 +87,7 @@ SOURCES += main.cpp\
     ../MobilePointServer/databaseresult.cpp \
     ../MobilePointServer/mtcpsocketthread.cpp \
     ../MobilePointServer/mtprintkitchen.cpp \
-    ../NewTax/printtaxn.cpp \
+    ../NewTax/Src/printtaxn.cpp \
     ../MobilePointServer/pimage.cpp \
     ../MobilePointServer/pprintscene.cpp \
     ../MobilePointServer/ptextrect.cpp \
@@ -95,9 +95,10 @@ SOURCES += main.cpp\
     ../MobilePointServer/mtfilelog.cpp \
     dlgpayment.cpp \
     elineedit.cpp \
-    ../MobilePoint/mptcpsocket.cpp \
     utils.cpp \
-    cnfapp.cpp
+    cnfapp.cpp \
+    mptcpsocket.cpp \
+    classes.cpp
 
 HEADERS  += \
     qelineedit.h \
@@ -182,7 +183,7 @@ HEADERS  += \
     ../MobilePointServer/databaseresult.h \
     ../MobilePointServer/mtcpsocketthread.h \
     ../MobilePointServer/mtprintkitchen.h \
-    ../NewTax/printtaxn.h \
+    ../NewTax/Src/printtaxn.h \
     ../MobilePointServer/pimage.h \
     ../MobilePointServer/pprintscene.h \
     ../MobilePointServer/ptextrect.h \
@@ -190,9 +191,11 @@ HEADERS  += \
     ../MobilePointServer/mtfilelog.h \
     dlgpayment.h \
     elineedit.h \
-    ../MobilePoint/mptcpsocket.h \
     utils.h \
-    cnfapp.h
+    cnfapp.h \
+    ../LibQREncode/getopt.h \
+    mptcpsocket.h \
+    classes.h
 
 
 FORMS    += \

@@ -875,7 +875,7 @@ void dlgorder::on_tblDishes_clicked(const QModelIndex &index)
         QTime time2 = QTime::fromString(params.at(1), TIME_FORMAT);
         int store = params.at(2).toInt();
         float value = params.at(3).toFloat();
-        if ((time > time1) and (time < time2)) {
+        if ((time > time1) && (time < time2)) {
             if (dish->f_storeId == store && dish->f_paymentMod == 1)
                 dish->f_priceDec = value;
         }

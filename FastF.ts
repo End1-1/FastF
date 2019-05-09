@@ -319,7 +319,7 @@
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -334,7 +334,7 @@
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>TextLabel</source>
@@ -720,6 +720,10 @@
         <translation>Անհայտ նվեր քարտ</translation>
     </message>
     <message>
+        <source>Service</source>
+        <translation>Սպասարկում</translation>
+    </message>
+    <message>
         <source>Cannot print multiple receipt for this order by you</source>
         <translation type="unfinished"></translation>
     </message>
@@ -816,11 +820,11 @@
     </message>
     <message>
         <source> +service </source>
-        <translation> + հավելավճար </translation>
+        <translation type="vanished"> + հավելավճար </translation>
     </message>
     <message>
         <source> -discount </source>
-        <translation>- զեղչ </translation>
+        <translation type="vanished">- զեղչ </translation>
     </message>
     <message>
         <source>Service included </source>
@@ -828,7 +832,7 @@
     </message>
     <message>
         <source>Discount included </source>
-        <translation>Այդ թվուվ ղեղչ</translation>
+        <translation>Այդ թվուվ ղեղչ </translation>
     </message>
     <message>
         <source>Tax SN</source>

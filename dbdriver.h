@@ -45,7 +45,7 @@ public:
     QVariant v(int index);
     QString v_str(int index);
     int v_int(int index);
-    float v_dbl(int index);
+    double v_dbl(int index);
     QDateTime v_dateTime(int index);
     QDate v_date(int index);
     QString lastQuery();

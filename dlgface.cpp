@@ -48,9 +48,7 @@ DlgFace::DlgFace(QWidget *parent) :
     qApp->processEvents();
     m_filterUsedTables = false;
     m_filterHall = FF_SettingsDrv::value(SD_DEFAULT_HALL_ID).toInt();
-
-    m_hallDrv = new FF_HallDrv();
-    connect(m_hallDrv, SIGNAL(errorMsg(QString)), this, SLOT(sqlError(QString)));
+    m_hallDrv = nullptr;
     initFace();
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(timer()));
     m_timeout = 0;
@@ -119,6 +117,10 @@ void DlgFace::configHallGrid()
 
 void DlgFace::initFace()
 {
+    if (!m_hallDrv) {
+        m_hallDrv = new FF_HallDrv();
+        connect(m_hallDrv, SIGNAL(errorMsg(QString)), this, SLOT(sqlError(QString)));
+    }
     m_hallDrv->unlockAllTables();
     m_hallDrv->filter(m_filterHall, m_filterUsedTables);
     configHallGrid();

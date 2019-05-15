@@ -1,14 +1,14 @@
 IDI_ICON              ICON    DISCARDABLE     "app.ico"
 1 VERSIONINFO
-FILEVERSION 4,4,30,374
-PRODUCTVERSION 4,4,30,374
+FILEVERSION 4,4,30,376
+PRODUCTVERSION 4,4,30,376
 FILEFLAGSMASK 0x3fL
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "FileVersion", "4,4,30,374"
+            VALUE "FileVersion", "4,4,30,376"
             VALUE "FileDescription", "Cafe control programm\0"
             VALUE "LegalCopyright", "(C)2014-2019, JAZZVE LLC\0"
             VALUE "Email", "it@jazzve.am\0"

@@ -7,6 +7,8 @@
 #include <QHostInfo>
 #include "od_drv.h"
 #include "ff_settingsdrv.h"
+#include "c5printing.h"
+#include <QApplication>
 
 QFont OD_Print::mfFont;
 QMap<int, QStringList> OD_Print::m_printSchema;
@@ -99,54 +101,47 @@ bool OD_Print::printService(int remind, const QString &objName, QList<OD_Dish *>
 
         LOG("Printing on " + it.key());
 
-        SizeMetrics sm(___printerInfo->resolution(it.key()));
-        XmlPrintMaker pm(&sm);
+        QFont font(qApp->font());
+        font.setPointSize(30);
+        C5Printing p;
+        p.setSceneParams(650, 2700, QPrinter::Portrait);
+        p.setFont(font);
 
-        pm.setFontName(mfFont.family());
-        pm.setFontSize(10);
-        pm.setFontBold(true);
-        int top = 0;
 
-        pm.text(tr("New order"), 0, top);
-        top += pm.lastTextHeight();
-        pm.text(tr("Order number"), 0, top);
-        pm.textRightAlign(header.f_id, page_width, top);
-        top += pm.lastTextHeight() + 1;
-        pm.text(tr("Table"), 0, top);
-        pm.textRightAlign(objName + " / " + header.f_tableName, page_width, top);
-        top += pm.lastTextHeight() + 1;
-        pm.text(tr("Staff"), 0, top);
-        pm.textRightAlign(header.f_currStaffName, page_width, top);
-        top += pm.lastTextHeight() + 1;
-        pm.text(tr("Date"), 0, top);
-        pm.textRightAlign(QDateTime::currentDateTime().toString("ddb->MM.yyyy HH:mm:ss"), page_width, top);
-        top += pm.lastTextHeight() + 2;
-        pm.line(0, top, page_width, top);
-        top++;
-        pm.line(0, top, page_width, top);
-
-        pm.setFontSize(12);
-        top++;
+        p.ctext(tr("New order"));
+        p.br();
+        p.ctext(tr("Order number") + " " + header.f_id);
+        p.br();
+        p.ltext(tr("Table"), 0);
+        p.rtext(objName + " / " + header.f_tableName);
+        p.br();
+        p.setFontSize(22);
+        p.ltext(tr("Staff"), 0);
+        p.rtext(header.f_currStaffName);
+        p.br();
+        p.ltext(tr("Date"), 0);
+        p.rtext(QDateTime::currentDateTime().toString("MM.yyyy HH:mm:ss"));
+        p.br();
+        p.line(5);
+        p.br(2);
+        p.setFontSize(28);
         for (QList<int>::const_iterator dish = it.value().begin(); dish != it.value().end(); dish++) {
-            pm.text(dishes[*dish]->f_dishName, 0, top, page_width);
-            top += pm.lastTextHeight() + 3;
+            p.ltext(dishes[*dish]->f_dishName, 0);
+            p.br();
             if (dishes[*dish]->f_comments.length()) {
-                top += 2;
-                pm.text(dishes[*dish]->f_comments, 0, top, page_width);
-                top += pm.lastTextHeight() + 1;
+                p.ltext(dishes[*dish]->f_comments, 0);
+                p.br();
             }
-            pm.text(QString("%1").arg(list[*dish]), 30, top);
-            top += pm.lastTextHeight() + 4;
-            pm.line(0, top, page_width, top);
-            top++;
-            pm.checkForNewPage(top);
+            p.setFontBold(true);
+            p.ltext(QString("%1").arg(list[*dish]), 0);
+            p.setFontBold(false);
+            p.br();
+            p.line(3);
+            p.br(2);
         }
-        top += 5;
-        pm.line(0, top, page_width, top);
-        pm.finishPage();
-
-        ThreadPrinter *tp = new ThreadPrinter(it.key(), sm, pm);
-        tp->start();
+        p.line(3);
+        p.br();
+        p.print(it.key(), QPrinter::Custom);
     }
     return true;
 }

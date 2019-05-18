@@ -90,5 +90,5 @@ FORMS += \
     ../../dlgcalcchange.ui \
     ../../../common/qlogwindow.ui
 
-INCLUDEPATH += C:/Qt/projects/FastF
+INCLUDEPATH += C:/projects/FastF
 

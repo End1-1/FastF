@@ -89,7 +89,7 @@ FORMS += \
     ../../dlgreportfilter.ui \
     ../../../common/qlogwindow.ui
 
-INCLUDEPATH += C:/Qt/projects/FastF
+INCLUDEPATH += C:/projects/FastF
 
 DEFINES += _ORGANIZATION_=\\\"Jazzve\\\"
 DEFINES += _APPLICATION_=\\\"FastF\\\"

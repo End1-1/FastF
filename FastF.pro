@@ -18,6 +18,7 @@ INCLUDEPATH += C:/OpenSSL-Win32/include/openssl
 INCLUDEPATH += C:/projects/common
 
 SOURCES += main.cpp\
+    c5printing.cpp \
     qelineedit.cpp \
     ff_user.cpp \
     dlgorder.cpp \
@@ -101,6 +102,7 @@ SOURCES += main.cpp\
     classes.cpp
 
 HEADERS  += \
+    c5printing.h \
     qelineedit.h \
     ff_user.h \
     dlgorder.h \

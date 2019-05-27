@@ -1,5 +1,7 @@
 #include "dbdriver.h"
+#include "dbmutexlocker.h"
 #include <QMapIterator>
+#include <QMutex>
 
 int DbDriver::m_number = 100000;
 QStringList m_lastQuery;
@@ -19,9 +21,10 @@ void DbDriver::log(const QString &message)
 
 DbDriver::DbDriver()
 {
+    QMutexLocker ml(&__mxDb);
     m_dbnumber = m_number++;
     m_db = QSqlDatabase::addDatabase("QIBASE", QString::number(m_dbnumber));
-    m_query = 0;
+    m_query = nullptr;
 }
 
 DbDriver::~DbDriver()
@@ -64,7 +67,7 @@ void DbDriver::closeDB()
     else
         m_db.commit();
     delete m_query;
-    m_query = 0;
+    m_query = nullptr;
     m_db.close();
 }
 

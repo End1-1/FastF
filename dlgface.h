@@ -32,7 +32,7 @@ class DlgFace : public QDialog
     Q_OBJECT
 
 public:
-    explicit DlgFace(QWidget *parent = 0);
+    explicit DlgFace(QWidget *parent = nullptr);
     ~DlgFace();
 
 private slots:

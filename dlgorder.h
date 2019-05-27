@@ -51,7 +51,6 @@ public:
 private slots:
     void discountCheckError();
     void discountChecked();
-    void discountRemoved();
     void message(const QString &msg);
     void printRemovedDish(int index, float qty);
     void orderCounted(const QMap<QString, QString> &values);
@@ -103,7 +102,6 @@ private slots:
     void on_btnPresent_clicked();
     void on_btnOrange_clicked();
     void on_btnCandyCotton_clicked();
-
     void on_btnDiscount_2_clicked();
 
 private:

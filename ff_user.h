@@ -48,9 +48,9 @@ public:
         bool edit;
         Role() {read = 0; write = 0; edit = 0;}
     };
+    QString m_groupId;
 
 private:
-    QString m_groupId;
     QString m_username;
     QString m_password;
     QMap<QString, Role> m_roleSet;

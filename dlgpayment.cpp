@@ -7,12 +7,14 @@
 #include "cnfapp.h"
 #include "ff_settingsdrv.h"
 #include "dlggetpassword.h"
+#include "ff_user.h"
 
-DlgPayment::DlgPayment(OD_Drv *drv, QWidget *parent) :
+DlgPayment::DlgPayment(FF_User *u, OD_Drv *drv, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DlgPayment)
 {
     ui->setupUi(this);
+    ui->btnComplimentary->setVisible(u->m_groupId.toInt() <= 2);
     fDrv = drv;
     fGift = 0;
     fTcpSocket.setServerIP(__cnfmaindb.fServerIP);
@@ -65,9 +67,9 @@ DlgPayment::~DlgPayment()
     delete ui;
 }
 
-bool DlgPayment::payment(OD_Drv *drv, QWidget *parent)
+bool DlgPayment::payment(FF_User *u, OD_Drv *drv, QWidget *parent)
 {
-    DlgPayment *d = new DlgPayment(drv, parent);
+    DlgPayment *d = new DlgPayment(u, drv, parent);
     bool result = d->exec() == QDialog::Accepted;
     delete d;
     return result;
@@ -109,6 +111,7 @@ void DlgPayment::receipt(int mode)
 {
     ui->btnCash->setEnabled(false);
     ui->btnCard->setEnabled(false);
+    ui->btnPrepaymentCash->setEnabled(false);
     fTcpSocket.setValue("session", SESSIONID);
     fTcpSocket.setValue("query", "printreceipt");
     fTcpSocket.setValue("staff", fDrv->m_header.f_currStaffId);
@@ -120,6 +123,7 @@ void DlgPayment::receipt(int mode)
     QJsonObject o = fTcpSocket.sendData();
     ui->btnCash->setEnabled(true);
     ui->btnCard->setEnabled(true);
+    ui->btnPrepaymentCash->setEnabled(true);
     if (!o.contains("reply")) {
         msg(tr("Unknown error"));
         return;
@@ -230,4 +234,17 @@ void DlgPayment::on_btnCard_clicked()
         return;
     }
     on_leCard_textChanged(num);
+}
+
+void DlgPayment::on_btnComplimentary_clicked()
+{
+    fDrv->openDB();
+    fDrv->prepare("delete from o_tax where fid=:fid");
+    fDrv->bindValue(":fid", fDrv->m_header.f_id);
+    fDrv->execSQL();
+    fDrv->prepare(QString("insert into o_tax (fid, ffiscal, fnumber, fhvhh, fcash, fcard, json) "
+               "values (:fid, '%1', '%1', '%1', 0, 0, '%1')").arg(tr("Comp.")));
+    fDrv->bindValue(":fid", fDrv->m_header.f_id);
+    fDrv->execSQL();
+    fDrv->closeDB();
 }

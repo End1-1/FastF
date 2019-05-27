@@ -425,15 +425,23 @@
     </message>
     <message>
         <source>Gift</source>
-        <translation type="unfinished"></translation>
+        <translation>Նվեր քարտ</translation>
     </message>
     <message>
         <source>To pay</source>
-        <translation type="unfinished"></translation>
+        <translation>Ենթակաէ վճարման</translation>
     </message>
     <message>
         <source>Invalid gift card</source>
-        <translation type="unfinished">Անհայտ նվեր քարտ</translation>
+        <translation>Անհայտ նվեր քարտ</translation>
+    </message>
+    <message>
+        <source>Complimentary</source>
+        <translation>Հյուրասիրություն</translation>
+    </message>
+    <message>
+        <source>Comp.</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -627,10 +635,6 @@
         <translation></translation>
     </message>
     <message>
-        <source>Database connection error</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>Table locked</source>
         <translation>Սեղանը արգելափակված է</translation>
     </message>
@@ -660,7 +664,7 @@
     </message>
     <message>
         <source>Cannot connect to database</source>
-        <translation>Հնարավոր չէ հաստատել կապ տվյալների պահոցների հետ</translation>
+        <translation type="vanished">Հնարավոր չէ հաստատել կապ տվյալների պահոցների հետ</translation>
     </message>
     <message>
         <source>Order is empty</source>
@@ -724,7 +728,7 @@
         <translation>Սպասարկում</translation>
     </message>
     <message>
-        <source>Cannot print multiple receipt for this order by you</source>
+        <source>Unable to select order with id: </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -772,7 +776,7 @@
     </message>
     <message>
         <source>Name | Qty | Price | Total</source>
-        <translation>Անվանում | Քնկ | Գին | Ընդամենը</translation>
+        <translation type="vanished">Անվանում | Քնկ | Գին | Ընդամենը</translation>
     </message>
     <message>
         <source>Counted</source>
@@ -856,15 +860,15 @@
     </message>
     <message>
         <source>Gift balance before</source>
-        <translation>Նվեր քարտ, բալանս</translation>
+        <translation type="vanished">Նվեր քարտ, բալանս</translation>
     </message>
     <message>
         <source>Gift balance used</source>
-        <translation>Նվերը քարտ, օգտագործված է</translation>
+        <translation type="vanished">Նվերը քարտ, օգտագործված է</translation>
     </message>
     <message>
         <source>Gift balance after</source>
-        <translation>Նվեր քարդ, նոր բալանս</translation>
+        <translation type="vanished">Նվեր քարդ, նոր բալանս</translation>
     </message>
 </context>
 <context>

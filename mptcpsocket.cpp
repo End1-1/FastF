@@ -1,5 +1,6 @@
 #include "mptcpsocket.h"
 #include <QNetworkProxy>
+#include <QApplication>
 
 MPTcpSocket::MPTcpSocket(QObject *parent) :
     QObject(parent)
@@ -39,6 +40,7 @@ QJsonObject MPTcpSocket::sendData()
         emit handleJson(jErr);
         return jErr;
     }
+    qApp->processEvents();
     qint32 dataSize = rawData.size();
     socket.write(reinterpret_cast<const char*>(&dataSize), sizeof(quint32));
     socket.write(rawData);
@@ -46,7 +48,8 @@ QJsonObject MPTcpSocket::sendData()
     socket.waitForBytesWritten();
     dataSize = 0;
     rawData.clear();
-    socket.waitForReadyRead();
+    qApp->processEvents();
+    socket.waitForReadyRead(10000);
     if (socket.bytesAvailable()) {
         do {
             socket.waitForReadyRead();

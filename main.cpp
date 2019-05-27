@@ -14,7 +14,6 @@
 #include "logthread.h"
 #include <QFontDatabase>
 #include "mtcpserver.h"
-#include "mudpserver.h"
 #include "msqldatabase.h"
 #include "cnfmaindb.h"
 #include "cnfapp.h"
@@ -82,10 +81,8 @@ int main(int argc, char *argv[])
     MJsonHandler::fServerIp = __cnfmaindb.fServerIP;
     if (__cnfmaindb.fServerMode.toInt() > 0) {
         MSqlDatabase::setConnectionParams(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
-        MTcpServer *s = new MTcpServer(nullptr);
-        s->start();
-        MUdpServer *su = new MUdpServer(nullptr);
-        su->start();
+        //MTcpServer *s = new MTcpServer();
+        //s->start();
     }
 
     DlgFace w;

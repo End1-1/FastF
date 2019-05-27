@@ -19,6 +19,7 @@ INCLUDEPATH += C:/projects/common
 
 SOURCES += main.cpp\
     c5printing.cpp \
+    dbmutexlocker.cpp \
     qelineedit.cpp \
     ff_user.cpp \
     dlgorder.cpp \
@@ -82,7 +83,6 @@ SOURCES += main.cpp\
     dlgpaymentjazzve.cpp \
     ../MobilePointServer/msqldatabase.cpp \
     ../MobilePointServer/mtcpserver.cpp \
-    ../MobilePointServer/mudpserver.cpp \
     cnfmaindb.cpp \
     ../MobilePointServer/mjsonhandler.cpp \
     ../MobilePointServer/databaseresult.cpp \
@@ -103,6 +103,7 @@ SOURCES += main.cpp\
 
 HEADERS  += \
     c5printing.h \
+    dbmutexlocker.h \
     qelineedit.h \
     ff_user.h \
     dlgorder.h \
@@ -179,7 +180,6 @@ HEADERS  += \
     dlgpaymentjazzve.h \
     ../MobilePointServer/msqldatabase.h \
     ../MobilePointServer/mtcpserver.h \
-    ../MobilePointServer/mudpserver.h \
     cnfmaindb.h \
     ../MobilePointServer/mjsonhandler.h \
     ../MobilePointServer/databaseresult.h \

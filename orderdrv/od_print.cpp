@@ -141,6 +141,11 @@ bool OD_Print::printService(int remind, const QString &objName, QList<OD_Dish *>
         }
         p.line(3);
         p.br();
+        p.br();
+        p.br();
+        p.br();
+        p.br();
+        p.ltext("_", 0);
         p.print(it.key(), QPrinter::Custom);
     }
     return true;

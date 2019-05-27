@@ -39,17 +39,13 @@
 #define RTotal 6
 #define RComment 7
 
-QStringList fGiftCards;
+static QStringList fGiftCards;
 
 dlgorder::dlgorder(QWidget *parent) :
     QDialog(parent, Qt::FramelessWindowHint),
     ui(new Ui::dlgorder)
 {
     ui->setupUi(this);
-
-    if (fGiftCards.count() == 0) {
-        fGiftCards << "549874523124";
-    }
 
     ui->tblTotal->setColumnWidth(0, 150);
     ui->tblTotal->setRowCount(total_row_count);
@@ -225,45 +221,6 @@ void dlgorder::discountChecked()
     m_ord->m_print.printCheckout(checkPrinterName, m_ord);
     LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, "Print receipt check", "");
     setButtonsState();
-}
-
-void dlgorder::discountRemoved()
-{
-//    disconnect(&m_drv, SIGNAL(discountRemoved()));
-//    if (DlgMessage::Msg(tr("Confirm to close order")) != QDialog::Accepted)
-//        return;
-
-//    DlgSelectePaymentType *d = new DlgSelectePaymentType(this);
-//    m_ord->m_header.f_payment = d->exec();
-//    if (m_ord->m_header.f_payment == 2) {
-//        m_ord->m_header.f_amountCard = m_ord->m_header.f_amount;
-//    }
-//    if (m_ord->m_header.f_payment == 3) {
-//        //TODO: find payment by jazzve card
-//        QString cardCode;
-//        if (!DlgInput::getString(cardCode, tr("Enter card code"), this))
-//            return;
-//        if (cardCode.length() == 0) {
-//            return;
-//        }
-//    }
-
-//    if (FF_SettingsDrv::value(SD_TAX_PRINT).toInt()) {
-//        QString orderNum = m_ord->m_header.f_id.right(1);
-//        if (FF_SettingsDrv::value(SD_TAX_PRINT_FREQ).toString().contains(orderNum))
-//            m_ord->m_print.printTax(FF_SettingsDrv::value(SD_TAX_PRINT_IP).toString(),
-//                                      FF_SettingsDrv::value(SD_TAX_PRINT_PORT).toString(),
-//                                      FF_SettingsDrv::value(SD_TAX_PRINT_PASS).toString(), m_ord);
-//        else if (m_ord->m_header.f_amountCard > 0.01)
-//            m_ord->m_print.printTax(FF_SettingsDrv::value(SD_TAX_PRINT_IP).toString(),
-//                                      FF_SettingsDrv::value(SD_TAX_PRINT_PORT).toString(),
-//                                      FF_SettingsDrv::value(SD_TAX_PRINT_PASS).toString(), m_ord);
-//    }
-
-//    m_ord->m_header.f_dateCash = FF_SettingsDrv::cashDate();
-//    m_ord->m_header.f_stateId = ORDER_STATE_CLOSED;
-//    LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, "Close order", "");
-//    accept();
 }
 
 void dlgorder::message(const QString &msg)
@@ -688,11 +645,6 @@ void dlgorder::beforeClose()
         if (m_ord->m_header.f_stateId == ORDER_STATE_OPEN) {
             if (!m_ord->m_dishes.count()) {
                 m_ord->m_header.f_stateId = ORDER_STATE_EMTPY1;
-                /*
-                OrderWindowDriver *owd = new OrderWindowDriver(0);
-                connect(owd, SIGNAL(discountRemoved()), owd, SLOT(deleteLater()));
-                owd->removeDiscountFromApp(FF_SettingsDrv::value(SD_DISCOUNT_APP_QUERY).toString() + m_ord->m_header.f_tableName);
-                */
             } else {
                 bool empty = true;
                 for (int i = 0; i < m_ord->m_dishes.count(); i++) {
@@ -1086,42 +1038,12 @@ void dlgorder::on_btnPrint_clicked()
 
 void dlgorder::on_btnPayment_clicked()
 {
-    if (!DlgPayment::payment(m_ord, this)) {
+    if (!DlgPayment::payment(m_user, m_ord, this)) {
         setButtonsState();
         return;
     }
-
-//        DlgSelectePaymentType *d = new DlgSelectePaymentType(this);
-//        m_ord->m_header.f_payment = d->exec();
-//        if (m_ord->m_header.f_payment == 2) {
-//            m_ord->m_header.f_amountCard = m_ord->m_header.f_amount;
-//        }
-//        if (m_ord->m_header.f_payment == 3) {
-//            //TODO: find payment by jazzve card
-//            QString cardCode;
-//            if (!DlgInput::getString(cardCode, tr("Enter card code"), this))
-//                return;
-//            if (cardCode.length() == 0) {
-//                return;
-//            }
-//        }
-
-//        if (FF_SettingsDrv::value(SD_TAX_PRINT).toInt()) {
-//            QString orderNum = m_ord->m_header.f_id.right(1);
-//            if (FF_SettingsDrv::value(SD_TAX_PRINT_FREQ).toString().contains(orderNum))
-//                m_ord->m_print.printTax(FF_SettingsDrv::value(SD_TAX_PRINT_IP).toString(),
-//                                          FF_SettingsDrv::value(SD_TAX_PRINT_PORT).toString(),
-//                                          FF_SettingsDrv::value(SD_TAX_PRINT_PASS).toString(), m_ord);
-//            else if (m_ord->m_header.f_amountCard > 0.01)
-//                m_ord->m_print.printTax(FF_SettingsDrv::value(SD_TAX_PRINT_IP).toString(),
-//                                          FF_SettingsDrv::value(SD_TAX_PRINT_PORT).toString(),
-//                                          FF_SettingsDrv::value(SD_TAX_PRINT_PASS).toString(), m_ord);
-//        }
-
-//        m_ord->m_header.f_dateCash = FF_SettingsDrv::cashDate();
-//        m_ord->m_header.f_stateId = ORDER_STATE_CLOSED;
-        LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, "Close order", "");
-        accept();
+    LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, "Close order", "");
+    accept();
 }
 
 void dlgorder::on_btnDuplicateDish_clicked()

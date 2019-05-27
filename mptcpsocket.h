@@ -8,7 +8,7 @@ class MPTcpSocket : public QObject
 {
     Q_OBJECT
 public:
-    MPTcpSocket(QObject *parent = 0);
+    MPTcpSocket(QObject *parent = nullptr);
     void setServerIP(const QString &ip);
     void setValue(const QString &key, const QVariant &value);
     QJsonObject sendData();

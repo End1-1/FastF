@@ -1,6 +1,7 @@
 #include "dlgtableformovement.h"
 #include "ui_dlgtableformovement.h"
 #include "dlgmessage.h"
+#include "dlglist.h"
 
 DlgTableForMovement::DlgTableForMovement(QWidget *parent) :
     QDialog(parent, Qt::FramelessWindowHint),
@@ -82,4 +83,15 @@ void DlgTableForMovement::on_tblHall_currentItemChanged(QTableWidgetItem *curren
 void DlgTableForMovement::on_btnOK_clicked()
 {
     accept();
+}
+
+void DlgTableForMovement::on_btnFilter_clicked()
+{
+    QVariant out;
+    if (!DlgList::value(m_hallDrv->getHallMap(), out, this)) {
+        return;
+    }
+    m_currentHallId = out.toInt();
+    m_hallDrv->filter(m_currentHallId, false);
+    m_hallDrv->configGrid(ui->tblHall, 0);
 }

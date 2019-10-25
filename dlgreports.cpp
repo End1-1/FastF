@@ -175,7 +175,7 @@ void dlgreports::on_btnPrint_clicked()
         DlgMessage::Msg(tr("Printer not exists") + " :" + checkPrinterName + "\r\n"
                         + tr("Available printers are: ") + "\r\n"
                         + prns);
-        return;
+        checkPrinterName = "local";
     }
 
     SizeMetrics sm(___printerInfo->resolution(checkPrinterName));

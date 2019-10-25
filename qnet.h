@@ -14,6 +14,7 @@ public:
     QString URL;
     QMap<QString, QString> rawHeader;
     QString ContentType;
+    void goSSL();
     void go();
     void addData(const QString &name, const QString &data);
     void addData(const QByteArray &data);

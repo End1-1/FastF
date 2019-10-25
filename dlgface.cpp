@@ -13,7 +13,6 @@
 #include "cnfmaindb.h"
 #include "ff_messanger.h"
 #include "ff_correcttime.h"
-#include "dlggatreader.h"
 #include "logthread.h"
 #include "msqldatabase.h"
 #include "dbdriver.h"
@@ -206,7 +205,7 @@ void DlgFace::onlineUp()
         n->addData("data[" + dr.value(i, "DATE_CASH").toDate().toString("yyyy-MM-dd") + "][amount]", dr.value(i, "AMOUNT").toString());
         n->addData("data[" + dr.value(i, "DATE_CASH").toDate().toString("yyyy-MM-dd") + "][qty]", dr.value(i, "QTY").toString());
     }
-    n->go();
+    n->goSSL();
 }
 
 HallItemDelegate::HallItemDelegate(FF_HallDrv *hallDrv)
@@ -223,6 +222,9 @@ void HallItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     if (!tableId)
         return;
     FF_HallDrv::Table *t = m_hallDrv->table(tableId);
+    if (!t) {
+        return;
+    }
 
     painter->save();
 
@@ -503,7 +505,7 @@ void DlgFace::on_lstReminder_clicked(const QModelIndex &index)
         return;
 
     QSqlDrv d("FASTFF", "main");
-    d.prepare("update o_dishes_reminder set date_done=current_timestamp where id=:id");
+    d.prepare("update o_dishes_reminder set state_id=4, date_done=current_timestamp where id=:id");
     d.bind(":id", index.data(Qt::UserRole));
     d.execSQL();
 

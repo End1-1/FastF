@@ -4,6 +4,7 @@
 #include <QHostInfo>
 #include <QMessageBox>
 #include <QSqlError>
+#include <QApplication>
 
 #define TaxIP "tax_ip_address"
 #define TaxPort "tax_port"
@@ -20,6 +21,11 @@ CnfApp __cnfapp;
 CnfApp::CnfApp()
 {
 
+}
+
+QString CnfApp::path()
+{
+    return qApp->applicationDirPath();
 }
 
 QString CnfApp::taxIP()

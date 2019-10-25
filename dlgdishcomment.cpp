@@ -2,8 +2,6 @@
 #include "ui_dlgdishcomment.h"
 #include <QScrollBar>
 
-#define U(X) QString::fromUtf8(X)
-
 DlgDishComment::DlgDishComment(QWidget *parent) :
     QDialog(parent, Qt::FramelessWindowHint),
     ui(new Ui::DlgDishComment)
@@ -31,7 +29,7 @@ DlgDishComment::DlgDishComment(QWidget *parent) :
     row2 << U("Է") << U("Թ") << U("Փ") << U("Ձ") << U("Ջ") << U("Ւ") << U("և") << U("Ր") << U("Չ") << U("Ճ") << U("-") << U("Ժ") << U(" ");
     row3 << U("Ք") << U("Ո") << U("Ե") << U("Ռ") << U("Տ") << U("Տ") << U("Ը") << U("Ւ") << U("Ի") << U("Օ") << U("Պ") << U("Խ") << U("Ծ");
     row4 << U("Ա") << U("Ս") << U("Դ") << U("Ֆ") << U("Գ") << U("Հ") << U("Յ") << U("Կ") << U("Լ") << U(":") << U("Շ") << U(" ") << U(" ");
-    row5 << U("Զ") << U("Ղ") << U("Ց") << U("Վ") << U("Բ") << U("Ն") << U("Մ") << U("") << U("") << U("?") << U(" ") << U(" ") << U(" ");
+    row5 << U("Զ") << U("Ղ") << U("Ց") << U("Վ") << U("Բ") << U("Ն") << U("Մ") << U("")  << U("")  << U("?") << U(" ") << U(" ") << U(" ");
     m_letters.insert(0, row1);
     m_letters.insert(1, row2);
     m_letters.insert(2, row3);

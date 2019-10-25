@@ -52,10 +52,6 @@ public:
     bool m_saved;
     bool m_removePrinted;
 
-public slots:
-    void incQty(float qty);
-    void decQty(float qty);
-
 signals:
     void update(int index);
     void removed(int index, float qty);

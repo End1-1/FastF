@@ -38,11 +38,12 @@
 #define DISH_MOD_NORMAL 1
 #define DISH_MOD_NOINCDEC 2
 
-#define dts(value) QString::number(value, 'f', 2)
 #define its(value) QString::number(value)
 #define datets(value) value.toString(DATE_FORMAT)
 
 #define page_width 55
+
+QString double_str(double value, int f = 2);
 
 #endif // OD_CONFIG
 

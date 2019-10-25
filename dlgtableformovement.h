@@ -21,12 +21,14 @@ private slots:
     void on_btnCancel_clicked();
     void on_tblHall_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
     void on_btnOK_clicked();
+    void on_btnFilter_clicked();
 
 private:
     Ui::DlgTableForMovement *ui;
     FF_HallDrv *m_hallDrv;
     int m_currentTableId;
     int m_newTableId;
+    int m_currentHallId;
 };
 
 #endif // DLGTABLEFORMOVEMENT_H

@@ -17,6 +17,37 @@
     </message>
 </context>
 <context>
+    <name>DlgApproveCorrectionMessage</name>
+    <message>
+        <source>APPROVE</source>
+        <translation>ՀԱՍՏԱՏՎԱԾ Է</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation>Ում կոմից</translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Նշում</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Այո</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Փակել</translation>
+    </message>
+    <message>
+        <source>Approved</source>
+        <translation>Հաստատված է</translation>
+    </message>
+    <message>
+        <source>Not approved</source>
+        <translation>Հաստատված չէ</translation>
+    </message>
+</context>
+<context>
     <name>DlgCalcChange</name>
     <message>
         <source>Amount</source>
@@ -174,6 +205,99 @@
     </message>
 </context>
 <context>
+    <name>DlgCorrection</name>
+    <message>
+        <source>Dish name</source>
+        <translation>ՈՒՏԵՍՏ</translation>
+    </message>
+    <message>
+        <source>Old qty</source>
+        <translation>ՔԱՆԱԿ</translation>
+    </message>
+    <message>
+        <source>Qty to
+remove</source>
+        <translation>ՀԵՌԱՑՆԵԼ</translation>
+    </message>
+    <message>
+        <source>1.0</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Remove reason</source>
+        <translation>Հեռացման
+պատճառ</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Ընդունել</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Հրաժարվել</translation>
+    </message>
+    <message>
+        <source>Removed from order</source>
+        <translation>Հեռացված է պատվերից</translation>
+    </message>
+    <message>
+        <source>Order number</source>
+        <translation>Պատվեր #</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation>Սեղան</translation>
+    </message>
+    <message>
+        <source>Staff</source>
+        <translation>Սպասարկող</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Ամսաթիվ</translation>
+    </message>
+    <message>
+        <source>Incorrect qty to remove</source>
+        <translation>Հեռացման քանակը սխալ է</translation>
+    </message>
+    <message>
+        <source>Reason cannot be empty</source>
+        <translation>Նշեք հեռացման պատճառը</translation>
+    </message>
+    <message>
+        <source>Removed without print</source>
+        <translation>Հեռացված է արանց տպելու</translation>
+    </message>
+    <message>
+        <source>Removed with print </source>
+        <translation>Հեռացված է տպելուց հետո</translation>
+    </message>
+    <message>
+        <source>Keyboard</source>
+        <translation>Ստեղնաշար</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Մաքրել</translation>
+    </message>
+    <message>
+        <source>Check request</source>
+        <translation>Ստուգել</translation>
+    </message>
+    <message>
+        <source>Request error</source>
+        <translation>Հարցման սխալ</translation>
+    </message>
+    <message>
+        <source>Request created. Wait for response.</source>
+        <translation>Հարցումը գրանցված է։ Սպասեք պատասխանին</translation>
+    </message>
+    <message>
+        <source>Response error.</source>
+        <translation>Հարցման սխալ</translation>
+    </message>
+</context>
+<context>
     <name>DlgDishComment</name>
     <message>
         <source>Result</source>
@@ -239,15 +363,15 @@
     <name>DlgGatReader</name>
     <message>
         <source>Read card</source>
-        <translation>Կարդալ քարտը</translation>
+        <translation type="vanished">Կարդալ քարտը</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Հրաժարվել</translation>
+        <translation type="vanished">Հրաժարվել</translation>
     </message>
     <message>
         <source>Bring your card</source>
-        <translation>Մոտեցրեք քարտը սարքին</translation>
+        <translation type="vanished">Մոտեցրեք քարտը սարքին</translation>
     </message>
 </context>
 <context>
@@ -338,7 +462,7 @@
     </message>
     <message>
         <source>TextLabel</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -465,6 +589,49 @@
     <message>
         <source>Cancel</source>
         <translation type="unfinished">Հրաժարվել</translation>
+    </message>
+</context>
+<context>
+    <name>DlgQty</name>
+    <message>
+        <source>7</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>8</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>6</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>3</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>2</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>5</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>9</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>1</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>4</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>0</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -729,7 +896,7 @@
     </message>
     <message>
         <source>Unable to select order with id: </source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -875,7 +1042,7 @@
     <name>OD_Dish</name>
     <message>
         <source>You can remove only</source>
-        <translation>Հնարավոր քանաք հեռացնելու համար</translation>
+        <translation type="vanished">Հնարավոր քանաք հեռացնելու համար</translation>
     </message>
 </context>
 <context>
@@ -938,7 +1105,7 @@
     </message>
     <message>
         <source>Removed from order</source>
-        <translation>Հեռացված է պատվերից</translation>
+        <translation type="vanished">Հեռացված է պատվերից</translation>
     </message>
 </context>
 <context>
@@ -1172,7 +1339,7 @@
     <message>
         <source>Update time from4 server</source>
         <oldsource>Update time from server</oldsource>
-        <translation>Ուղղել համակարգչի ամսաթիվը</translation>
+        <translation type="vanished">Ուղղել համակարգչի ամսաթիվը</translation>
     </message>
     <message>
         <source>Time server</source>
@@ -1261,6 +1428,14 @@
     <message>
         <source>Merci</source>
         <translation>Մերսի</translation>
+    </message>
+    <message>
+        <source>Update time from server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dish correction red timeout</source>
+        <translation>Անվտանգ հեռացում, րոպե</translation>
     </message>
 </context>
 <context>
@@ -1400,7 +1575,7 @@
     </message>
     <message>
         <source>Connectin error</source>
-        <translation>Կապի սխալ</translation>
+        <translation type="vanished">Կապի սխալ</translation>
     </message>
     <message>
         <source>Empty</source>
@@ -1416,7 +1591,7 @@
     </message>
     <message>
         <source>Cannot connect to database</source>
-        <translation>Հնարավոր չէ հաստատել կապ տվյալների պահոցների հետ</translation>
+        <translation type="vanished">Հնարավոր չէ հաստատել կապ տվյալների պահոցների հետ</translation>
     </message>
     <message>
         <source>SQL error. Movement error, please check source and destination tables</source>
@@ -1584,7 +1759,7 @@
     </message>
     <message>
         <source>Connection error</source>
-        <translation type="vanished">Կապի սխալ</translation>
+        <translation>Կապի սխալ</translation>
     </message>
     <message>
         <source>Invalid password</source>
@@ -1607,10 +1782,6 @@
         <translation></translation>
     </message>
     <message>
-        <source>5</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>4</source>
         <translation></translation>
     </message>
@@ -1619,35 +1790,11 @@
         <translation></translation>
     </message>
     <message>
-        <source>7</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>3</source>
         <translation></translation>
     </message>
     <message>
-        <source>0.5</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>2</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>9</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>6</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>8</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>+10</source>
         <translation></translation>
     </message>
     <message>
@@ -1685,6 +1832,42 @@
     <message>
         <source>Balance:</source>
         <translation>Բալանս՝</translation>
+    </message>
+    <message>
+        <source>+1</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>+0.5</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>-0.5</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>-1</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>+/-</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Set qty to</source>
+        <translation>Քանակ</translation>
+    </message>
+    <message>
+        <source>Decrease qty by</source>
+        <translation>Քանակը իչեցված է</translation>
+    </message>
+    <message>
+        <source>Remove, because qty is zero. Decrease by</source>
+        <translation>Հեռացված է, քանի որ քանակը 0 է։ Իջեցված է՝</translation>
+    </message>
+    <message>
+        <source>Increase qty by</source>
+        <translation>Քանակը ավելացված է</translation>
     </message>
 </context>
 <context>

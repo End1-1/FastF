@@ -16,7 +16,7 @@
 #define SD_REMINDER QObject::tr("REMINDER")
 #define SD_AVAILABLE_HALL QObject::tr("Available halls")
 #define SD_AVAILABLE_MENU QObject::tr("Available menu")
-#define SD_UPDATE_TIME_FROM_SERVER QObject::tr("Update time from4 server")
+#define SD_UPDATE_TIME_FROM_SERVER QObject::tr("Update time from server")
 #define SD_UPDATE_TIME_SERVER QObject::tr("Time server")
 #define SD_PRINT_QRCODE QObject::tr("Print QR Code")
 #define SD_ORDER_ID_PREFIX QObject::tr("Order id prefix")
@@ -28,6 +28,7 @@
 #define SD_IDRAM_ID QObject::tr("IDram id")
 #define SD_IDRAM_PHONE QObject::tr("IDram phone")
 #define SD_DISCOUNT_APP_QUERY QObject::tr("Discount app query")
+#define SD_DISH_CORRECTION_RED_TIMEOUT QObject::tr("Dish correction red timeout")
 
 #define SD_TAX_PRINT_SERVER QObject::tr("PRINT_TAX_SERVER")
 #define SD_TAX_PRINT QObject::tr("PRINT_TAX")

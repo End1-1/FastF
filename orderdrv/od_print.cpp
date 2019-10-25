@@ -7,8 +7,11 @@
 #include <QHostInfo>
 #include "od_drv.h"
 #include "ff_settingsdrv.h"
+#include "kitreminderthread.h"
 #include "c5printing.h"
 #include <QApplication>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 QFont OD_Print::mfFont;
 QMap<int, QStringList> OD_Print::m_printSchema;
@@ -60,17 +63,37 @@ bool OD_Print::printService(int remind, const QString &objName, QList<OD_Dish *>
             return false;
 
     if (remind) {
-        if (!db.prepare("insert into o_dishes_reminder (staff_id, table_id, dish_id, qty) values (:staff_id, :table_id, :dish_id, :qty)"))
+        QStringList jsonReminder;
+        if (!db.prepare("insert into o_dishes_reminder (state_id, date_register, record_id, staff_id, table_id, dish_id, qty) values (:state_id, :date_register, :record_id, :staff_id, :table_id, :dish_id, :qty)"))
             return false;
         for (QMap<int, float>::const_iterator i = list.begin(); i != list.end(); i++) {
             if (dishes[i.key()]->f_remind) {
+                OD_Dish *d = dishes[i.key()];
+                db.bindValue(":state_id", 0);
+                db.bindValue(":date_register", QDateTime::currentDateTime());
+                db.bindValue(":record_id", d->f_id);
                 db.bindValue(":staff_id", header.f_currStaffId);
                 db.bindValue(":table_id", header.f_tableId);
-                db.bindValue(":dish_id", dishes.at(i.key())->f_dishId);
+                db.bindValue(":dish_id", d->f_dishId);
                 db.bindValue(":qty", i.value());
-                if (!db.execSQL())
+                if (!db.execSQL()) {
                     return false;
+                }
+                QJsonObject jo;
+                jo["state"] = 0;
+                jo["rec"] = QString::number(d->f_id);
+                jo["dish"] = d->f_dishName;
+                jo["time"] = QTime::currentTime().toString("HH:mm");
+                jo["qty"] = i.value();
+                jo["table"] = header.f_tableName;
+                jo["staff"] = header.f_currStaffName;
+                jo["comment"] = d->f_comments;
+                jsonReminder.append(QJsonDocument(jo).toJson(QJsonDocument::Compact) + "\r\n");
             }
+        }
+        if (jsonReminder.count() > 0) {
+            KitReminderThread *kt = new KitReminderThread(jsonReminder);
+            kt->start();
         }
     }
     db.closeDB();
@@ -310,60 +333,6 @@ void OD_Print::printCheckout(const QString &prnName, OD_Drv *d)
     ThreadPrinter *tp = new ThreadPrinter(prnName, sm, pm);
     tp->start();
 
-}
-
-void OD_Print::printRemoved(int index, float qty, OD_Drv *d, const QString &reason)
-{
-    QStringList prn;
-    if (!d->m_dishes[index]->f_print1.isEmpty()) {
-        prn << d->m_dishes[index]->f_print1;
-    }
-    if (!d->m_dishes[index]->f_print2.isEmpty()) {
-        prn << d->m_dishes[index]->f_print2;
-    }
-    for (QStringList::const_iterator it = prn.begin(); it != prn.end(); it++) {
-        if (!___printerInfo->printerExists(*it))
-            continue;
-        SizeMetrics sm(___printerInfo->resolution(*it));
-        XmlPrintMaker xp(&sm);
-        int top = 3;
-
-        xp.setFontName(mfFont.family());
-        xp.setFontSize(8);
-
-        xp.text(tr("Removed from order"), 1, top);
-        top += xp.lastTextHeight() + 1;
-        xp.text(tr("Order number"), 1, top);
-        xp.textRightAlign(d->m_header.f_id, page_width, top);
-        top += xp.lastTextHeight() + 1;
-        xp.text(tr("Table"), 1, top);
-        xp.textRightAlign(d->m_header.f_tableName, page_width, top);
-        top += xp.lastTextHeight() + 1;
-        xp.text(tr("Staff"), 1, top);
-        xp.textRightAlign(d->m_header.f_currStaffName, page_width, top);
-        top += xp.lastTextHeight() + 1;
-        xp.text(tr("Date"), 1, top);
-        xp.textRightAlign(QDateTime::currentDateTime().toString(DATETIME_FORMAT), page_width, top);
-        top += xp.lastTextHeight() + 1;
-        top ++;
-        xp.line(1, top, page_width, top);
-        top ++;
-        xp.text(d->m_dishes[index]->f_dishName, 1, top);
-        top += xp.lastTextHeight() + 1;
-        xp.textRightAlign(QString("%1").arg(qty), page_width, top);
-        top += xp.lastTextHeight() + 2;
-        xp.text(reason, 1, top);
-        top += xp.lastTextHeight() + 1;
-        top ++;
-        xp.line(1, top, page_width, top);
-        top ++;
-        top ++;
-        xp.text(".", 1, top);
-        xp.finishPage();
-
-        ThreadPrinter *tp = new ThreadPrinter(*it, sm, xp);
-        tp->start();
-    }
 }
 
 void OD_Print::printTax(const QString &ip, const QString &port, const QString &pass, OD_Drv *d, bool print)

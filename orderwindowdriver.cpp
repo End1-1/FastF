@@ -27,7 +27,7 @@ void OrderWindowDriver::checkOnlinePayment(OD_Drv *o)
     QString request = QString("{\"Detail\":\"" + m_drv->m_header.f_id + "\"}");
     n->addData(request.toUtf8());
     LogThread::logOrderThread(o->m_header.f_currStaffId, o->m_header.f_id, "IDram request", request + " Session:" + FF_SettingsDrv::value(SD_IDRAM_SESSION_ID).toString());
-    n->go();
+    n->goSSL();
 }
 
 void OrderWindowDriver::checkDiscountApp(OD_Drv *o, const QString &query)
@@ -40,7 +40,7 @@ void OrderWindowDriver::checkDiscountApp(OD_Drv *o, const QString &query)
     QNet *n = new QNet(this);
     connect(n, SIGNAL(getResponse(QString,bool)), this, SLOT(parseDiscountAppResponse(QString,bool)));
     n->URL = "http://jazzve.am/zMobileApp/control/app_response.php?t=" + query;
-    n->go();
+    n->goSSL();
 }
 
 void OrderWindowDriver::removeDiscountFromApp(const QString &query)
@@ -52,7 +52,7 @@ void OrderWindowDriver::removeDiscountFromApp(const QString &query)
     QNet *n = new QNet(this);
     connect(n, SIGNAL(getResponse(QString,bool)), this, SLOT(parseRemoveDiscountFromApp(QString,bool)));
     n->URL = "http://jazzve.am/zMobileApp/control/app_remove.php?t=" + query;
-    n->go();
+    n->goSSL();
 }
 
 void OrderWindowDriver::parseOnlinePaymentResponse(const QString &str, bool isError)

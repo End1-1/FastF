@@ -29,7 +29,9 @@ DbDriver::DbDriver()
 
 DbDriver::~DbDriver()
 {
-    qDebug() << "Database open state: " << m_db.isOpen();
+    if (m_db.isOpen()) {
+        m_db.close();
+    }
     m_db = QSqlDatabase::addDatabase("QIBASE");
     if (m_query)
         delete m_query;

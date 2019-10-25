@@ -19,6 +19,7 @@ class CnfApp
     static QMap<QString, QString> fData;
 public:
     CnfApp();    
+    static QString path();
     static QString taxIP();
     static int taxPort();
     static QString taxPassword();

@@ -12,7 +12,7 @@ QNet::~QNet()
     qDebug() << "QNet destroyes";
 }
 
-void QNet::go()
+void QNet::goSSL()
 {
     connect(this, SIGNAL(finished(QNetworkReply*)), this, SLOT(finished(QNetworkReply*)));
     QNetworkRequest nr = QNetworkRequest(QUrl(URL));
@@ -21,6 +21,20 @@ void QNet::go()
     sslConf.setProtocol(QSsl::AnyProtocol);
     nr.setSslConfiguration(sslConf);
 
+    nr.setRawHeader("Content-Type", ContentType.toLatin1());
+    nr.setRawHeader("Content-Length", QString::number(m_data.length()).toLatin1());
+    nr.setRawHeader("Cache-Control", "no-cache");
+    nr.setRawHeader("Accept", "*/*");
+
+    for (QMap<QString, QString>::const_iterator it = rawHeader.begin(); it != rawHeader.end(); it++)
+        nr.setRawHeader(it.key().toLatin1(), it.value().toLatin1());
+    post(nr, m_data);
+}
+
+void QNet::go()
+{
+    connect(this, SIGNAL(finished(QNetworkReply*)), this, SLOT(finished(QNetworkReply*)));
+    QNetworkRequest nr = QNetworkRequest(QUrl(URL));
     nr.setRawHeader("Content-Type", ContentType.toLatin1());
     nr.setRawHeader("Content-Length", QString::number(m_data.length()).toLatin1());
     nr.setRawHeader("Cache-Control", "no-cache");

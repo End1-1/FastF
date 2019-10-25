@@ -1,7 +1,5 @@
 #include "dlgorder.h"
 #include "ui_dlgorder.h"
-#include <QPainter>
-#include <math.h>
 #include "dlgmessage.h"
 #include "dlgtableformovement.h"
 #include "ff_settingsdrv.h"
@@ -13,20 +11,23 @@
 #include "cnfmaindb.h"
 #include "dlghistory.h"
 #include "dlgreportfilter.h"
-#include <QCryptographicHash>
 #include "dlglist.h"
+#include "dlgcorrection.h"
 #include "dlgpayment.h"
+#include "dlgqty.h"
 #include "dlgcalcchange.h"
+#include "orderwindowdriver.h"
+#include "cnfmaindb.h"
+#include "dlgremovereason.h"
+#include "logthread.h"
+#include "dlg14.h"
+#include <QException>
 #include <QScrollBar>
 #include <QDir>
 #include <QLibrary>
-#include "orderwindowdriver.h"
-#include "dlggatreader.h"
-#include "cnfmaindb.h"
-#include "dlgremovereason.h"
-#include <QException>
-#include "logthread.h"
-#include "dlg14.h"
+#include <QPainter>
+#include <math.h>
+#include <QCryptographicHash>
 
 #define total_row_count 8
 
@@ -53,18 +54,6 @@ dlgorder::dlgorder(QWidget *parent) :
     for (int i = 0; i < total_row_count; i++)
         for (int j = 0; j < 2; j++)
             ui->tblTotal->setItem(i, j, new QTableWidgetItem());
-
-    m_btnQtySet.append(ui->btn1);
-    m_btnQtySet.append(ui->btn2);
-    m_btnQtySet.append(ui->btn3);
-    m_btnQtySet.append(ui->btn4);
-    m_btnQtySet.append(ui->btn5);
-    m_btnQtySet.append(ui->btn6);
-    m_btnQtySet.append(ui->btn7);
-    m_btnQtySet.append(ui->btn8);
-    m_btnQtySet.append(ui->btn9);
-    m_btnQtySet.append(ui->btn10);
-    m_btnQtySet.append(ui->btnQtyDot);
 
     m_widgetsSet.append(ui->wdtGroup_Btn);
     m_widgetsSet.append(ui->wdtDish);
@@ -95,12 +84,8 @@ void dlgorder::setCashMode()
     m_flagCashMode = true;
     ui->wdtDishGroup->setEnabled(false);
     ui->wdtOrderService->setEnabled(false);
-    for(QList<QPushButton*>::iterator i = m_btnQtySet.begin(); i != m_btnQtySet.end(); i++)
-        (*i)->setEnabled(false);
+    ui->wdtDishQty->setEnabled(false);
     ui->lstOrder->setEnabled(false);
-
-    ui->btnDishOk->setEnabled(false);
-    ui->btnDishCancel->setEnabled(false);
     setButtonsState();
 }
 
@@ -228,39 +213,6 @@ void dlgorder::message(const QString &msg)
     DlgMessage::Msg(msg);
 }
 
-void dlgorder::printRemovedDish(int index, float qty)
-{
-    if (!m_ord->openDB())
-        return;
-    m_ord->prepare("select id, name from o_remove_reason order by name");
-    m_ord->execSQL();
-    QMap<int, QString> rv;
-    while (m_ord->next()) {
-        rv[m_ord->v_int(0)] = m_ord->v_str(1);
-    }
-    DlgRemoveReason *dlg = new DlgRemoveReason(rv, this);
-    dlg->exec();
-    int reasonId = dlg->m_reasonId;
-    QString reasonName = dlg->m_reasonName;
-    delete dlg;
-
-    m_ord->m_print.printRemoved(index, qty, m_ord, reasonName);
-
-    OD_Dish *d = m_ord->dish(index);
-    QString sql = "insert into o_important (order_id, user_id, action_id, data, reason_id) values (:order_id, :user_id, :action_id, :data, :reason_id)";
-    QString data = QString("%1;%2;%3;%4").arg(d->f_dishName).arg(qty).arg(d->f_price).arg(d->f_price * qty);
-    if (!m_ord->prepare(sql))
-        return;
-    m_ord->bindValue(":order_id", m_ord->m_header.f_id);
-    m_ord->bindValue(":user_id", m_ord->m_header.f_currStaffId);
-    m_ord->bindValue(":action_id", 1);
-    m_ord->bindValue(":data", data);
-    m_ord->bindValue(":reason_id", reasonId);
-    if (!m_ord->execSQL())
-        return;
-    m_ord->closeDB();
-}
-
 void dlgorder::orderCounted(const QMap<QString, QString> &values)
 {
     ui->tblTotal->item(RService, 0)->setText(QString("%1: %2%").arg(tr("Service sum")).arg(values["inc_value"]));
@@ -342,28 +294,32 @@ void dlgorder::buildDishes(int typeId)
 
 int dlgorder::dishIndexFromListWidget()
 {
-    QList<QListWidgetItem*> selectedIndexes = ui->lstOrder->selectedItems();
-    if (!selectedIndexes.count())
+    int row = ui->lstOrder->currentRow();
+    if (row < 0) {
         return -1;
+    }
 
-    return selectedIndexes.at(0)->data(Qt::UserRole).toInt();
+    return ui->lstOrder->item(row)->data(Qt::UserRole).toInt();
+}
+
+OD_Dish *dlgorder::dishFromListWidget()
+{
+    int index = dishIndexFromListWidget();
+    if (index < 0) {
+        return nullptr;
+    }
+    return m_ord->dish(index);
 }
 
 void dlgorder::disableWidgetsSet(bool enabled)
 {
     for (QList<QWidget *>::const_iterator it = m_widgetsSet.begin(); it != m_widgetsSet.end(); it++)
         (*it)->setEnabled(enabled);
-
-    ui->btn10->setText(enabled ? "+10" : "10");
-    ui->btnDishOk->setEnabled(!enabled);
-    ui->btnDishCancel->setEnabled(!enabled);
-    ui->btnRmDish->setEnabled(enabled);
 }
 
 void dlgorder::setButtonsState()
 {
-    if (ui->btnRmDish->isChecked())
-        return;
+    ui->lstOrder->viewport()->update();
     bool btnPrint = false;
     bool btnPay = true;
     bool btnRemoveOrder = true;
@@ -420,8 +376,7 @@ void dlgorder::setButtonsState()
         ui->tblDishes->setEnabled(m_user->roleRead(ROLE_REMOVE_ORDER) && m_user->roleRead(ROLE_REMOVE_ORDER_AFTER_CHECKOUT));
 
     bool enableControls = !(m_ord->m_header.f_printQty > 0) && !m_flagCashMode && !m_user->roleRead(ROLE_REMOVE_ORDER_AFTER_CHECKOUT);
-    for(QList<QPushButton*>::iterator i = m_btnQtySet.begin(); i != m_btnQtySet.end(); i++)
-        (*i)->setEnabled(enableControls);
+    ui->wdtDishQty->setEnabled(enableControls);
     ui->tblDishes->setEnabled(enableControls);
     ui->wdtDishBtn->setEnabled(enableControls && !m_flagCashMode);
     ui->wdtDishGroup->setEnabled(enableControls);
@@ -431,14 +386,22 @@ void dlgorder::setButtonsState()
     if (m_ord->m_header.f_printQty > 0) {
         ui->wdtDishQty->setEnabled(false);
     }
+    ui->btnRmDish->setEnabled(m_user->roleRead(ROLE_ORDER_REMOVE_PRINTED_QTY));
+    ui->btnRemoveOrder->setEnabled(false);
 }
 
-void dlgorder::moveTable()
+void dlgorder::moveDish(int index, int dtid, const QString &dtname)
 {
     int tableId = m_ord->m_header.f_tableId;
     QString tableName = m_ord->m_header.f_tableName;
-    if (DlgTableForMovement::getTable(tableId, this, m_hallDrv) != QDialog::Accepted)
-        return;
+    if (dtid == 0) {
+        if (DlgTableForMovement::getTable(tableId, this, m_hallDrv) != QDialog::Accepted) {
+            return;
+        }
+    } else {
+        tableId = dtid;
+        tableName = dtname;
+    }
 
     if (m_hallDrv->lockTable(tableId) != LOCK_SUCCESS) {
         DlgMessage::Msg(tr("Cannot lock table"));
@@ -446,7 +409,7 @@ void dlgorder::moveTable()
     }
 
     if (!m_ord->openDB()) {
-        DlgMessage::Msg(tr("Connectin error"));
+        DlgMessage::Msg(tr("Connection error"));
         return;
     }
     if (!m_ord->prepare("select order_id, name from h_table where id=:id")) {
@@ -471,110 +434,127 @@ void dlgorder::moveTable()
     }
     if (dstOrdId.length()) {
         /* Check destination table for receipt */
-        if (!m_ord->prepare("select print_qty from o_order where id=:id")) {
-            DlgMessage::Msg(tr("SQL error"));
-            return;
-        }
+        m_ord->prepare("select print_qty from o_order where id=:id");
         m_ord->bindValue(":id", dstOrdId);
         if (!m_ord->execSQL()) {
             DlgMessage::Msg(tr("SQL error"));
             return;
         }
-        m_ord->next();
-        if (m_ord->v_int(0)) {
+        if (m_ord->next() && m_ord->v_int(0)) {
             m_ord->closeDB();
             DlgMessage::Msg(tr("Cannot to move the order on the table, which is printed receipt."));
             return;
         }
+
         /* Merge orders */
         dstTableState = tr("Not empty: ") + dstOrdId;
-        DbDriver db;
-        db.configureDb(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
-        if (!db.openDB()) {
-            DlgMessage::Msg(tr("Cannot connect to database"));
+        m_ord->prepare("update o_dishes set order_id=:order_id, moved_from=:moved_from where id=:id");
+        if (index < 0) {
+            for (int i = ui->lstOrder->count() - 1; i > -1; i--) {
+                int idx = ui->lstOrder->item(i)->data(Qt::UserRole).toInt();
+                OD_Dish *d = m_ord->dish(idx);
+                m_ord->bindValue(":order_id", dstOrdId);
+                m_ord->bindValue(":moved_from", m_ord->m_header.f_id);
+                m_ord->bindValue(":id", d->f_id);
+                m_ord->execSQL();
+                delete ui->lstOrder->item(i);
+                m_ord->m_dishes.removeAt(idx);
+            }
+        } else {
+            int idx = ui->lstOrder->item(index)->data(Qt::UserRole).toInt();
+            OD_Dish *d = m_ord->dish(idx);
+            m_ord->bindValue(":order_id", dstOrdId);
+            m_ord->bindValue(":moved_from", m_ord->m_header.f_id);
+            m_ord->bindValue(":id", d->f_id);
+            m_ord->execSQL();
+            delete ui->lstOrder->item(index);
+            m_ord->m_dishes.removeAt(idx);
+        }
+
+        /* Update destination table status, set to merged or no */
+        if (ui->lstOrder->count() == 0) {
+            m_ord->prepare("update o_order set state_id=:state_id where id=:id");
+            m_ord->bindValue(":state_id", ORDER_STATE_MERGE);
+            m_ord->bindValue(":id", m_ord->m_header.f_id);
+            if (!m_ord->execSQL()) {
+                DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
+                return;
+            }
+            m_ord->prepare("update h_table set order_id='' where id=:id");
+            m_ord->bindValue(":id", m_ord->m_header.f_tableId);
+            if (!m_ord->execSQL()) {
+                DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
+                return;
+            }
+        }
+        m_ord->prepare("update o_order set amount = (select sum(qty*price) from o_dishes where state_id=1 and order_id=:order_id) where id=:id");
+        m_ord->bindValue(":order_id", dstOrdId);
+        m_ord->bindValue(":id", dstOrdId);
+        m_ord->execSQL();
+        m_ord->prepare("update o_order set amount_inc = amount * amount_inc_value where id=:id");
+        m_ord->bindValue(":id", dstOrdId);
+        m_ord->execSQL();
+        m_ord->prepare("update o_order set amount = amount + amount_inc where id=:id");
+        m_ord->bindValue(":id", dstOrdId);
+        m_ord->execSQL();
+        m_ord->closeDB();
+        if (ui->lstOrder->count() > 0) {
+            makeDishesList();
+            m_ord->countAmounts();
+        } else {
+            on_btnExit_clicked();
             return;
         }
-        if (!db.prepare(SQL_ODISHES)) {
-            DlgMessage::Msg(tr("SQL error"));
-            return;
-        }
-        db.bindValue(":order_id", dstOrdId);
-        if (!db.execSQL()) {
-            DlgMessage::Msg(tr("SQL error"));
-            return;
-        }
-        while (db.next()) {
-            OD_Dish *dish = new OD_Dish();
-            dish->loadFromDb(db);
-            dish->m_index = m_ord->m_dishes.count();
-            m_ord->appendDish2(dish);
-            dstTableItems += QString::number(dish->f_id) + ";";
-        }
-        /* Update destination table status, set to merged */
-        if (!db.prepare("update o_order set state_id=:state_id where id=:id")) {
+    } else {
+        //Create new order and repeat this function
+        int new_id = m_ord->m_dbDrv.genId("GEN_O_ORDER_ID");
+        if (!new_id) {
             DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
             return;
         }
-        db.bindValue(":state_id", ORDER_STATE_MERGE);
-        db.bindValue(":id", dstOrdId);
-        if (!db.execSQL()) {
+        QString newStrId = QString("%1%2").arg(m_ord->mfOrderIdPrefix).arg(new_id);
+        m_ord->prepare("insert into o_order (id) values (:id)");
+        m_ord->bindValue(":id", newStrId);
+        if (!m_ord->execSQL()) {
             DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
             return;
         }
-        db.closeDB();
+
+        m_ord->prepare("update o_order set state_id=:state_id, table_id=:table_id, date_open=:date_open, date_close=:date_close, "
+                     "date_cash=:date_cash, staff_id=:staff_id, print_qty=:print_qty, "
+                     "amount=:amount, amount_inc=:amount_inc, amount_dec=:amount_dec, "
+                     "amount_inc_value=:amount_inc_value, amount_dec_value=:amount_dec_value, payment=:payment, taxprint=:taxprint, "
+                     "comment=:comment where id=:id");
+        m_ord->bindValue(":state_id", ORDER_STATE_OPEN);
+        m_ord->bindValue(":table_id", tableId);
+        m_ord->bindValue(":date_open", QDateTime::currentDateTime());
+        m_ord->bindValue(":date_close", QDateTime::currentDateTime());
+        m_ord->bindValue(":date_cash", QDate::currentDate());
+        m_ord->bindValue(":staff_id", m_ord->m_header.f_staffId);
+        m_ord->bindValue(":print_qty", 0);
+        m_ord->bindValue(":payment", 0);
+        m_ord->bindValue(":taxprint", 0);
+        m_ord->bindValue(":amount", 0);
+        m_ord->bindValue(":amount_inc", 0);
+        m_ord->bindValue(":amount_dec", 0);
+        m_ord->bindValue(":amount_inc_value", m_ord->m_header.f_amount_inc_value);
+        m_ord->bindValue(":amount_dec_value", m_ord->m_header.f_amount_dec_value);
+        m_ord->bindValue(":comment", "");
+        m_ord->bindValue(":id", newStrId);
+        if (!m_ord->execSQL()) {
+            DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
+            return;
+        }
+        m_ord->prepare("update h_table set order_id=:order_id where id=:id");
+        m_ord->bindValue(":order_id", newStrId);
+        m_ord->bindValue(":id", tableId);
+        if (!m_ord->execSQL()) {
+            DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
+            return;
+        }
+        m_ord->closeDB();
+        moveDish(index, tableId, tableName);
     }
-    /* Update table info */
-    if (!m_ord->prepare("update h_table set order_id='' where id=:id")) {
-        DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
-        return;
-    }
-    m_ord->bindValue(":id", m_ord->m_header.f_tableId);
-    if (!m_ord->execSQL()) {
-        DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
-        return;
-    }
-    if (!m_ord->prepare("update h_table set order_id=:order_id where id=:id")) {
-        DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
-        return;
-    }
-    m_ord->bindValue(":order_id", m_ord->m_header.f_id);
-    m_ord->bindValue(":id", m_ord->m_header.f_id);
-    if (!m_ord->execSQL()) {
-        DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
-        return;
-    }
-    m_ord->closeDB();
-    int oldTableId = m_ord->m_header.f_tableId;
-    m_ord->m_header.f_tableId = tableId;
-    m_ord->m_header.f_tableName = m_hallDrv->table(tableId)->name;
-    m_ord->countAmounts();
-    if (!m_ord->openDB()) {
-        DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
-        return;
-    }
-    if (!m_ord->saveAll()) {
-        DlgMessage::Msg(tr("SQL error. Movement error, please check source and destination tables"));
-        return;
-    }
-    m_hallDrv->unlockTable(oldTableId);
-    m_ord->closeDB();
-    makeDishesList();
-    /* Log */
-    if (!m_ord->openDB())
-        return;
-    QString sql = "insert into o_important (order_id, user_id, action_id, data) values (:order_id, :user_id, :action_id, :data)";
-    QString data = QString("%1 > %2;%3;%4").arg(tableName).arg(dstTableName).arg(dstTableState).arg(dstTableItems);
-    if (!m_ord->prepare(sql))
-        return;
-    LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, "Table moved", data);
-    m_ord->bindValue(":order_id", m_ord->m_header.f_id);
-    m_ord->bindValue(":user_id", m_ord->m_header.f_currStaffId);
-    m_ord->bindValue(":action_id", 4);
-    m_ord->bindValue(":data", data);
-    if (!m_ord->execSQL())
-        return;
-    m_ord->closeDB();
-   /* End log */
 }
 
 void dlgorder::insertDiscount()
@@ -609,27 +589,6 @@ void dlgorder::insertDiscount()
         DlgMessage::Msg(tr("Discount failed"));
     }
     delete d;
-}
-
-void dlgorder::moveDish()
-{
-//    int dishIndex = dishIndexFromListWidget();
-//    if (dishIndex < 0)
-//        return;
-
-//    int tableId = m_orderDrv->m_header.table_id;
-//    if (DlgTableForMovement::getTable(tableId, this, m_hallDrv) != QDialog::Accepted)
-//        return;
-
-//    if (!m_orderDrv->moveDish(tableId, m_user, dishIndex, m_orderDrv->m_dishes[dishIndex].rqty)) {
-//        DlgMessage::Msg(tr("Movement of dish failed"));
-//        return;
-//    }
-
-//    if (m_orderDrv->m_dishes[dishIndex].state_id != DISH_STATE_NORMAL)
-//        delete ui->lstOrder->selectedItems().at(0);
-//    else
-//        dishRepaint(dishIndex);
 }
 
 void dlgorder::beforeClose()
@@ -832,7 +791,6 @@ void dlgorder::on_tblDishes_clicked(const QModelIndex &index)
                 dish->f_priceDec = value;
         }
     }
-    connect(dish, SIGNAL(removed(int,float)), this, SLOT(printRemovedDish(int,float)));
 
     int newDishIndex = m_ord->appendDish(dish);
     if (newDishIndex < 0) {
@@ -938,93 +896,22 @@ void QOrderItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 
 void dlgorder::on_btn1_clicked()
 {
-    emit qtyClick(1);
+    setQty(1);
 }
 
 void dlgorder::on_btn2_clicked()
 {
-    emit qtyClick(2);
+    setQty(2);
 }
 
 void dlgorder::on_btn3_clicked()
 {
-    emit qtyClick(3);
+    setQty(3);
 }
 
 void dlgorder::on_btn4_clicked()
 {
-    emit qtyClick(4);
-}
-
-void dlgorder::on_btn5_clicked()
-{
-    emit qtyClick(5);
-}
-
-void dlgorder::on_btn6_clicked()
-{
-    emit qtyClick(6);
-}
-
-void dlgorder::on_btn7_clicked()
-{
-    emit qtyClick(7);
-}
-
-void dlgorder::on_btn8_clicked()
-{
-    emit qtyClick(8);
-}
-
-void dlgorder::on_btn9_clicked()
-{
-    emit qtyClick(9);
-}
-
-void dlgorder::on_btnDishCancel_clicked()
-{
-    int i = dishIndexFromListWidget();
-    if (i > -1) {
-        OD_Dish *d = m_ord->dish(i);
-        d->rollbackDecQty();
-        d->disconnect();
-        connect(d, SIGNAL(update(int)), this, SLOT(dishRepaint(int)));
-        connect(d, SIGNAL(removed(int,float)), this, SLOT(printRemovedDish(int,float)));
-        connect(this, SIGNAL(qtyClick(float)), d, SLOT(incQty(float)));
-    }
-    ui->btnDishOk->setEnabled(false);
-    ui->btnRmDish->setChecked(false);
-    ui->btnDishCancel->setEnabled(false);
-    disableWidgetsSet(true);
-}
-
-void dlgorder::on_btnDishOk_clicked()
-{
-    int i = dishIndexFromListWidget();
-    if (i > -1) {
-        OD_Dish *d = m_ord->dish(i);
-        d->commitDecQty();
-        d->disconnect();
-        if (d->f_stateId != DISH_STATE_NORMAL) {
-            int currItemIndex = ui->lstOrder->currentRow();
-            if (currItemIndex > -1)
-                delete ui->lstOrder->item(currItemIndex);
-        } else {
-            connect(d, SIGNAL(update(int)), this, SLOT(dishRepaint(int)));
-            connect(d, SIGNAL(removed(int,float)), this, SLOT(printRemovedDish(int,float)));
-            connect(this, SIGNAL(qtyClick(float)), d, SLOT(incQty(float)));
-        }
-    }
-    ui->btnRmDish->setChecked(false);
-    ui->btnDishOk->setEnabled(false);
-    ui->btnDishCancel->setEnabled(false);
-    disableWidgetsSet(true);
-    setButtonsState();
-}
-
-void dlgorder::on_btnQtyDot_clicked()
-{
-    emit qtyClick(0.5);
+    setQty(4);
 }
 
 void dlgorder::on_btnPrint_clicked()
@@ -1102,7 +989,7 @@ void dlgorder::on_btnRemoveOrder_clicked()
                 if (d->f_printedQty > 0.01) {
                     d->f_stateId = DISH_STATE_REMOVED_PRINTED;
                     d->m_saved = false;
-                    m_ord->m_print.printRemoved(i, d->f_printedQty, m_ord, reasonName);
+                    //m_ord->m_print.printRemoved(i, d->f_printedQty, m_ord, reasonName);
                 }
         }
         m_ord->m_header.f_stateId = ORDER_STATE_REMOVED;
@@ -1128,7 +1015,7 @@ void dlgorder::on_btnRemoveOrder_clicked()
 
 void dlgorder::on_btnMoveOrder_clicked()
 {
-    moveTable();
+    moveDish(-1, 0, "");
 }
 
 void dlgorder::makeDishesList()
@@ -1136,7 +1023,6 @@ void dlgorder::makeDishesList()
     ui->lstOrder->clear();
     for (int i = 0; i < m_ord->m_dishes.count(); i++)
         if (m_ord->m_dishes[i]->f_stateId == DISH_STATE_NORMAL) {
-            connect(m_ord->m_dishes[i], SIGNAL(removed(int,float)), this, SLOT(printRemovedDish(int,float)));
             QListWidgetItem *item = new QListWidgetItem(ui->lstOrder);
             item->setSizeHint(QSize(ui->lstOrder->width(), 50));
             item->setData(Qt::UserRole, i);
@@ -1223,23 +1109,10 @@ void dlgorder::on_btnChangeStaff_clicked()
 
 void dlgorder::on_btnMoveDish_clicked()
 {
-//    int dishIndex = dishIndexFromListWidget();
-//    if (dishIndex < 0)
-//        return;
-
-//    double qty = m_orderDrv->m_dishes[dishIndex].qty;
-//    double qtyPrinted = m_orderDrv->m_dishes[dishIndex].pqty;
-//    if (qty > qtyPrinted) {
-//        DlgMessage::Msg(tr("Print all quantity"));
-//        return;
-//    }
-//    m_orderDrv->m_dishes[dishIndex].rqty = 0;
-
-//    disableWidgetsSet(false);
-
-//    int btnEnabled = trunc(qty);
-//    for (int i = btnEnabled; i < 9; i++)
-//        m_btnQtySet.at(i)->setEnabled(false);
+    int i = ui->lstOrder->currentRow();
+    if (i < 0)
+        return;
+    moveDish(i, 0, "");
 }
 
 void dlgorder::on_btnTaxPrint_clicked()
@@ -1308,12 +1181,6 @@ void dlgorder::on_tblDishGroup_clicked(const QModelIndex &index)
     buildDishes(index.data(Qt::UserRole).toInt());
 }
 
-
-void dlgorder::on_btn10_clicked()
-{
-    emit qtyClick(10);
-}
-
 void dlgorder::on_btnHistory_clicked()
 {
     DlgHistory *d = new DlgHistory(m_ord->m_header.f_id, m_user->fullName, this);
@@ -1327,16 +1194,6 @@ void dlgorder::on_btnChangeMenu_clicked()
     if (!DlgList::value(m_dishesDrv->getMenuList(), out, this))
         return;
     buildTypes(out.toInt(), 0);
-}
-
-void dlgorder::on_lstOrder_currentRowChanged(int currentRow)
-{
-    if (currentRow < 0) {
-        ui->btnRmDish->setEnabled(false);
-        return;
-    }
-
-    ui->btnRmDish->setEnabled(m_ord->m_header.f_printQty == 0 ? true : m_user->roleRead(ROLE_REMOVE_ORDER_AFTER_CHECKOUT));
 }
 
 void dlgorder::on_btnPlugins_clicked()
@@ -1433,46 +1290,15 @@ void dlgorder::on_lstOrder_currentItemChanged(QListWidgetItem *current, QListWid
     if (previous) {
         d = m_ord->dish(previous->data(Qt::UserRole).toInt());
         d->disconnect();
-        disconnect(this, SIGNAL(qtyClick(float)), d, SLOT(incQty(float)));
     }
 
     if (current) {
         d = m_ord->dish(current->data(Qt::UserRole).toInt());
         connect(d, SIGNAL(update(int)), this, SLOT(dishRepaint(int)));
-        connect(d, SIGNAL(removed(int,float)), this, SLOT(printRemovedDish(int,float)));
-        connect(this, SIGNAL(qtyClick(float)), d, SLOT(incQty(float)));
         if (d->f_price > 0.001)
             ui->btnPresent->setEnabled(FF_DishesDrv::canPresent(d->f_dishId) && m_user->roleRead(ROLE_W_PRESENT));
     }
 }
-
-void dlgorder::on_btnRmDish_clicked(bool checked)
-{
-    int i = ui->lstOrder->currentRow();
-    if (i < 0) {
-        ui->btnRmDish->setChecked(false);
-        return;
-    }
-    OD_Dish *d = m_ord->dish(dishIndexFromListWidget());
-    if (!d) {
-        ui->btnRmDish->setChecked(false);
-        return;
-    }
-    d->setOldQty();
-    d->disconnect();
-    d->m_removePrinted = m_user->roleRead(ROLE_ORDER_REMOVE_PRINTED_QTY);
-    disconnect(d);
-    disconnect(this, SIGNAL(qtyClick(float)), d, SLOT(incQty(float)));
-    connect(this, SIGNAL(qtyClick(float)), d, SLOT(decQty(float)));
-    connect(d, SIGNAL(update(int)), this, SLOT(dishRepaint(int)));
-    connect(d, SIGNAL(removed(int,float)), this, SLOT(printRemovedDish(int,float)));
-    connect(d, SIGNAL(message(QString)), this, SLOT(message(QString)));
-    d->decQty(d->f_totalQty - d->availableForRemove());
-    ui->btnDishOk->setEnabled(checked);
-    ui->btnDishCancel->setEnabled(checked);
-    disableWidgetsSet(false);
-}
-
 
 void dlgorder::on_btnPresent_clicked()
 {
@@ -1623,4 +1449,125 @@ void dlgorder::on_btnDiscount_2_clicked()
         return;
     }
     message(tr("Balance:") + "<br>" + db.v_str(0));
+}
+
+void dlgorder::on_btnPluse05_clicked()
+{
+    incQty(0.5);
+}
+
+void dlgorder::on_btnMinus05_clicked()
+{
+    decQty(0.5);
+}
+
+void dlgorder::setQty(double qty)
+{
+    if (OD_Dish *d = dishFromListWidget()) {
+        if (d->f_printedQty > qty) {
+            return;
+        }
+        if (d->f_remind > 0 && d->f_printedQty > 0.001) {
+            return;
+        }
+        d->f_totalQty = qty;
+        d->m_saved = false;
+        LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, tr("Set qty to"), d->f_dishName + ": " +  double_str(qty));
+        m_ord->countAmounts();
+        setButtonsState();
+    }
+}
+
+void dlgorder::decQty(double qty)
+{
+    int index = dishIndexFromListWidget();
+    if (index < 0) {
+        return;
+    }
+    if (OD_Dish *d = m_ord->dish(index)) {
+        if (d->f_printedQty > d->f_totalQty - qty) {
+            return;
+        }
+        d->f_totalQty -= qty;
+        d->m_saved = false;
+        QString msg = tr("Decrease qty by");
+        if (d->f_totalQty < 0.001) {
+            msg = tr("Remove, because qty is zero. Decrease by");
+            d->f_stateId = DISH_STATE_REMOVED_NORMAL;
+            QListWidgetItem *item = ui->lstOrder->currentItem();
+            delete item;
+        }
+        LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, msg, d->f_dishName + ": " + double_str(qty));
+        m_ord->countAmounts();
+        setButtonsState();
+    }
+}
+
+void dlgorder::incQty(double qty)
+{
+    if(OD_Dish *d = dishFromListWidget()) {
+        if (d->f_remind > 0) {
+            if (d->f_printedQty > 0.001) {
+                OD_Dish *nd = d->copy();
+                nd->f_printedQty = 0;
+                nd->f_totalQty = 1;
+                int ni = m_ord->appendDish(nd);
+                QListWidgetItem *item = new QListWidgetItem(ui->lstOrder);
+                item->setSizeHint(QSize(ui->lstOrder->width(), 50));
+                ui->lstOrder->addItem(item);
+                ui->lstOrder->setItemSelected(item, true);
+                item->setData(Qt::UserRole, ni);
+                setButtonsState();
+
+                ui->lstOrder->verticalScrollBar()->setValue(ui->lstOrder->verticalScrollBar()->maximum());
+                ui->lstOrder->setCurrentRow(ui->lstOrder->count() - 1);
+                LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, tr("Increase qty by"), d->f_dishName + ": " + double_str(qty));
+                return;
+            }
+        }
+        d->f_totalQty += qty;
+        d->m_saved = false;
+        LogThread::logOrderThread(m_ord->m_header.f_currStaffId, m_ord->m_header.f_id, tr("Increase qty by"), d->f_dishName + ": " + double_str(qty));
+        m_ord->countAmounts();
+        setButtonsState();
+    }
+}
+
+void dlgorder::on_btnPlus1_clicked()
+{
+    incQty(1);
+}
+
+void dlgorder::on_btnMinus1_clicked()
+{
+    decQty(1);
+}
+
+void dlgorder::on_btnRmDish_clicked()
+{   
+    if (OD_Dish *d = dishFromListWidget()) {
+        DlgCorrection *dc = new DlgCorrection(m_ord, d, this);
+        if (dc->exec() == QDialog::Accepted) {
+            for (int i = 0; i < ui->lstOrder->count(); i++) {
+                OD_Dish *dd = m_ord->dish(ui->lstOrder->item(i)->data(Qt::UserRole).toInt());
+                if (dd == d) {
+                    if (d->f_totalQty < 0.001 || d->f_stateId != DISH_STATE_NORMAL) {
+                        delete ui->lstOrder->item(i);
+                        break;
+                    }
+                }
+            }
+            m_ord->countAmounts();
+            setButtonsState();
+        }
+        dc->deleteLater();        
+    }
+}
+
+void dlgorder::on_btnAnyQty_clicked()
+{
+    double qty;
+    if (DlgQty::qty(qty, this)) {
+        setQty(qty);
+    }
 }

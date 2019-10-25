@@ -29,13 +29,6 @@ bool OD_Drv::openTable(const QString &orderId, bool isClosed, int userId)
             m_header.f_id = v_str(0);
         else
             m_header.f_id = orderId;
-        if (!prepare("select gat from gat where order_id=:order_id"))
-            return false;
-        bindValue(":order_id", m_header.f_id);
-        if (!execSQL())
-            return -1;
-        if (next())
-            m_header.f_gat = v_str(0);
     } else
         m_header.f_id = orderId;
     if (!m_header.f_id.length()) {
@@ -172,14 +165,14 @@ void OD_Drv::countAmounts()
         m_header.f_amount_inc += (*it)->getTotalInc();
         m_header.f_amount_dec += (*it)->getTotalDec();
     }
-    values["counted"] = dts(m_header.f_amount);
+    values["counted"] = double_str(m_header.f_amount);
     m_header.f_amount = m_header.f_amount + m_header.f_amount_inc - m_header.f_amount_dec;
     m_header.m_saved = false;
-    values["inc_value"] = dts(m_header.f_amount_inc_value * 100);
-    values["inc"] = dts(m_header.f_amount_inc);
-    values["dec_value"] = dts(m_header.f_amount_dec_value * 100);
-    values["dec"] = dts(m_header.f_amount_dec);
-    values["total"] = dts(m_header.f_amount);
+    values["inc_value"] = double_str(m_header.f_amount_inc_value * 100);
+    values["inc"] = double_str(m_header.f_amount_inc);
+    values["dec_value"] = double_str(m_header.f_amount_dec_value * 100);
+    values["dec"] = double_str(m_header.f_amount_dec);
+    values["total"] = double_str(m_header.f_amount);
     emit counted(values);
 }
 

@@ -6,6 +6,8 @@
 #include <QPainter>
 #include "qsqldrv.h"
 
+#define U(X) QString::fromUtf8(X)
+
 namespace Ui {
 class DlgDishComment;
 }
@@ -13,13 +15,14 @@ class DlgDishComment;
 class DlgDishComment : public QDialog
 {
     Q_OBJECT
+    
+public:
 
     class QLetterDelegate : public QItemDelegate {
     protected:
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     };
-    
-public:
+
     explicit DlgDishComment(QWidget *parent = 0);
     ~DlgDishComment();
     QString result();

@@ -47,5 +47,11 @@
         <file>res/menu.PNG</file>
         <file>res/COMENT.png</file>
         <file>res/cotton-candy.png</file>
+        <file>res/minus.png</file>
+        <file>res/plus.png</file>
+        <file>res/ball-green.png</file>
+        <file>res/ball-red.png</file>
+        <file>res/ball-yellow.png</file>
+        <file>res/typing.png</file>
     </qresource>
 </RCC>

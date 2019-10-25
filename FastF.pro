@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql network xml printsupport axcontainer
+QT       += core gui sql network xml printsupport
 
 TARGET = FastF
 TEMPLATE = app
@@ -16,10 +16,16 @@ INCLUDEPATH += C:/projects/NewTax/Src
 INCLUDEPATH += C:/OpenSSL-Win32/include
 INCLUDEPATH += C:/OpenSSL-Win32/include/openssl
 INCLUDEPATH += C:/projects/common
+INCLUDEPATH += C:/projects/FastF/orderdrv
 
 SOURCES += main.cpp\
     c5printing.cpp \
     dbmutexlocker.cpp \
+    dlgapprovecorrectionmessage.cpp \
+    dlgcorrection.cpp \
+    dlgqty.cpp \
+    kitreminderthread.cpp \
+    orderdrv/od_config.cpp \
     qelineedit.cpp \
     ff_user.cpp \
     dlgorder.cpp \
@@ -73,8 +79,6 @@ SOURCES += main.cpp\
     orderdrv/od_print.cpp \
     dbdriver.cpp \
     ff_correcttime.cpp \
-    gatwriter.cpp \
-    dlggatreader.cpp \
     taxcheckout.cpp \
     dlgremovereason.cpp \
     dlgkinoparkcall.cpp \
@@ -104,6 +108,10 @@ SOURCES += main.cpp\
 HEADERS  += \
     c5printing.h \
     dbmutexlocker.h \
+    dlgapprovecorrectionmessage.h \
+    dlgcorrection.h \
+    dlgqty.h \
+    kitreminderthread.h \
     qelineedit.h \
     ff_user.h \
     dlgorder.h \
@@ -170,8 +178,6 @@ HEADERS  += \
     orderdrv/od_config.h \
     dbdriver.h \
     ff_correcttime.h \
-    gatwriter.h \
-    dlggatreader.h \
     taxcheckout.h \
     dlgremovereason.h \
     dlgkinoparkcall.h \
@@ -201,11 +207,14 @@ HEADERS  += \
 
 
 FORMS    += \
+    dlgapprovecorrectionmessage.ui \
+    dlgcorrection.ui \
     dlgorder.ui \
     dlgmessage.ui \
     dlgface.ui \
     ../common/qlogwindow.ui \
     ../common/dlgconnection.ui \
+    dlgqty.ui \
     dlgtableformovement.ui \
     ../common/dlginput.ui \
     dlgreports.ui \
@@ -219,7 +228,6 @@ FORMS    += \
     dlgcalcchange.ui \
     dlgtimelimit.ui \
     dlgsplash.ui \
-    dlggatreader.ui \
     dlgremovereason.ui \
     dlgkinoparkcall.ui \
     dlg14.ui \
@@ -240,7 +248,7 @@ LIBS += -lwsock32
 LIBS += -LC:/OpenSSL-Win32/lib
 LIBS += -lopenssl
 LIBS += -llibcrypto
-
+LIBS += -ladvapi32
 
 
 

@@ -59,6 +59,7 @@ void FF_SettingsDrv::init()
     m_settings[SD_IDRAM_ID] = "100000502";
     m_settings[SD_IDRAM_PHONE] = "";
     m_settings[SD_DISCOUNT_APP_QUERY] = "jazzve_";
+    m_settings[SD_DISH_CORRECTION_RED_TIMEOUT] = 30;
 
     m_settings[SD_TAX_PRINT] = "0";
     m_settings[SD_TAX_PRINT_FREQ] = "1";

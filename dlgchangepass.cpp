@@ -25,7 +25,7 @@ DlgChangePass::~DlgChangePass()
 
 void DlgChangePass::getEmployesList()
 {
-    if (!m_sqlDrv->prepare("select id, fname || ' ' || lname from employes where ((group_id in (3,14)) or (group_id in (2,11) and id=:id)) and state_id=1 order by 2"))
+    if (!m_sqlDrv->prepare("select id, fname || ' ' || lname from employes where ((group_id in (3,14,16)) or (group_id in (2,11) and id=:id)) and state_id=1 order by 2"))
         return;
     m_sqlDrv->bind(":id", m_user->id);
     if (!m_sqlDrv->execSQL())

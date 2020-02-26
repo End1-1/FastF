@@ -19,6 +19,8 @@ public:
     ~dlgreports();
 
 private slots:
+    void toError(const QString &msg);
+    void toTableLocked(int tableId);
     void ordersHeaderClicked(const QModelIndex &index);
     void on_btnClose_clicked();
     void on_btnOrderFilter_clicked();
@@ -27,7 +29,6 @@ private slots:
     void on_btnUp_clicked();
     void on_btnDown_clicked();
     void on_btnPrint_clicked();
-
     void on_btnDailySale_clicked();
 
 private:

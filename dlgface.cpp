@@ -5,6 +5,7 @@
 #include "dlgconnection.h"
 #include "ff_settingsdrv.h"
 #include <QPainter>
+#include "tableordersocket.h"
 #include "dlgreports.h"
 #include "dlggetpassword.h"
 #include "dlgchangepass.h"
@@ -54,11 +55,74 @@ DlgFace::DlgFace(QWidget *parent) :
     m_timer.start(TIMER_TIMEOUT);
     activateWindow();
     raise();
+//    int i = 0;
+//    while (1) {
+//        qApp->processEvents();
+//        TableOrderSocket *t = new TableOrderSocket(++i % 10);
+//        connect(t, SIGNAL(err(QString)), this, SLOT(toErrText(QString)));
+//        connect(t, SIGNAL(tableLocked(int)), this, SLOT(toTableLocketText(int)));
+//        t->begin();
+//        Sleep(1000);
+//    }
 }
 
 DlgFace::~DlgFace()
 {
     delete ui;
+}
+
+void DlgFace::toErrText(const QString &msg)
+{
+    sender()->deleteLater();
+    qDebug() << msg;
+}
+
+void DlgFace::toTableLocketText(int tableId)
+{
+    sender()->deleteLater();
+    qDebug() << tableId;
+}
+
+void DlgFace::toError(const QString &msg)
+{
+    DlgMessage::Msg(msg);
+    sender()->deleteLater();
+}
+
+void DlgFace::toTableLocked(int tableId)
+{
+    TableOrderSocket *to = static_cast<TableOrderSocket*>(sender());
+    QString pass;
+    if (!DlgGetPassword::password(m_hallDrv->table(tableId)->name, pass, true, this)) {
+        to->deleteLater();
+        return;
+    }
+    pass.replace(";", "");
+    pass.replace("?", "");
+    if (pass.length() < 4)
+        return;
+
+    m_timer.stop();
+    FF_User *user = new FF_User("main");
+    user->setCredentails("", pass);
+    if (user->auth1()) {
+        if (user->roleRead(ROLE_EDIT_ORDER)) {
+            dlgorder *order = new dlgorder(this);
+            connect(to, SIGNAL(socketDisconnected()), order, SLOT(toDisconnected()));
+            if (order->setData(user, m_hallDrv, tableId, "", to))
+                order->exec();
+            else
+                DlgMessage::Msg(tr("Cannot open table"));
+            delete order;
+            timer();
+        } else
+            DlgMessage::Msg(tr("User have not access to edit order"));
+    } else
+        DlgMessage::Msg(tr("Invalid password"));
+
+    delete user;
+    to->deleteLater();
+    m_timer.start(TIMER_TIMEOUT);
 }
 
 void DlgFace::timer()
@@ -75,7 +139,6 @@ void DlgFace::timer()
     if (!(m_timeout % UPDATE_TIME_DEVIDER))
         correctTime();
     ui->lbTime->setText(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm"));
-    m_hallDrv->unlockAllTables();
     m_hallDrv->refresh();
     ui->lbOrders->setText(m_hallDrv->total());
     loadReadyDishes();
@@ -120,7 +183,6 @@ void DlgFace::initFace()
         m_hallDrv = new FF_HallDrv();
         connect(m_hallDrv, SIGNAL(errorMsg(QString)), this, SLOT(sqlError(QString)));
     }
-    m_hallDrv->unlockAllTables();
     m_hallDrv->filter(m_filterHall, m_filterUsedTables);
     configHallGrid();
     loadReadyDishes();
@@ -166,21 +228,6 @@ void DlgFace::correctTime()
     }
     FF_CorrectTime *ff = new FF_CorrectTime(FF_SettingsDrv::value(SD_UPDATE_TIME_FROM_SERVER).toInt(), dbParams);
     ff->start();
-}
-
-void DlgFace::checkKinoPark()
-{
-    for (int i = 0; i < m_hallDrv->m_tables.count(); i++) {
-        FF_HallDrv::Table t = m_hallDrv->m_tables[i];
-        bool flagNew = m_hallDrv->tableFlag(t, TFLAG_NEW);
-        bool flagCallStaff = m_hallDrv->tableFlag(t, TFLAG_CALLSTAFF);
-        if (flagNew || flagCallStaff) {
-            dlgKinoParkCall *d = new dlgKinoParkCall(flagNew, flagCallStaff, t.name, this);
-            d->exec();
-            delete d;
-            m_hallDrv->setFlag(t.id, TFLAG_CALLSTAFF, '0');
-        }
-    }
 }
 
 void DlgFace::onlineUp()
@@ -338,40 +385,10 @@ void DlgFace::on_tblHall_clicked(const QModelIndex &index)
     if (!tableId)
         return;
 
-    if (m_hallDrv->lockTable(tableId)){
-        DlgMessage::Msg(tr("Table is locked by another user"));
-        return;
-    }
-
-    QString pass;
-    if (!DlgGetPassword::password(m_hallDrv->table(tableId)->name, pass, true, this)) {
-        m_hallDrv->unlockTable(tableId);
-        return;
-    }
-    pass.replace(";", "");
-    pass.replace("?", "");
-    if (pass.length() < 4)
-        return;
-
-    m_timer.stop();
-    FF_User *user = new FF_User("main");
-    user->setCredentails("", pass);
-    if (user->auth1()) {
-        if (user->roleRead(ROLE_EDIT_ORDER)) {
-            dlgorder *order = new dlgorder(this);
-            if (order->setData(user, m_hallDrv, tableId, ""))
-                order->exec();
-            else
-                DlgMessage::Msg(tr("Cannot open table"));
-            delete order;
-            timer();
-        } else
-            DlgMessage::Msg(tr("User have not access to edit order"));
-    } else
-        DlgMessage::Msg(tr("Invalid password"));
-
-    delete user;
-    m_timer.start(TIMER_TIMEOUT);
+    TableOrderSocket *to = new TableOrderSocket(tableId, this);
+    connect(to, SIGNAL(err(QString)), this, SLOT(toError(QString)));
+    connect(to, SIGNAL(tableLocked(int)), this, SLOT(toTableLocked(int)));
+    to->begin();
 }
 
 void DlgFace::on_btnSettings_clicked()

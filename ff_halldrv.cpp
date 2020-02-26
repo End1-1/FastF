@@ -1,6 +1,7 @@
 #include "ff_halldrv.h"
 #include "ff_settingsdrv.h"
 #include "cnfmaindb.h"
+#include "od_config.h"
 #include <QHeaderView>
 
 QItemDelegate *FF_HallDrv::m_itemDelegate = 0;
@@ -176,8 +177,8 @@ QString FF_HallDrv::total()
         }
     }
 
-    return QString::number(m_hallTotal[m_filterHallId].qty) + " / " + QString::number(m_hallTotal[m_filterHallId].amount, 'f', 0)
-            + " [" + QString::number(m_totalAmount) + " / " + QString::number(m_totalQty) + "] ";
+    return QString::number(m_hallTotal[m_filterHallId].qty) + " / " + double_str(m_hallTotal[m_filterHallId].amount)
+            + " [" + double_str(m_totalAmount) + " / " + QString::number(m_totalQty) + "] ";
 }
 
 void FF_HallDrv::filter(int hallId, bool onlyBusy)
@@ -236,60 +237,6 @@ void FF_HallDrv::configGrid(QTableWidget *t, QItemDelegate *itemDelegate)
             row++;
         }
     }
-}
-
-int FF_HallDrv::lockTable(int tableId)
-{
-    if (!openDB())
-        return LOCK_ERROR;
-    QString m_sql = "update h_table set lock_host=:lock_host where id=:id and (lock_host is null or char_length(lock_host)=0)";
-    if (!prepare(m_sql))
-        return LOCK_ERROR;
-    bindValue(":lock_host", getLockName());
-    bindValue(":id", tableId);
-    if (!execSQL())
-        return LOCK_ERROR;
-
-    m_sql = "select id from h_table where id=:id and lock_host=:lock_host";
-    if (!prepare(m_sql))
-        return LOCK_ERROR;
-    bindValue(":id", tableId);
-    bindValue(":lock_host", getLockName());
-    if (!execSQL())
-        return LOCK_ERROR;
-    int result = LOCK_LOCKED;
-    if (next())
-        result = LOCK_SUCCESS;
-    closeDB();
-    return result;
-}
-
-bool FF_HallDrv::unlockTable(int tableId)
-{
-    if (!openDB())
-        return false;
-    QString m_sql = "update h_table set lock_host = null where lock_host=:lock_host and id=:id";
-    if (!prepare(m_sql))
-        return false;
-    bindValue(":lock_host", getLockName());
-    bindValue(":id", tableId);
-    if (!execSQL())
-        return false;
-    closeDB();
-    return true;
-}
-
-bool FF_HallDrv::unlockAllTables()
-{
-    if (!openDB())
-        return false;
-    if (!prepare("update h_table set lock_host = null where lock_host=:lock_host"))
-        return false;
-    bindValue(":lock_host", getLockName());
-    if (!execSQL())
-        return false;
-    closeDB();
-    return true;
 }
 
 QMap<QString, QVariant> FF_HallDrv::getHallMap()

@@ -7,6 +7,7 @@
 #include "dlgorder.h"
 #include "printing.h"
 #include "qsqldb.h"
+#include "tableordersocket.h"
 #include "dlglist.h"
 #include <QDir>
 #include <QScrollBar>
@@ -66,6 +67,24 @@ dlgreports::dlgreports(FF_User *user, FF_HallDrv *hall, QWidget *parent) :
 dlgreports::~dlgreports()
 {
     delete ui;
+}
+
+void dlgreports::toError(const QString &msg)
+{
+    sender()->deleteLater();
+    DlgMessage::Msg(msg);
+}
+
+void dlgreports::toTableLocked(int tableId)
+{
+    TableOrderSocket *to = static_cast<TableOrderSocket*>(sender());
+    dlgorder *d = new dlgorder(this);
+    d->setData(m_user, m_hall, tableId, to->fOrderId, to);
+    d->setCashMode();
+    d->showFullScreen();
+    d->exec();
+    delete d;
+    sender()->deleteLater();
 }
 
 void dlgreports::ordersHeaderClicked(const QModelIndex &index)
@@ -139,14 +158,10 @@ void dlgreports::on_pushButton_2_clicked()
         return;
     }
 
-    QSqlLog::write(TABLE_HISTORY, tr("Open order from cash"), "", m_user->fullName, ui->tblOrders->item(il.at(0).row(), 0)->text().toInt());
-
-    dlgorder *d = new dlgorder(this);
-    d->setData(m_user, m_hall, 0, ui->tblOrders->item(il.at(0).row(), 0)->text());
-    d->setCashMode();
-    d->showFullScreen();
-    d->exec();
-    delete d;
+    TableOrderSocket *to = new TableOrderSocket(ui->tblOrders->item(il.at(0).row(), 0)->text(), this);
+    connect(to, SIGNAL(err(QString)), this, SLOT(toError(QString)));
+    connect(to, SIGNAL(tableLocked(int)), this, SLOT(toTableLocked(int)));
+    to->begin();
 }
 
 void dlgreports::on_btnUp_clicked()

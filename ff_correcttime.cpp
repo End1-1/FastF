@@ -65,7 +65,6 @@ void FF_CorrectTime::run()
                              lpBuffer,              // Put the message here
                              255,                     // Number of bytes to store the message
                              NULL);
-        //TODO QLogWindow::writeLog("Cannot set the system time. " + QString::fromStdWString(lpBuffer));
     }
 }
 

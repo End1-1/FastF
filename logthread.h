@@ -9,15 +9,16 @@ class LogThread : public QThread
 public:
     LogThread(QObject *parent = 0);
     ~LogThread();
-    static void logOrderThread(int user, const QString &order, const QString &action, const QString &data);
+    static void logOrderThread(const QString &user, const QString &order, const QString &body, const QString &action, const QString &data);
     static void logDiscountFailureThread(int user, const QString &code);
 protected:
     virtual void run();
 private:
     enum LogMode {logOrder, logDiscountFailure};
     LogMode fLogMode;
-    int fUser;
+    QString fUser;
     QString fOrder;
+    QString fBody;
     QString fAction;
     QString fData;
 };

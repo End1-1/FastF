@@ -14,6 +14,8 @@ namespace Ui {
 class dlgorder;
 }
 
+class TableOrderSocket;
+
 class QDishTableItemDelegate : public QItemDelegate {
 private:
     const FF_DishesDrv &m_data;
@@ -44,11 +46,16 @@ public:
     explicit dlgorder(QWidget *parent);
     ~dlgorder();
     void setCashMode();
-    bool setData(FF_User *user, FF_HallDrv *hallDrv, int tableId, QString orderId);
+    bool setData(FF_User *user, FF_HallDrv *hallDrv, int tableId, QString orderId, TableOrderSocket *to);
     void accept();
     void reject();
 
+public slots:
+    void toDisconnected();
+
 private slots:
+    void toLockError(const QString &msg);
+    void toTableLockedMove(int tableId);
     void discountCheckError();
     void discountChecked();
     void message(const QString &msg);
@@ -65,13 +72,11 @@ private slots:
     void on_btnPayment_clicked();
     void on_btnDuplicateDish_clicked();
     void on_btnExit_clicked();
-    void on_btnRemoveOrder_clicked();
     void on_btnMoveOrder_clicked();
     void on_btnDiscount_clicked();
     void on_btnTotalOrders_clicked();
     void on_btnChangeStaff_clicked();
     void on_btnMoveDish_clicked();
-    void on_btnTaxPrint_clicked();
     void on_btnDishUp_3_clicked();
     void on_btnGroupDown_clicked();
     void on_btnGroupUp_clicked();
@@ -89,7 +94,6 @@ private slots:
     void on_lstOrder_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
     void on_btnPresent_clicked();
     void on_btnOrange_clicked();
-    void on_btnCandyCotton_clicked();
     void on_btnDiscount_2_clicked();
     void on_btnPluse05_clicked();
     void on_btnMinus05_clicked();
@@ -106,6 +110,7 @@ private:
     OrderWindowDriver m_drv;
     QList<QWidget*> m_widgetsSet;
     FF_HallDrv *m_hallDrv;
+    TableOrderSocket *ftoSocket;
     int m_currentMenu;
     bool m_flagCashMode;
     void setQty(double qty);
@@ -118,12 +123,12 @@ private:
     void buildDishes(int typeId);
     int dishIndexFromListWidget();
     OD_Dish *dishFromListWidget();
-    void disableWidgetsSet(bool enabled);
     void setButtonsState();
     void moveDish(int index, int dtid, const QString &dtname);
     void insertDiscount();
     void beforeClose();
     void giftCard(const QString &code);
+    void moveOrderDish(int index, int tableId, QString tableName);
 };
 
 #endif // DLGORDER_H

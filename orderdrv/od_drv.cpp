@@ -1,4 +1,5 @@
 #include "od_drv.h"
+#include "logthread.h"
 
 OD_Drv::OD_Drv() :
     OD_Base()
@@ -33,10 +34,12 @@ bool OD_Drv::openTable(const QString &orderId, bool isClosed, int userId)
         m_header.f_id = orderId;
     if (!m_header.f_id.length()) {
         m_header.m_saved = false;
-        if (!m_header.saveToDb(m_dbDrv, mfOrderIdPrefix))
+        if (!m_header.saveToDb(m_dbDrv, mfOrderIdPrefix)) {
             return false;
+        }
+        LogThread::logOrderThread(m_header.f_currStaffName, m_header.f_id, "", tr("New order "), "");
     } else {
-        //LogThread::logOrderThread(userId,  m_header.f_id, "Open order", "");
+
         if (!prepare(SQL_OORDER))
             return false;
         bindValue(":id", m_header.f_id);
@@ -128,10 +131,11 @@ bool OD_Drv::discount(int id, float value)
     countAmounts();
     if (!saveAll())
         return false;
-    if (!prepare("insert into costumers_history (order_id, costumer_id) values (:order_id, :costumer_id)"))
+    if (!prepare("insert into costumers_history (order_id, costumer_id, val) values (:order_id, :costumer_id, :val)"))
         return false;
     bindValue(":order_id", m_header.f_id);
     bindValue(":costumer_id", id);
+    bindValue(":val", m_header.f_amount_dec_value);
     if (!execSQL())
         return false;
     closeDB();

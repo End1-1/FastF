@@ -296,6 +296,10 @@ remove</source>
         <source>Response error.</source>
         <translation>Հարցման սխալ</translation>
     </message>
+    <message>
+        <source>Request for correction</source>
+        <translation>Հեռացման հարցում</translation>
+    </message>
 </context>
 <context>
     <name>DlgDishComment</name>
@@ -312,7 +316,7 @@ remove</source>
     <name>DlgFace</name>
     <message>
         <source>Table is locked by another user</source>
-        <translation>Սեղանը խմբագրվում է ուրիշի կողմից</translation>
+        <translation type="vanished">Սեղանը խմբագրվում է ուրիշի կողմից</translation>
     </message>
     <message>
         <source>Cannot open table</source>
@@ -650,7 +654,7 @@ remove</source>
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -722,14 +726,10 @@ remove</source>
     </message>
     <message>
         <source>Table is locked</source>
-        <translation>Սեղանը արգելափակված է</translation>
+        <translation type="vanished">Սեղանը արգելափակված է</translation>
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SQL error</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -898,6 +898,10 @@ remove</source>
         <source>Unable to select order with id: </source>
         <translation></translation>
     </message>
+    <message>
+        <source>Cannot print multiple receipt<byte value="xd"/> for this order by you</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MTPrintKitchen</name>
@@ -1043,6 +1047,13 @@ remove</source>
     <message>
         <source>You can remove only</source>
         <translation type="vanished">Հնարավոր քանաք հեռացնելու համար</translation>
+    </message>
+</context>
+<context>
+    <name>OD_Drv</name>
+    <message>
+        <source>New order </source>
+        <translation>Նոր պատվեր</translation>
     </message>
 </context>
 <context>
@@ -1411,19 +1422,19 @@ remove</source>
     </message>
     <message>
         <source>IDram id</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>IDram phone</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Cancelations</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Group queries</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Merci</source>
@@ -1431,11 +1442,22 @@ remove</source>
     </message>
     <message>
         <source>Update time from server</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Dish correction red timeout</source>
         <translation>Անվտանգ հեռացում, րոպե</translation>
+    </message>
+</context>
+<context>
+    <name>TableOrderSocket</name>
+    <message>
+        <source>Could not secure socket.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not lock table</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1571,7 +1593,7 @@ remove</source>
     </message>
     <message>
         <source>Cannot lock table</source>
-        <translation>Հնարավոր չէ արքելափակել սեղանը</translation>
+        <translation type="vanished">Հնարավոր չէ արքելափակել սեղանը</translation>
     </message>
     <message>
         <source>Connectin error</source>
@@ -1607,7 +1629,7 @@ remove</source>
     </message>
     <message>
         <source>Close order</source>
-        <translation type="vanished">Փակել պատվերը</translation>
+        <translation>Փակել պատվերը</translation>
     </message>
     <message>
         <source>End of edit</source>
@@ -1627,7 +1649,7 @@ remove</source>
     </message>
     <message>
         <source>Staff</source>
-        <translation>Սպասարկող</translation>
+        <translation type="vanished">Սպասարկող</translation>
     </message>
     <message>
         <source>Print date</source>
@@ -1635,7 +1657,7 @@ remove</source>
     </message>
     <message>
         <source>Print service check</source>
-        <translation type="vanished">Տպել պատվերը</translation>
+        <translation>Տպել պատվերը</translation>
     </message>
     <message>
         <source>Printer not exists</source>
@@ -1643,7 +1665,7 @@ remove</source>
     </message>
     <message>
         <source>Date</source>
-        <translation>Ամսաթիվ</translation>
+        <translation type="vanished">Ամսաթիվ</translation>
     </message>
     <message>
         <source>Counted</source>
@@ -1655,7 +1677,7 @@ remove</source>
     </message>
     <message>
         <source>Discount</source>
-        <translation type="vanished">Զեղջ</translation>
+        <translation>Զեղջ</translation>
     </message>
     <message>
         <source>Total</source>
@@ -1727,7 +1749,7 @@ remove</source>
     </message>
     <message>
         <source>Confirm to tax checkout</source>
-        <translation>Հաստատեք ՀԴՄ կտրոնի տպելը</translation>
+        <translation type="vanished">Հաստատեք ՀԴՄ կտրոնի տպելը</translation>
     </message>
     <message>
         <source>Complete</source>
@@ -1747,7 +1769,7 @@ remove</source>
     </message>
     <message>
         <source>Confirm order delete</source>
-        <translation>Հաստատեք պատվերի ջնջելը</translation>
+        <translation type="vanished">Հաստատեք պատվերի ջնջելը</translation>
     </message>
     <message>
         <source>Remove order</source>
@@ -1814,10 +1836,6 @@ remove</source>
         <translation></translation>
     </message>
     <message>
-        <source>CANDY COTTON</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>Invalid gift card</source>
         <translation>Անհայտ նվեր քարտ</translation>
     </message>
@@ -1868,6 +1886,22 @@ remove</source>
     <message>
         <source>Increase qty by</source>
         <translation>Քանակը ավելացված է</translation>
+    </message>
+    <message>
+        <source>Open table </source>
+        <translation>Մուտք պատվեր</translation>
+    </message>
+    <message>
+        <source>Move dish</source>
+        <translation>Ուտեստի տեղափոխում</translation>
+    </message>
+    <message>
+        <source>New dish </source>
+        <translation>Նոր ուտեստ</translation>
+    </message>
+    <message>
+        <source>Quit</source>
+        <translation>Ելք</translation>
     </message>
 </context>
 <context>
@@ -1922,7 +1956,7 @@ remove</source>
     </message>
     <message>
         <source>Open order from cash</source>
-        <translation>Պատվերի դիտում դրամարկղից</translation>
+        <translation type="vanished">Պատվերի դիտում դրամարկղից</translation>
     </message>
     <message>
         <source>Printer not exists</source>

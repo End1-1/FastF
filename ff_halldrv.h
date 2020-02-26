@@ -67,9 +67,6 @@ public:
     void filter(int hallId, bool onlyBusy);
     void refresh();
     void configGrid(QTableWidget *t, QItemDelegate *itemDelegate);
-    int lockTable(int tableId);
-    bool unlockTable(int tableId);
-    bool unlockAllTables();
     QMap<QString, QVariant> getHallMap();
     bool tableFlag(const Table &t, int flag);
     void setFlag(int tableId, int flag, const QChar &value);

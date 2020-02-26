@@ -7,7 +7,6 @@
 #include <QHostInfo>
 #include "od_drv.h"
 #include "ff_settingsdrv.h"
-#include "kitreminderthread.h"
 #include "c5printing.h"
 #include <QApplication>
 #include <QJsonObject>
@@ -63,11 +62,13 @@ bool OD_Print::printService(int remind, const QString &objName, QList<OD_Dish *>
             return false;
 
     if (remind) {
-        QStringList jsonReminder;
-        if (!db.prepare("insert into o_dishes_reminder (state_id, date_register, record_id, staff_id, table_id, dish_id, qty) values (:state_id, :date_register, :record_id, :staff_id, :table_id, :dish_id, :qty)"))
+        if (!db.prepare("insert into o_dishes_reminder "
+                        "(state_id, date_register, record_id, staff_id, table_id, dish_id, qty, reminder_id) "
+                        "values "
+                        "(:state_id, :date_register, :record_id, :staff_id, :table_id, :dish_id, :qty, :reminder_id)"))
             return false;
         for (QMap<int, float>::const_iterator i = list.begin(); i != list.end(); i++) {
-            if (dishes[i.key()]->f_remind) {
+            if (dishes[i.key()]->f_remind > 0) {
                 OD_Dish *d = dishes[i.key()];
                 db.bindValue(":state_id", 0);
                 db.bindValue(":date_register", QDateTime::currentDateTime());
@@ -76,24 +77,11 @@ bool OD_Print::printService(int remind, const QString &objName, QList<OD_Dish *>
                 db.bindValue(":table_id", header.f_tableId);
                 db.bindValue(":dish_id", d->f_dishId);
                 db.bindValue(":qty", i.value());
+                db.bindValue(":reminder_id", dishes[i.key()]->f_remind);
                 if (!db.execSQL()) {
                     return false;
                 }
-                QJsonObject jo;
-                jo["state"] = 0;
-                jo["rec"] = QString::number(d->f_id);
-                jo["dish"] = d->f_dishName;
-                jo["time"] = QTime::currentTime().toString("HH:mm");
-                jo["qty"] = i.value();
-                jo["table"] = header.f_tableName;
-                jo["staff"] = header.f_currStaffName;
-                jo["comment"] = d->f_comments;
-                jsonReminder.append(QJsonDocument(jo).toJson(QJsonDocument::Compact) + "\r\n");
             }
-        }
-        if (jsonReminder.count() > 0) {
-            KitReminderThread *kt = new KitReminderThread(jsonReminder);
-            kt->start();
         }
     }
     db.closeDB();

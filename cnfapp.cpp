@@ -14,6 +14,12 @@
 #define OnlineReportAddress "online_report_address"
 #define OnlineReportPassword "online_report_password"
 #define OnlineReportCafeId "online_report_cafe_id"
+#define ExchangeServer "exchange_server"
+#define ExchangePassword "exchange_password"
+#define ExchangeIdentifiedBy "exchange_identify_by"
+
+#define IdramID "idram id"
+#define IdramPhone "idram phone"
 
 QMap<QString, QString> CnfApp::fData;
 CnfApp __cnfapp;
@@ -63,6 +69,31 @@ QString CnfApp::onlineReportCafeId()
     return fData[OnlineReportCafeId];
 }
 
+QString CnfApp::exchangeServer()
+{
+    return fData[ExchangeServer];
+}
+
+QString CnfApp::exchangePassword()
+{
+    return fData[ExchangePassword];
+}
+
+QString CnfApp::exchangeIdentifyBy()
+{
+    return fData[ExchangeIdentifiedBy];
+}
+
+QString CnfApp::idramId()
+{
+    return fData[IdramID];
+}
+
+QString CnfApp::idramPhone()
+{
+    return fData[IdramPhone];
+}
+
 void CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &dbUser, const QString &dbPass, const QString &prefix)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QIBASE", "CnfApp");
@@ -95,6 +126,16 @@ void CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &d
     if (!fData.contains(OnlineReportAddress)) {
         QStringList v;
         v << OnlineReportAddress << OnlineReportCafeId << OnlineReportPassword;
+        foreach (QString s, v) {
+            q.prepare("insert into sys_cnfapp (fhost, fkey) values (:fhost, :fkey)");
+            q.bindValue(":fhost", settingsName);
+            q.bindValue(":fkey", s);
+            q.exec();
+        }
+    }
+    if (!fData.contains(ExchangeServer)) {
+        QStringList v;
+        v << ExchangeServer << ExchangePassword << ExchangeIdentifiedBy;
         foreach (QString s, v) {
             q.prepare("insert into sys_cnfapp (fhost, fkey) values (:fhost, :fkey)");
             q.bindValue(":fhost", settingsName);

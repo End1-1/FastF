@@ -18,12 +18,13 @@ LogThread::~LogThread()
     qDebug() << "LogThread quit";
 }
 
-void LogThread::logOrderThread(int user, const QString &order, const QString &action, const QString &data)
+void LogThread::logOrderThread(const QString &user, const QString &order, const QString &body, const QString &action, const QString &data)
 {
     LogThread *log = new LogThread(0);
     log->fLogMode = logOrder;
     log->fUser = user;
     log->fOrder = order;
+    log->fBody = body;
     log->fAction = action;
     log->fData = data;
     log->start();
@@ -43,23 +44,24 @@ void LogThread::run()
     DbDriver d;
     d.configureDb(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
     d.openDB();
-    QString query;
     switch (fLogMode) {
     case logOrder:
-        query = QString("insert into o_log (f_user, f_order, f_action, f_data, f_comp) values (%1, '%2', '%3', '%4', '%5')")
-                .arg(fUser)
-                .arg(fOrder)
-                .arg(fAction)
-                .arg(fData)
-                .arg(QSystem::hostInfo());
+        d.prepare("insert into o_tr(fcomp, fuser, forder, fbody, ftr, fdata) values (:fcomp, :fuser, :forder, :fbody, :ftr, :fdata)");
+        d.bindValue(":fcomp", QSystem::hostInfo());
+        d.bindValue(":fuser", fUser);
+        d.bindValue(":forder", fOrder);
+        d.bindValue(":fbody", fBody);
+        d.bindValue(":ftr", fAction);
+        d.bindValue(":fdata", fData);
         break;
     case logDiscountFailure:
-        query = QString("insert into o_disc_code_failure (f_user, f_code) values (%1, '%2')")
-                .arg(fUser)
-                .arg(fData);
+        d.prepare("insert into o_disc_code_failure (f_user, f_code) values (:f_user, :f_code)");
+        d.bindValue(":f_user", fUser);
+        d.bindValue(":f_code", fData);
         break;
     }
-    d.execSQL(query);
+    d.execSQL();
     d.closeDB();
     quit();
+
 }

@@ -28,6 +28,7 @@ signals:
 public slots:
     void finished(QNetworkReply *reply);
     void rawFinished(QNetworkReply *reply);
+    void deleteLater(const QString &data, bool isError);
 
 public:
     QByteArray m_data;

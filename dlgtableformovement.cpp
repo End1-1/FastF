@@ -14,12 +14,16 @@ DlgTableForMovement::DlgTableForMovement(QWidget *parent) :
     f.setPointSize(f.pointSize() + 10);
     ui->lbTable->setFont(f);
     ui->lbOldTable->setFont(f);
-    m_newTableId = -1;
+    fNewTableId = -1;
     ui->tblHall->setButtons(ui->btnUp, ui->btnDown);
+    ftoSocket = nullptr;
 }
 
 DlgTableForMovement::~DlgTableForMovement()
 {
+    if (ftoSocket) {
+        ftoSocket->deleteLater();
+    }
     delete ui;
 }
 
@@ -31,53 +35,53 @@ int DlgTableForMovement::getTable(int &tableId, QWidget *parent, FF_HallDrv *hal
     d->m_hallDrv->configGrid(d->ui->tblHall, 0);
     d->ui->lbOldTable->setText(d->m_hallDrv->table(tableId)->name + " >> ");
     int result = d->exec();
-    if (result == QDialog::Accepted)
-        tableId = d->m_newTableId;
+    if (result == QDialog::Accepted) {
+        tableId = d->fNewTableId;
+    }
     delete d;
     return result;
 }
 
+void DlgTableForMovement::err(const QString &msg)
+{
+    sender()->deleteLater();
+    ftoSocket = nullptr;
+    ui->btnOK->setEnabled(false);
+    ui->lbTable->clear();
+    fNewTableId = -1;
+    DlgMessage::Msg(msg);
+}
+
+void DlgTableForMovement::tableLocked(int tableId)
+{
+    ui->btnOK->setEnabled(true);
+    ui->lbTable->setText(m_hallDrv->table(tableId)->name);
+    fNewTableId = tableId;
+}
+
 void DlgTableForMovement::on_btnCancel_clicked()
 {
-    if (m_newTableId > -1)
-        m_hallDrv->unlockTable(m_newTableId);
+    if (ftoSocket) {
+        ftoSocket->deleteLater();
+    }
     reject();
 }
 
 void DlgTableForMovement::on_tblHall_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous)
 {
-    Q_UNUSED(previous)
-
-    if (m_newTableId > -1)
-        m_hallDrv->unlockTable(m_newTableId);
-
-    ui->lbTable->clear();
-    ui->btnOK->setEnabled(false);
-    if (!current)
-        return;
-
-    m_newTableId = current->data(Qt::UserRole).toInt();
-    if (!m_newTableId)
-        return;
-
-    m_newTableId = m_hallDrv->table(m_newTableId)->id;
-    if (m_newTableId != m_currentTableId) {
-        switch(m_hallDrv->lockTable(m_newTableId)) {
-        case LOCK_SUCCESS:
-            ui->btnOK->setEnabled(true);
-            ui->lbTable->setText(m_hallDrv->table(m_newTableId)->name);
-            break;
-        case LOCK_LOCKED:
-            m_newTableId = -1;
-            DlgMessage::Msg(tr("Table is locked"));
-            break;
-        case LOCK_ERROR:
-            m_newTableId = -1;
-            DlgMessage::Msg(tr("SQL error"));
-            break;
-        }
+    Q_UNUSED(previous);
+    if (ftoSocket) {
+        ftoSocket->deleteLater();
+        ftoSocket = nullptr;
     }
-
+    fNewTableId = current->data(Qt::UserRole).toInt();
+    if (!fNewTableId) {
+        return;
+    }
+    ftoSocket = new TableOrderSocket(fNewTableId, this);
+    connect(ftoSocket, SIGNAL(err(QString)), this, SLOT(err(QString)));
+    connect(ftoSocket, SIGNAL(tableLocked(int)), this, SLOT(tableLocked(int)));
+    ftoSocket->begin();
 }
 
 void DlgTableForMovement::on_btnOK_clicked()

@@ -24,7 +24,6 @@ SOURCES += main.cpp\
     dlgapprovecorrectionmessage.cpp \
     dlgcorrection.cpp \
     dlgqty.cpp \
-    kitreminderthread.cpp \
     orderdrv/od_config.cpp \
     qelineedit.cpp \
     ff_user.cpp \
@@ -79,6 +78,7 @@ SOURCES += main.cpp\
     orderdrv/od_print.cpp \
     dbdriver.cpp \
     ff_correcttime.cpp \
+    tableordersocket.cpp \
     taxcheckout.cpp \
     dlgremovereason.cpp \
     dlgkinoparkcall.cpp \
@@ -106,12 +106,12 @@ SOURCES += main.cpp\
     classes.cpp
 
 HEADERS  += \
+    ../common/fastfprotocol.h \
     c5printing.h \
     dbmutexlocker.h \
     dlgapprovecorrectionmessage.h \
     dlgcorrection.h \
     dlgqty.h \
-    kitreminderthread.h \
     qelineedit.h \
     ff_user.h \
     dlgorder.h \
@@ -140,6 +140,7 @@ HEADERS  += \
     ../common/wdtnumpad.h \
     dlgchangepass.h \
     dlgreportfilter.h \
+    tableordersocket.h \
     wdtnumpad.h \
     dlgdishcomment.h \
     dlghistory.h \

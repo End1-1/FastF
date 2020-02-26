@@ -499,70 +499,6 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="btnComment">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>40</horstretch>
-                   <verstretch>40</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>45</width>
-                   <height>45</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>45</width>
-                   <height>45</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="Res.qrc">
-                   <normaloff>:/res/comment.png</normaloff>:/res/comment.png</iconset>
-                 </property>
-                 <property name="iconSize">
-                  <size>
-                   <width>36</width>
-                   <height>36</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnCandyCotton">
-                 <property name="minimumSize">
-                  <size>
-                   <width>45</width>
-                   <height>45</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>45</width>
-                   <height>45</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="Res.qrc">
-                   <normaloff>:/res/cotton-candy.png</normaloff>:/res/cotton-candy.png</iconset>
-                 </property>
-                 <property name="iconSize">
-                  <size>
-                   <width>36</width>
-                   <height>36</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <widget class="QPushButton" name="btnTotalOrders">
                  <property name="minimumSize">
                   <size>
@@ -690,35 +626,6 @@
                  <property name="icon">
                   <iconset resource="Res.qrc">
                    <normaloff>:/res/history.png</normaloff>:/res/history.png</iconset>
-                 </property>
-                 <property name="iconSize">
-                  <size>
-                   <width>36</width>
-                   <height>36</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnTaxPrint">
-                 <property name="minimumSize">
-                  <size>
-                   <width>45</width>
-                   <height>45</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>45</width>
-                   <height>45</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="Res.qrc">
-                   <normaloff>:/res/hdm.png</normaloff>:/res/hdm.png</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -1079,7 +986,13 @@
           </widget>
          </item>
          <item row="2" column="6">
-          <widget class="QPushButton" name="btnRmDish">
+          <widget class="QPushButton" name="btnComment">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>40</horstretch>
+             <verstretch>40</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>45</width>
@@ -1097,22 +1010,13 @@
            </property>
            <property name="icon">
             <iconset resource="Res.qrc">
-             <normaloff>:/res/Delete_Icon.png</normaloff>:/res/Delete_Icon.png</iconset>
+             <normaloff>:/res/comment.png</normaloff>:/res/comment.png</iconset>
            </property>
            <property name="iconSize">
             <size>
              <width>36</width>
              <height>36</height>
             </size>
-           </property>
-           <property name="checkable">
-            <bool>false</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <property name="flat">
-            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -1160,14 +1064,14 @@
           <widget class="QPushButton" name="btnDishUp_3">
            <property name="minimumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="text">
@@ -1189,14 +1093,14 @@
           <widget class="QPushButton" name="pushButton">
            <property name="minimumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="text">
@@ -1234,14 +1138,14 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="text">
@@ -1260,46 +1164,17 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnChangeStaff">
-           <property name="minimumSize">
-            <size>
-             <width>50</width>
-             <height>50</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>50</width>
-             <height>50</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="Res.qrc">
-             <normaloff>:/res/change_waiter.png</normaloff>:/res/change_waiter.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>36</width>
-             <height>36</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="btnPrint">
            <property name="minimumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="text">
@@ -1321,14 +1196,14 @@
           <widget class="QPushButton" name="btnMoveDish">
            <property name="minimumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
-             <height>50</height>
+             <width>45</width>
+             <height>45</height>
             </size>
            </property>
            <property name="text">
@@ -1343,6 +1218,44 @@
              <width>36</width>
              <height>36</height>
             </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnRmDish">
+           <property name="minimumSize">
+            <size>
+             <width>45</width>
+             <height>45</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>45</width>
+             <height>45</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="Res.qrc">
+             <normaloff>:/res/Delete_Icon.png</normaloff>:/res/Delete_Icon.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>36</width>
+             <height>36</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -1466,7 +1379,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btnRemoveOrder">
+          <widget class="QPushButton" name="btnChangeStaff">
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -1484,7 +1397,7 @@
            </property>
            <property name="icon">
             <iconset resource="Res.qrc">
-             <normaloff>:/res/trash.PNG</normaloff>:/res/trash.PNG</iconset>
+             <normaloff>:/res/change_waiter.png</normaloff>:/res/change_waiter.png</iconset>
            </property>
            <property name="iconSize">
             <size>

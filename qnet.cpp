@@ -9,7 +9,6 @@ QNet::QNet(QObject *parent) :
 
 QNet::~QNet()
 {
-    qDebug() << "QNet destroyes";
 }
 
 void QNet::goSSL()
@@ -67,6 +66,13 @@ void QNet::downloadRawData(const QString &url)
     sslConf.setProtocol(QSsl::AnyProtocol);
     r.setSslConfiguration(sslConf);
     get(r);
+}
+
+void QNet::deleteLater(const QString &data, bool isError)
+{
+    Q_UNUSED(data);
+    Q_UNUSED(isError);
+    QObject::deleteLater();
 }
 
 void QNet::finished(QNetworkReply *reply)

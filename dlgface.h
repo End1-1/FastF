@@ -36,6 +36,10 @@ public:
     ~DlgFace();
 
 private slots:
+    void toErrText(const QString &msg);
+    void toTableLocketText(int tableId);
+    void toError(const QString &msg);
+    void toTableLocked(int tableId);
     void timer();
     void sqlError(const QString &msg);
     void on_btnExit_clicked();
@@ -60,7 +64,6 @@ private:
     void initFace();
     void loadReadyDishes();
     void correctTime();
-    void checkKinoPark();
     void onlineUp();
 };
 

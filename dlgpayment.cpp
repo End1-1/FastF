@@ -100,7 +100,7 @@ void DlgPayment::payment(quint8 mode)
     }
     if (o["reply"] == "ok") {
         fDrv->m_header.f_stateId = ORDER_STATE_CLOSED;
-        LogThread::logOrderThread(fDrv->m_header.f_currStaffId, fDrv->m_header.f_id, "Order closed", "");
+        LogThread::logOrderThread(fDrv->m_header.f_currStaffName, fDrv->m_header.f_id, "", "Order closed", "");
         accept();
         return;
     }
@@ -139,7 +139,7 @@ void DlgPayment::receipt(int mode)
         }
         msg(text);
         fDrv->m_header.f_printQty = abs(fDrv->m_header.f_printQty) + 1;
-        LogThread::logOrderThread(fDrv->m_header.f_currStaffId, fDrv->m_header.f_id, "Print prepayment check", "");
+        LogThread::logOrderThread(fDrv->m_header.f_currStaffName, fDrv->m_header.f_id, "", "Print prepayment check", "");
         return;
     }
     msg(o["reply"].toString());

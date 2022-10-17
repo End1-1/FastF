@@ -16,5 +16,3 @@ SOURCES += ice.cpp
 HEADERS += ice.h
 
 CONFIG += dll
-
-QMAKE_LFLAGS += -static-libgcc -static-libstdc++ -static -lpthread

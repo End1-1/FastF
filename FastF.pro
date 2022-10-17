@@ -13,17 +13,20 @@ RC_FILE = res/res.rc
 
 INCLUDEPATH += C:/projects/MobilePointServer
 INCLUDEPATH += C:/projects/NewTax/Src
-INCLUDEPATH += C:/OpenSSL-Win32/include
-INCLUDEPATH += C:/OpenSSL-Win32/include/openssl
+INCLUDEPATH += C:/Soft/OpenSSL-Win32/include
+INCLUDEPATH += C:/Soft/OpenSSL-Win32/include/openssl
 INCLUDEPATH += C:/projects/common
 INCLUDEPATH += C:/projects/FastF/orderdrv
 
 SOURCES += main.cpp\
     c5printing.cpp \
+    configmobilewidget.cpp \
     dbmutexlocker.cpp \
     dlgapprovecorrectionmessage.cpp \
+    dlgconfigmobile.cpp \
     dlgcorrection.cpp \
     dlgqty.cpp \
+    dlgselecttaxreport.cpp \
     orderdrv/od_config.cpp \
     qelineedit.cpp \
     ff_user.cpp \
@@ -66,10 +69,8 @@ SOURCES += main.cpp\
     ../LibQREncode/qrspec.c \
     ../LibQREncode/rscode.c \
     ../LibQREncode/split.c \
-    genqrcode.cpp \
     dlgtimelimit.cpp \
     dlgsplash.cpp \
-    ff_messanger.cpp \
     orderdrv/od_dish.cpp \
     orderdrv/od_base.cpp \
     orderdrv/od_header.cpp \
@@ -108,10 +109,13 @@ SOURCES += main.cpp\
 HEADERS  += \
     ../common/fastfprotocol.h \
     c5printing.h \
+    configmobilewidget.h \
     dbmutexlocker.h \
     dlgapprovecorrectionmessage.h \
+    dlgconfigmobile.h \
     dlgcorrection.h \
     dlgqty.h \
+    dlgselecttaxreport.h \
     qelineedit.h \
     ff_user.h \
     dlgorder.h \
@@ -165,10 +169,8 @@ HEADERS  += \
     ../LibQREncode/qrspec.h \
     ../LibQREncode/rscode.h \
     ../LibQREncode/split.h \
-    genqrcode.h \
     dlgtimelimit.h \
     dlgsplash.h \
-    ff_messanger.h \
     orderdrv/od_dish.h \
     orderdrv/od_base.h \
     orderdrv/od_header.h \
@@ -208,7 +210,9 @@ HEADERS  += \
 
 
 FORMS    += \
+    configmobilewidget.ui \
     dlgapprovecorrectionmessage.ui \
+    dlgconfigmobile.ui \
     dlgcorrection.ui \
     dlgorder.ui \
     dlgmessage.ui \
@@ -216,6 +220,7 @@ FORMS    += \
     ../common/qlogwindow.ui \
     ../common/dlgconnection.ui \
     dlgqty.ui \
+    dlgselecttaxreport.ui \
     dlgtableformovement.ui \
     ../common/dlginput.ui \
     dlgreports.ui \
@@ -245,11 +250,12 @@ DEFINES += _ORGANIZATION_=\\\"Jazzve\\\"
 DEFINES += _APPLICATION_=\\\"FastF\\\"
 
 LIBS += -lVersion
-LIBS += -lwsock32
-LIBS += -LC:/OpenSSL-Win32/lib
+
+LIBS += -LC:/Soft/OpenSSL-Win64/lib
 LIBS += -lopenssl
 LIBS += -llibcrypto
 LIBS += -ladvapi32
+LIBS += -lwsock32
 
 
 

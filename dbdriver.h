@@ -50,6 +50,8 @@ public:
     QDate v_date(int index);
     QString lastQuery();
     void commit();
+    static QDate serverDate();
+    static QDateTime serverDateTime();
 
 signals:
     void errorMsg(const QString &message);

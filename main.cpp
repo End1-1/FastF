@@ -10,9 +10,9 @@
 #include "ff_settingsdrv.h"
 #include <QLockFile>
 #include "dlgsplash.h"
-#include "ff_messanger.h"
 #include "logthread.h"
 #include <QFontDatabase>
+#include "tableordersocket.h"
 #include "mtcpserver.h"
 #include "msqldatabase.h"
 #include "cnfmaindb.h"
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
     QFont f = a.font();
     QFontDatabase fdb;
-    int fontId = fdb.addApplicationFont("./ahuni.ttf");
+    int fontId = fdb.addApplicationFont(a.applicationDirPath() + "/ahuni.ttf");
     if (fontId < 0) {
         f.setFamily("Arial Latarm Unicode");
         f.setPointSize(12);
@@ -43,9 +43,6 @@ int main(int argc, char *argv[])
         f = fdb.font(fontFamily, "Normal", 11);
         a.setFont(f);
     }
-
-    OD_Print::mfFont.setFamily(f.family());
-    OD_Print::mfFont.setPointSize(f.pointSize());
 
     QTranslator t;
     t.load(":/FastF.qm");
@@ -71,10 +68,15 @@ int main(int argc, char *argv[])
 
     d->setText("Get printers...");
     ___printerInfo = new PrinterInfo();
-    FF_Messanger::updatePrintersList();
+
+    d->setText("Init ssl socket");
+    TableOrderSocket tt(0);
+    tt.begin();
+    Q_UNUSED(tt);
 
     d->setText("All done... Starting...");
     d->hide();
+
     delete d;
 
     CnfApp::init(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword, "FASTF");

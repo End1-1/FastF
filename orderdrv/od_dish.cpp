@@ -9,6 +9,7 @@ OD_Dish::OD_Dish()
     m_qty05 = false;
     m_saved = true;
     flag14 = 0;
+    f_storestate = 0;
 }
 
 OD_Dish *OD_Dish::copy()
@@ -35,6 +36,7 @@ OD_Dish *OD_Dish::copy()
     dish->f_adgCode = f_adgCode;
     dish->m_saved = false;
     dish->flag14 = flag14;
+    dish->f_storestate = f_storestate;
     return dish;
 }
 
@@ -61,6 +63,7 @@ void OD_Dish::loadFromDb(DbDriver &db)
     f_priceDec = db.v_dbl(i++);
     f_adgCode = db.v_str(i++);
     flag14 = db.v_int(i++);
+    f_storestate = db.v_int(i++);
 }
 
 bool OD_Dish::saveToDB(DbDriver &db)
@@ -79,9 +82,9 @@ bool OD_Dish::saveToDB(DbDriver &db)
     }
     if (!db.prepare("update o_dishes set order_id=:order_id, state_id=:state_id, dish_id=:dish_id, qty=:qty, printed_qty=:printed_qty, price=:price,"
                  "last_user=:last_user, store_id=:store_id, print_schema=:print_schema, comments=:comments,"
-                 "print1=:print1, print2=:print2, "
+                 "print1=:print1, print2=:print2, f_removereason=:f_removereason, "
                  "payment_mod=:payment_mod, price_inc=:price_inc, price_dec=:price_dec, remind=:remind,"
-                 "flag14=:flag14 where id=:id"))
+                 "flag14=:flag14, f_storestate=:f_storestate where id=:id"))
         return false;
     db.bindValue(":order_id", f_orderId);
     db.bindValue(":state_id", f_stateId);
@@ -100,6 +103,8 @@ bool OD_Dish::saveToDB(DbDriver &db)
     db.bindValue(":remind", f_remind);
     db.bindValue(":id", f_id);
     db.bindValue(":flag14", flag14);
+    db.bindValue(":f_storestate", f_storestate);
+    db.bindValue(":f_removereason", f_removeReason);
     if (!db.execSQL())
         return false;
     m_saved = true;

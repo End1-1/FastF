@@ -8,6 +8,10 @@
 #include "printing.h"
 #include "qsqldb.h"
 #include "tableordersocket.h"
+#include "dlgselecttaxreport.h"
+#include "mptcpsocket.h"
+#include "cnfmaindb.h"
+#include "utils.h"
 #include "dlglist.h"
 #include <QDir>
 #include <QScrollBar>
@@ -52,7 +56,6 @@ dlgreports::dlgreports(FF_User *user, FF_HallDrv *hall, QWidget *parent) :
             l.unload();
             continue;
         }
-
 
         QString dllCaption = c();
         m_reports[dllCaption] = s();
@@ -185,7 +188,7 @@ void dlgreports::on_btnPrint_clicked()
     QString checkPrinterName = FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString();
     if(!___printerInfo->printerExists(checkPrinterName)) {
         QString prns;
-        for (QList<QPrinterInfo>::const_iterator it = ___printerInfo->m_printers.begin(); it != ___printerInfo->m_printers.end(); it++)
+        for (QList<QPrinterInfo>::const_iterator it = ___printerInfo->m_printers.constBegin(); it != ___printerInfo->m_printers.constEnd(); it++)
             prns += it->printerName() + "\r\n";
         DlgMessage::Msg(tr("Printer not exists") + " :" + checkPrinterName + "\r\n"
                         + tr("Available printers are: ") + "\r\n"
@@ -221,11 +224,11 @@ void dlgreports::on_btnPrint_clicked()
     QStringList &repFields = m_repFields[title];
     QStringList &repTotal = m_totalFields[title];
     QMap<QString, float> totals;
-    for (QStringList::const_iterator i = repTotal.begin(); i != repTotal.end(); i++)
+    for (QStringList::const_iterator i = repTotal.constBegin(); i != repTotal.constEnd(); i++)
         totals[*i] = 0;
 
     while (m_sqlDrv->next()) {
-        for (QStringList::const_iterator i = repFields.begin(); i != repFields.end(); i++) {
+        for (QStringList::const_iterator i = repFields.constBegin(); i != repFields.constEnd(); i++) {
             QVariant v = m_sqlDrv->val();
             pm.text(*i, 1, top);
             if (v.type() == QVariant::Double)
@@ -614,11 +617,56 @@ void dlgreports::on_btnDailySale_clicked()
     top += 20;
     pm.checkForNewPage(top);
     pm.setFontSize(8);
-    pm.text(QString("%1: %2").arg(tr("Printed")).arg(QDateTime::currentDateTime().toString(DATETIME_FORMAT)), 2, top);
+    pm.text(QString("%1: %2").arg(tr("Printed"), QDateTime::currentDateTime().toString(DATETIME_FORMAT)), 2, top);
     top += pm.lastTextHeight() + 2;
     pm.text(".", 1, top);
     pm.finishPage();
 
     ThreadPrinter *tp = new ThreadPrinter(FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString(), sm, pm);
     tp->start();
+}
+
+void dlgreports::on_btnPrintTaxReport_clicked()
+{
+    if (int t = DlgSelectTaxReport::getReportType()) {
+        MPTcpSocket fTcpSocket;
+        fTcpSocket.setServerIP(__cnfmaindb.fServerIP);
+        fTcpSocket.setValue("session", SESSIONID);
+        fTcpSocket.setValue("query", "taxreport");
+        fTcpSocket.setValue("type", t);
+        fTcpSocket.setValue("d1", m_filter["date1"] + " 00:00:00");
+        fTcpSocket.setValue("d2", m_filter["date2"] + " 00:00:00");
+        QJsonObject o = fTcpSocket.sendData();
+        if (o["reply"].toString() == "ok") {
+            msg(tr("Printed"));
+        } else {
+            msg(o["reply"].toString());
+        }
+    }
+}
+
+void dlgreports::on_btnTaxBack_clicked()
+{
+    QModelIndexList il = ui->tblOrders->selectionModel()->selectedRows();
+    if (!il.count()) {
+        DlgMessage::Msg(tr("No order is selected"));
+        return;
+    }
+    QString ord = ui->tblOrders->item(il.at(0).row(), 0)->text();
+
+    if (DlgMessage::Msg(QString("%1 %2").arg(tr("Confirm to cancel fiscal"), ord)) != QDialog::Accepted) {
+        return;
+    }
+
+    MPTcpSocket fTcpSocket;
+    fTcpSocket.setServerIP(__cnfmaindb.fServerIP);
+    fTcpSocket.setValue("session", SESSIONID);
+    fTcpSocket.setValue("query", "taxcancel");
+    fTcpSocket.setValue("order", ord);
+    QJsonObject o = fTcpSocket.sendData();
+    if (o["reply"].toString() == "ok") {
+        msg(tr("Fiscal canceled"));
+    } else {
+        msg(o["reply"].toString());
+    }
 }

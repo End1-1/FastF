@@ -5,7 +5,7 @@
 
 #define SQL_ODISHES "select od.id, od.order_id, od.state_id, od.dish_id, md.name, od.qty, od.printed_qty, od.price, od.last_user, " \
     "e.fname || ' ' || e.lname as lastusername, od.store_id, od.payment_mod, od.print1, od.print2, od.comments, od.remind, od.price_inc, od.price_dec, " \
-    "mt.adgcode, od.flag14 " \
+    "mt.adgcode, od.flag14, od.f_storestate " \
     "from o_dishes od, employes e, me_dishes md, me_types mt " \
     "where od.dish_id=md.id and od.last_user=e.id and od.order_id=:order_id and md.type_id=mt.id " \
     "order by od.id "

@@ -120,11 +120,9 @@ public:
     bool closeOrder(int state, const QDate &cashDate);
     void clearOrder();
     void countOrder();
-    bool moveOrder(int dstTableId, FF_User *user, FF_HallDrv *hallDrv);
     void removeDishesFrom(int index);
     void incMod(float value);
     void decMod(int costumerId, float value);
-    bool moveDish(int dstTableId, FF_User *user, int dishIndex, float qty);
     void makeTaxPrintCheck(bool print = true);
     int setOrderFlag(int flagId, const QString &data, bool unique = true);
 

@@ -52,6 +52,7 @@ private slots:
     void on_btnFilterUsedTables_clicked();
     void on_btnLockStations_clicked();
     void onlineUpReply(const QString &data, bool isError);
+    void on_btnConfigMobile_clicked();
 
 private:
     int m_timeout;

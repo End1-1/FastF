@@ -2,11 +2,11 @@
 #include <QProcess>
 #include "../printing.h"
 #include "../qsystem.h"
-#include "../genqrcode.h"
 #include <math.h>
 #include <QHostInfo>
 #include "od_drv.h"
 #include "ff_settingsdrv.h"
+#include <QMessageBox>
 #include "c5printing.h"
 #include <QApplication>
 #include <QJsonObject>
@@ -164,7 +164,8 @@ bool OD_Print::printService(int remind, const QString &objName, QList<OD_Dish *>
 
 void OD_Print::printCheckout(const QString &prnName, OD_Drv *d)
 {
-    if (d->m_header.f_printQty < 0)
+    /*
+     * if (d->m_header.f_printQty < 0)
         d->m_header.f_printQty *= -1;
     d->m_header.f_printQty++;
 
@@ -219,7 +220,7 @@ void OD_Print::printCheckout(const QString &prnName, OD_Drv *d)
         pm.line(0, top, page_width, top);
         pm.checkForNewPage(top);
     }
-    /* Without service */
+
     for (int i = 0; i <d->m_dishes.count(); i++) {
         if (d->m_dishes[i]->f_stateId != DISH_STATE_NORMAL)
             continue;
@@ -235,7 +236,7 @@ void OD_Print::printCheckout(const QString &prnName, OD_Drv *d)
         pm.line(0, top, page_width, top);
         pm.checkForNewPage(top);
     }
-    /* And without service */
+
     top += 2;
     pm.line(0, top, page_width, top);
     top++;
@@ -296,7 +297,8 @@ void OD_Print::printCheckout(const QString &prnName, OD_Drv *d)
     pm.text(h.hostName() + "/" + prnName, 1, top);
 
     pm.checkForNewPage(top);
-    /* QRCode */
+
+
     top += pm.lastTextHeight() + 3;
     pm.text(tr("Payment avaiable with IDram"), 10, top);
     top += pm.lastTextHeight() + 1;
@@ -311,7 +313,7 @@ void OD_Print::printCheckout(const QString &prnName, OD_Drv *d)
                .arg("1").toLatin1().data());
 
     top += pm.imageCenter(qrCodeFile, top + 5, page_width, true);
-    /* End QRCode */
+
 
     top += 5;
     pm.text(".", 1, top);
@@ -320,7 +322,8 @@ void OD_Print::printCheckout(const QString &prnName, OD_Drv *d)
 
     ThreadPrinter *tp = new ThreadPrinter(prnName, sm, pm);
     tp->start();
-
+    */
+    QMessageBox::information(0, "Info", "Old version of print");
 }
 
 void OD_Print::printTax(const QString &ip, const QString &port, const QString &pass, OD_Drv *d, bool print)

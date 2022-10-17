@@ -1,10 +1,10 @@
 #include "ff_halldrv.h"
 #include "ff_settingsdrv.h"
 #include "cnfmaindb.h"
-#include "od_config.h"
 #include <QHeaderView>
 
 QItemDelegate *FF_HallDrv::m_itemDelegate = 0;
+#define float_str(value, f) QString::number(value, 'f', f).remove(QRegExp("\\.0+$")).remove(QRegExp("\\.$"))
 
 void FF_HallDrv::loadHall()
 {
@@ -111,30 +111,6 @@ void FF_HallDrv::loadHall()
         }
     }
 
-    int maxid = FF_SettingsDrv::value(SD_MESSANGER_MAX_ID).toInt();
-    m_sql = "select id, dst from messanger where id>:id and type_id=2 order by 1";
-    if (!prepare(m_sql))
-        return;
-    bindValue(":id", maxid);
-    if (!execSQL())
-        return;
-    QList<Table*> tables;
-    while (next()) {
-        Table *t = table(v_int(1));
-        if (!t)
-            continue;
-        tables.append(t);
-        maxid = v_int(0);
-    }
-    FF_SettingsDrv::m_settings[SD_MESSANGER_MAX_ID] = maxid;
-    prepare("update sys_settings_values set key_value=:key_value where settings_id=:settings_id and key_name=:key_name");
-    bindValue(":key_value", maxid);
-    bindValue(":settings_id", FF_SettingsDrv::m_id);
-    bindValue(":key_name", SD_MESSANGER_MAX_ID);
-    execSQL();
-    closeDB();
-    for (QList<Table*>::iterator it = tables.begin(); it != tables.end(); it++)
-        setFlag((*it)->id, TFLAG_CALLSTAFF, '1');
     filter(m_filterHallId, m_filterOnlyBusy);
 }
 
@@ -177,8 +153,8 @@ QString FF_HallDrv::total()
         }
     }
 
-    return QString::number(m_hallTotal[m_filterHallId].qty) + " / " + double_str(m_hallTotal[m_filterHallId].amount)
-            + " [" + double_str(m_totalAmount) + " / " + QString::number(m_totalQty) + "] ";
+    return QString::number(m_hallTotal[m_filterHallId].qty) + " / " + QLocale().toString(float_str(m_hallTotal[m_filterHallId].amount, 2).toDouble())
+            + " [" + QString::number(m_totalQty) + " / " + QLocale().toString(float_str(m_totalAmount, 2).toDouble()) + "] ";
 }
 
 void FF_HallDrv::filter(int hallId, bool onlyBusy)

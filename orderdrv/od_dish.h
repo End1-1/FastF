@@ -15,6 +15,7 @@ public:
     QString f_orderId;
     int f_stateId;
     int f_dishId;
+    int f_storestate;
     QString f_adgCode;
     QString f_dishName;
     float f_totalQty;
@@ -31,7 +32,7 @@ public:
     int f_paymentMod;
     float f_priceInc;
     float f_priceDec;
-    int f_removeReason;
+    QString f_removeReason;
     QString f_print1;
     QString f_print2;
     int flag14;

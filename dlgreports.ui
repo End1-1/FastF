@@ -72,7 +72,7 @@
    </item>
    <item>
     <widget class="QWidget" name="widget" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -85,7 +85,54 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item>
+      <item row="0" column="8">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>771</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="4">
+       <widget class="QPushButton" name="btnPrintTaxReport">
+        <property name="text">
+         <string>Print tax report</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/res/service_check.png</normaloff>:/res/service_check.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QPushButton" name="btnUp">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/res/down.png</normaloff>:/res/down.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
        <widget class="QPushButton" name="btnOrderFilter">
         <property name="minimumSize">
          <size>
@@ -108,14 +155,14 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="pushButton">
+      <item row="0" column="4">
+       <widget class="QPushButton" name="btnPrint">
         <property name="text">
-         <string>Refresh</string>
+         <string>Print</string>
         </property>
         <property name="icon">
          <iconset resource="Res.qrc">
-          <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
+          <normaloff>:/res/service_check.png</normaloff>:/res/service_check.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -125,7 +172,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="2">
        <widget class="QPushButton" name="pushButton_2">
         <property name="text">
          <string>View order</string>
@@ -142,7 +189,24 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Refresh</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
        <widget class="QPushButton" name="btnDailySale">
         <property name="minimumSize">
          <size>
@@ -165,41 +229,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="btnPrint">
-        <property name="text">
-         <string>Print</string>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/res/service_check.png</normaloff>:/res/service_check.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnUp">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/res/down.png</normaloff>:/res/down.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="1" column="6">
        <widget class="QPushButton" name="btnDown">
         <property name="text">
          <string/>
@@ -216,20 +246,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>771</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
+      <item row="0" column="9">
        <widget class="QPushButton" name="btnClose">
         <property name="minimumSize">
          <size>
@@ -252,6 +269,23 @@
         </property>
         <property name="flat">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QPushButton" name="btnTaxBack">
+        <property name="text">
+         <string>Cancel fiscal</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/res/service_check.png</normaloff>:/res/service_check.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
         </property>
        </widget>
       </item>

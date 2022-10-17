@@ -12,12 +12,12 @@
 #include "dlglist.h"
 #include "dlgtimelimit.h"
 #include "cnfmaindb.h"
-#include "ff_messanger.h"
 #include "ff_correcttime.h"
 #include "logthread.h"
 #include "msqldatabase.h"
 #include "dbdriver.h"
 #include "dlgkinoparkcall.h"
+#include "dlgconfigmobile.h"
 #include "cnfapp.h"
 #include <windows.h>
 #include <QWindow>
@@ -35,7 +35,7 @@ DlgFace::DlgFace(QWidget *parent) :
     ui(new Ui::DlgFace)
 {
     ui->setupUi(this);
-    ui->lbTime->setText(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm"));
+    ui->lbTime->setText("--");
     ui->lbOrders->setText("0/0");
     showFullScreen();
     QSqlDatabase db = QSqlDB::dbByName("main");
@@ -58,11 +58,11 @@ DlgFace::DlgFace(QWidget *parent) :
 //    int i = 0;
 //    while (1) {
 //        qApp->processEvents();
-//        TableOrderSocket *t = new TableOrderSocket(++i % 10);
+//        qDebug() << "CURRENT TABLE ORDER" << i;
+//        TableOrderSocket *t = new TableOrderSocket(++i % 20);
 //        connect(t, SIGNAL(err(QString)), this, SLOT(toErrText(QString)));
 //        connect(t, SIGNAL(tableLocked(int)), this, SLOT(toTableLocketText(int)));
 //        t->begin();
-//        Sleep(1000);
 //    }
 }
 
@@ -80,7 +80,7 @@ void DlgFace::toErrText(const QString &msg)
 void DlgFace::toTableLocketText(int tableId)
 {
     sender()->deleteLater();
-    qDebug() << tableId;
+    qDebug() << "Locked" << tableId;
 }
 
 void DlgFace::toError(const QString &msg)
@@ -99,8 +99,10 @@ void DlgFace::toTableLocked(int tableId)
     }
     pass.replace(";", "");
     pass.replace("?", "");
-    if (pass.length() < 4)
+    if (pass.length() < 4) {
+        to->deleteLater();
         return;
+    }
 
     m_timer.stop();
     FF_User *user = new FF_User("main");
@@ -117,8 +119,9 @@ void DlgFace::toTableLocked(int tableId)
             timer();
         } else
             DlgMessage::Msg(tr("User have not access to edit order"));
-    } else
+    } else {
         DlgMessage::Msg(tr("Invalid password"));
+    }
 
     delete user;
     to->deleteLater();
@@ -130,15 +133,15 @@ void DlgFace::timer()
     if (!__cnfmaindb.fOk) {
         return;
     }
+    m_timeout++;
     if (__cnfmaindb.fServerMode.toInt() > 0) {
         if ((m_timeout % UPDATE_TIME_ONLINE) == 0) {
             onlineUp();
         }
     }
-    m_timeout++;
     if (!(m_timeout % UPDATE_TIME_DEVIDER))
         correctTime();
-    ui->lbTime->setText(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm"));
+    ui->lbTime->setText(DbDriver::serverDateTime().toString("dd.MM.yyyy HH:mm"));
     m_hallDrv->refresh();
     ui->lbOrders->setText(m_hallDrv->total());
     loadReadyDishes();
@@ -146,19 +149,6 @@ void DlgFace::timer()
         for (int j = 0; j < ui->tblHall->columnCount(); j++)
             ui->tblHall->update(ui->tblHall->model()->index(i, j));
 
-    for (QMap<int, QString>::iterator it = FF_Messanger::msg.begin(); it != FF_Messanger::msg.end(); it++) {
-        switch (it.key()) {
-        case 10:
-            qApp->quit();
-            return;
-        }
-
-        FF_Messanger::msg.remove(it.key());
-    }
-
-//    FF_Messanger *f = new FF_Messanger(this);
-//    f->start();
-//    checkKinoPark();
 }
 
 void DlgFace::sqlError(const QString &msg)
@@ -365,14 +355,6 @@ void HallItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
        }
     }
 
-    bool isCallStaff = m_hallDrv->tableFlag(*t, TFLAG_CALLSTAFF);
-    if (isCallStaff) {
-        brush.setColor(Qt::black);
-        brush.setStyle(Qt::CrossPattern);
-        painter->setBrush(brush);
-        painter->drawEllipse(rSignal);
-    }
-
     painter->restore();
 }
 
@@ -562,3 +544,9 @@ void DlgFace::onlineUpReply(const QString &data, bool isError)
     sender()->deleteLater();
 }
 
+
+void DlgFace::on_btnConfigMobile_clicked()
+{
+    DlgConfigMobile d;
+    d.exec();
+}

@@ -53,5 +53,6 @@
         <file>res/ball-red.png</file>
         <file>res/ball-yellow.png</file>
         <file>res/typing.png</file>
+        <file>res/qr_code.png</file>
     </qresource>
 </RCC>

@@ -11,14 +11,6 @@ TableOrderSocket::TableOrderSocket(int tableId, QObject *parent) :
     TableOrderSocket(parent)
 {
     fTable = tableId;
-    if (fCert.isNull()) {
-        QFile file(qApp->applicationDirPath() + "/" + "cert.pem");
-        if (!file.open(QIODevice::ReadOnly)) {
-            emit err("Certificate file missing");
-            return;
-        }
-        fCert = QSslCertificate(file.readAll());
-    }
 }
 
 TableOrderSocket::TableOrderSocket(const QString &orderId, QObject *parent) :
@@ -29,14 +21,23 @@ TableOrderSocket::TableOrderSocket(const QString &orderId, QObject *parent) :
 
 void TableOrderSocket::begin()
 {
-    //qDebug() << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString() << QSslSocket::sslLibraryVersionString();
+    if (fCert.isNull()) {
+        QString certFileName = qApp->applicationDirPath() + "/" + "cert.pem";
+        QFile file(certFileName);
+        if (!file.open(QIODevice::ReadOnly)) {
+            emit err("Certificate file missing");
+            return;
+        }
+        fCert = QSslCertificate(file.readAll());
+    }
+    qDebug() << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString() << QSslSocket::sslLibraryVersionString();
     reset();    
     fSocket->addCaCertificate(fCert);
     fSocket->setPeerVerifyMode(QSslSocket::VerifyNone);
     fSocket->connectToHostEncrypted(__cnfmaindb.fServerIP, 8788);
     if (!fSocket->waitForEncrypted(3000)) {
         qDebug() << fSocket->errorString();
-        emit err(tr("Could not secure socket.") + "<br>" + fSocket->errorString());
+        emit err(tr("Could not secure socket.") + "<br>" + fSocket->errorString() + "<br>" + QString("%1:%2").arg(__cnfmaindb.fServerIP).arg(8788));
         return;
     }
     if (fOrderId.isEmpty()) {

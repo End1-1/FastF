@@ -129,7 +129,7 @@ bool dlgorder::setData(FF_User *user, FF_HallDrv *hallDrv, int tableId, QString 
     m_ord->m_header.f_amount_inc = 0.0;
     m_ord->m_header.f_amount_dec = 0.0;
     m_ord->m_header.f_amount_dec_value = 0.0;
-    m_ord->m_header.f_dateCash = QDate::currentDate();
+    m_ord->m_header.f_dateCash = DbDriver::serverDate();
     m_ord->m_header.f_comment = "";
     m_ord->m_header.f_taxPrint = 0;
     m_ord->m_header.f_payment = 0;
@@ -468,7 +468,6 @@ void dlgorder::insertDiscount()
 
 void dlgorder::beforeClose()
 {
-    m_hallDrv->setFlag(m_ord->m_header.f_tableId, TFLAG_CALLSTAFF, '0');
     m_hallDrv->setFlag(m_ord->m_header.f_tableId, TFLAG_NEW, '0');
     m_ord->disconnect();
     m_ord->openDB();
@@ -670,7 +669,7 @@ void dlgorder::moveOrderDish(int index, int tableId, QString tableName)
         m_ord->bindValue(":table_id", tableId);
         m_ord->bindValue(":date_open", QDateTime::currentDateTime());
         m_ord->bindValue(":date_close", QDateTime::currentDateTime());
-        m_ord->bindValue(":date_cash", QDate::currentDate());
+        m_ord->bindValue(":date_cash", DbDriver::serverDate());
         m_ord->bindValue(":staff_id", m_ord->m_header.f_staffId);
         m_ord->bindValue(":print_qty", 0);
         m_ord->bindValue(":payment", 0);
@@ -1420,6 +1419,10 @@ void dlgorder::decQty(double qty)
     }
     if (OD_Dish *d = m_ord->dish(index)) {
         if (d->f_printedQty > d->f_totalQty - qty) {
+            return;
+        }
+        if (d->f_totalQty - qty < 0.5) {
+            message(tr("Use removal tool or call to manager."));
             return;
         }
         d->f_totalQty -= qty;

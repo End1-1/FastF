@@ -1,5 +1,6 @@
 #include "dbdriver.h"
 #include "dbmutexlocker.h"
+#include "cnfmaindb.h"
 #include <QMapIterator>
 #include <QMutex>
 
@@ -15,8 +16,9 @@ void DbDriver::log(const QString &message)
 #else
     Q_UNUSED(finalMessage)
 #endif
-    if (m_errorFlag)
+    if (m_errorFlag) {
         emit errorMsg(message);
+    }
 }
 
 DbDriver::DbDriver()
@@ -217,5 +219,39 @@ QString DbDriver::lastQuery()
 void DbDriver::commit()
 {
     m_db.commit();
+}
+
+QDate DbDriver::serverDate()
+{
+    DbDriver db;
+    db.configureDb(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
+    QDate d;
+    if (db.openDB()) {
+        if (db.execSQL("select current_date from rdb$database")) {
+            if (db.next()) {
+                d = db.v_date(0);
+            }
+            db.commit();
+        }
+    }
+    Q_ASSERT(d.isValid());
+    return d;
+}
+
+QDateTime DbDriver::serverDateTime()
+{
+    DbDriver db;
+    db.configureDb(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
+    QDateTime d;
+    if (db.openDB()) {
+        if (db.execSQL("select current_timestamp from rdb$database")) {
+            if (db.next()) {
+                d = db.v_dateTime(0);
+            }
+            db.commit();
+        }
+    }
+    Q_ASSERT(d.isValid());
+    return d;
 }
 

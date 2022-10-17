@@ -52,7 +52,6 @@ void FF_SettingsDrv::init()
     m_settings[SD_UPDATE_TIME_SERVER] = "";
     m_settings[SD_PRINT_QRCODE] = 0;
     m_settings[SD_ORDER_ID_PREFIX] = "N";
-    m_settings[SD_MESSANGER_MAX_ID] = 0;
     m_settings[SD_AVAILABLE_PRESENT] = "";
     m_settings[SD_AUTODISCOUNT_V1] = "";
     m_settings[SD_IDRAM_SESSION_ID] = "";

@@ -30,7 +30,6 @@ SOURCES += menu_am.cpp \
     ../../orderdrv/od_print.cpp \
     ../../dbdriver.cpp \
     ../../../CafeV4/core/printing.cpp \
-    ../../genqrcode.cpp \
     ../../../LibQREncode/bitstream.c \
     ../../../LibQREncode/mask.c \
     ../../../LibQREncode/mmask.c \
@@ -67,7 +66,6 @@ HEADERS += menu_am.h \
     ../../dbdriver.h \
     ../../printing.h \
     ../../../CafeV4/core/printing.h \
-    ../../genqrcode.h \
     ../../../LibQREncode/bitstream.h \
     ../../../LibQREncode/config.h \
     ../../../LibQREncode/mask.h \

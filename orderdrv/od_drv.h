@@ -32,7 +32,6 @@ public:
     bool updateTableInfo(const QString &orderId, int tableId, int state);
     bool closeTable();
     bool saveAll();
-    bool saveGat();
 
     bool discount(int id, float value);
     void countAmounts();

@@ -13,7 +13,6 @@
 
 #define TFLAG_NEW 0
 #define TFLAG_CHECKOUT 1
-#define TFLAG_CALLSTAFF 2
 #define TFLAG_DEFAULT "000000000000"
 
 class FF_HallDrv : public DbDriver

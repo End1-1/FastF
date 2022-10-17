@@ -301,7 +301,7 @@
                </font>
               </property>
               <property name="text">
-               <string>TextLabel</string>
+               <string>01:00:00</string>
               </property>
              </widget>
             </item>
@@ -315,7 +315,7 @@
                </font>
               </property>
               <property name="text">
-               <string>TextLabel</string>
+               <string>50000/100</string>
               </property>
              </widget>
             </item>
@@ -387,6 +387,35 @@
            <property name="icon">
             <iconset resource="Res.qrc">
              <normaloff>:/res/Billing.png</normaloff>:/res/Billing.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnConfigMobile">
+           <property name="minimumSize">
+            <size>
+             <width>60</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>60</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="Res.qrc">
+             <normaloff>:/res/qr_code.png</normaloff>:/res/qr_code.png</iconset>
            </property>
            <property name="iconSize">
             <size>

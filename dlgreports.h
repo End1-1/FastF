@@ -30,6 +30,8 @@ private slots:
     void on_btnDown_clicked();
     void on_btnPrint_clicked();
     void on_btnDailySale_clicked();
+    void on_btnPrintTaxReport_clicked();
+    void on_btnTaxBack_clicked();
 
 private:
     Ui::dlgreports *ui;

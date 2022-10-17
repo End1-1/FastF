@@ -21,7 +21,6 @@
 #define SD_PRINT_QRCODE QObject::tr("Print QR Code")
 #define SD_ORDER_ID_PREFIX QObject::tr("Order id prefix")
 #define SD_BTN_LOCKSTATIONS QObject::tr("Lock stations button")
-#define SD_MESSANGER_MAX_ID QObject::tr("Messanger max id")
 #define SD_AVAILABLE_PRESENT QObject::tr("Available present")
 #define SD_AUTODISCOUNT_V1 QObject::tr("Auto discount v1")
 #define SD_IDRAM_SESSION_ID QObject::tr("IDram session id")

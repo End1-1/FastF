@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="hy_AM">
 <context>
+    <name>ConfigMobileWidget</name>
+    <message>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Dlg14</name>
     <message>
         <source>Dialog</source>
@@ -143,6 +154,13 @@
     <message>
         <source>Dialog</source>
         <translation></translation>
+    </message>
+</context>
+<context>
+    <name>DlgConfigMobile</name>
+    <message>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -300,6 +318,22 @@ remove</source>
         <source>Request for correction</source>
         <translation>Հեռացման հարցում</translation>
     </message>
+    <message>
+        <source>Loss?</source>
+        <translation>Կորուստ՞</translation>
+    </message>
+    <message>
+        <source>YES</source>
+        <translation>ԱՅՈ</translation>
+    </message>
+    <message>
+        <source>NO</source>
+        <translation>ՈՉ</translation>
+    </message>
+    <message>
+        <source>No one of loss option was selected</source>
+        <translation>Նշեք, կորուստ է թե ոչ</translation>
+    </message>
 </context>
 <context>
     <name>DlgDishComment</name>
@@ -359,7 +393,11 @@ remove</source>
         <translation></translation>
     </message>
     <message>
-        <source>TextLabel</source>
+        <source>01:00:00</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>50000/100</source>
         <translation></translation>
     </message>
 </context>
@@ -424,11 +462,11 @@ remove</source>
     <name>DlgInput</name>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>TextLabel</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -571,28 +609,48 @@ remove</source>
         <source>Comp.</source>
         <translation></translation>
     </message>
+    <message>
+        <source>Customer tax id</source>
+        <translation>Հաճախորդի ՀՎՀՀ</translation>
+    </message>
+    <message>
+        <source>...</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Confirm to cancel fiscal</source>
+        <translation>Հաստատեք կտրոնի հետվերադարձը</translation>
+    </message>
+    <message>
+        <source>Fiscal canceled</source>
+        <translation>Հետվարադարձը կատարվեց</translation>
+    </message>
+    <message>
+        <source>Fiscal cancel</source>
+        <translation>ՀԴՄ հետվերադարձ</translation>
+    </message>
 </context>
 <context>
     <name>DlgPaymentJazzve</name>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Costumer</source>
-        <translation type="unfinished"></translation>
+        <translation>Հաճախորդ</translation>
     </message>
     <message>
         <source>Balance</source>
-        <translation type="unfinished"></translation>
+        <translation>Հաշվեկշիռ</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished">Այո</translation>
+        <translation>Այո</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">Հրաժարվել</translation>
+        <translation>Հրաժարվել</translation>
     </message>
 </context>
 <context>
@@ -673,7 +731,26 @@ remove</source>
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
+    </message>
+</context>
+<context>
+    <name>DlgSelectTaxReport</name>
+    <message>
+        <source>Dialog</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>REPORT X</source>
+        <translation>Տպել X հաշվետվություն</translation>
+    </message>
+    <message>
+        <source>REPORT Z</source>
+        <translation>Տպել Z հաշվետվություն</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation>Հրաժարվել</translation>
     </message>
 </context>
 <context>
@@ -900,7 +977,7 @@ remove</source>
     </message>
     <message>
         <source>Cannot print multiple receipt<byte value="xd"/> for this order by you</source>
-        <translation type="unfinished"></translation>
+        <translation>Դուք չեք կարող տպել մեկից ավել օրինակ</translation>
     </message>
 </context>
 <context>
@@ -1080,39 +1157,39 @@ remove</source>
     </message>
     <message>
         <source>Counted</source>
-        <translation>Հաշվարկված է</translation>
+        <translation type="vanished">Հաշվարկված է</translation>
     </message>
     <message>
         <source>Service</source>
-        <translation>Սպասարկում</translation>
+        <translation type="vanished">Սպասարկում</translation>
     </message>
     <message>
         <source>Discount</source>
-        <translation>Զեղջ</translation>
+        <translation type="vanished">Զեղջ</translation>
     </message>
     <message>
         <source>* Partial discount</source>
-        <translation>* Մասնակի զեղջ</translation>
+        <translation type="vanished">* Մասնակի զեղջ</translation>
     </message>
     <message>
         <source>Total</source>
-        <translation>Ընդամենը</translation>
+        <translation type="vanished">Ընդամենը</translation>
     </message>
     <message>
         <source>Thank you for visit</source>
-        <translation>Շնորհակալություն այցելության համար</translation>
+        <translation type="vanished">Շնորհակալություն այցելության համար</translation>
     </message>
     <message>
         <source>Printed</source>
-        <translation>Տպված</translation>
+        <translation type="vanished">Տպված</translation>
     </message>
     <message>
         <source>Smpl.</source>
-        <translation>Օրնկ.</translation>
+        <translation type="vanished">Օրնկ.</translation>
     </message>
     <message>
         <source>Payment avaiable with IDram</source>
-        <translation>Վճարել ԻԴՐԱՄ դրամապանակով</translation>
+        <translation type="vanished">Վճարել ԻԴՐԱՄ դրամապանակով</translation>
     </message>
     <message>
         <source>Removed from order</source>
@@ -1163,6 +1240,18 @@ remove</source>
     <message>
         <source>Data read timeout</source>
         <translation></translation>
+    </message>
+    <message>
+        <source>You should to setup cashier and pin before to use fiscal printer</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Connection error</source>
+        <translation>Կապի սխալ</translation>
+    </message>
+    <message>
+        <source>Tax error code</source>
+        <translation>ՀԴՄ-ի սխալի կոդ</translation>
     </message>
 </context>
 <context>
@@ -1370,7 +1459,7 @@ remove</source>
     </message>
     <message>
         <source>Messanger max id</source>
-        <translation>Հաղորդագրության մաքսիմալ համարը</translation>
+        <translation type="vanished">Հաղորդագրության մաքսիմալ համարը</translation>
     </message>
     <message>
         <source>Available present</source>
@@ -1453,11 +1542,11 @@ remove</source>
     <name>TableOrderSocket</name>
     <message>
         <source>Could not secure socket.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Could not lock table</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1903,6 +1992,10 @@ remove</source>
         <source>Quit</source>
         <translation>Ելք</translation>
     </message>
+    <message>
+        <source>Use removal tool or call to manager.</source>
+        <translation>Օգտագործեկ հեռացման կոճակը կամ կանչ տվեք մենեջերին</translation>
+    </message>
 </context>
 <context>
     <name>dlgreports</name>
@@ -2017,6 +2110,22 @@ remove</source>
     <message>
         <source>Dialog</source>
         <translation></translation>
+    </message>
+    <message>
+        <source>Print tax report</source>
+        <translation>Տպել ՀԴՄ հաշվետվություն</translation>
+    </message>
+    <message>
+        <source>Cancel fiscal</source>
+        <translation>ՀԴՄ հետվերադարձ</translation>
+    </message>
+    <message>
+        <source>Confirm to cancel fiscal</source>
+        <translation>Հաստատեք կտրոնի հետվերադարձը</translation>
+    </message>
+    <message>
+        <source>Fiscal canceled</source>
+        <translation>Հետվարադարձը կատարվեց</translation>
     </message>
 </context>
 </TS>

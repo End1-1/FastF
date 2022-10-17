@@ -94,7 +94,12 @@ QString CnfApp::idramPhone()
     return fData[IdramPhone];
 }
 
-void CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &dbUser, const QString &dbPass, const QString &prefix)
+QString CnfApp::mobileConfigString()
+{
+    return fData["mobile_config"];
+}
+
+bool CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &dbUser, const QString &dbPass, const QString &prefix)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QIBASE", "CnfApp");
     db.setHostName(dbHost);
@@ -103,7 +108,7 @@ void CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &d
     db.setPassword(dbPass);
     if (!db.open()) {
         QMessageBox::critical(nullptr, "Db error", db.lastError().databaseText());
-        return;
+        return false;
     }
     QString settingsName = prefix.toUpper() + "-" + QHostInfo::localHostName().toUpper();
     QSqlQuery q(db);
@@ -145,4 +150,5 @@ void CnfApp::init(const QString &dbHost, const QString &dbPath, const QString &d
     }
     db.close();
     QSqlDatabase::removeDatabase("CnfApp");
+    return true;
 }

@@ -107,20 +107,6 @@ bool OD_Drv::saveAll()
     return true;
 }
 
-bool OD_Drv::saveGat()
-{
-    if (!openDB())
-        return false;
-    if (!prepare("insert into gat (gat, order_id) values (:gat, :order_id)"))
-        return false;
-    bindValue(":gat", m_header.f_gat);
-    bindValue(":order_id", m_header.f_id);
-    if (!execSQL())
-        return false;
-    closeDB();
-    return true;
-}
-
 bool OD_Drv::discount(int id, float value)
 {
     if (!openDB())

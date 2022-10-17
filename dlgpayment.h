@@ -40,6 +40,10 @@ private slots:
     void on_btnCard_clicked();
     void on_btnComplimentary_clicked();
 
+    void on_btnPrepaymentCash_2_clicked();
+
+    void on_btnChange_clicked();
+
 private:
     Ui::DlgPayment *ui;
     OD_Drv *fDrv;

@@ -4,10 +4,11 @@
 #include "dlgmessage.h"
 #include "utils.h"
 #include "cnfmaindb.h"
-#include "cnfapp.h"
 #include "ff_settingsdrv.h"
 #include "dlggetpassword.h"
+#include "dlgcalcchange.h"
 #include "ff_user.h"
+#include "cnfapp.h"
 
 DlgPayment::DlgPayment(FF_User *u, OD_Drv *drv, QWidget *parent) :
     QDialog(parent),
@@ -15,6 +16,7 @@ DlgPayment::DlgPayment(FF_User *u, OD_Drv *drv, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->btnComplimentary->setVisible(u->m_groupId.toInt() <= 2);
+    ui->btnPrepaymentCash_2->setVisible(u->m_groupId.toInt() <= 2);
     fDrv = drv;
     fGift = 0;
     fTcpSocket.setServerIP(__cnfmaindb.fServerIP);
@@ -120,6 +122,7 @@ void DlgPayment::receipt(int mode)
     fTcpSocket.setValue("mode", mode);
     fTcpSocket.setValue("cash", ui->leCash->text().toDouble());
     fTcpSocket.setValue("card", ui->leCard->text().toDouble());
+    fTcpSocket.setValue("tax", ui->leTax->text());
     QJsonObject o = fTcpSocket.sendData();
     ui->btnCash->setEnabled(true);
     ui->btnCard->setEnabled(true);
@@ -247,4 +250,30 @@ void DlgPayment::on_btnComplimentary_clicked()
     fDrv->bindValue(":fid", fDrv->m_header.f_id);
     fDrv->execSQL();
     fDrv->closeDB();
+}
+
+void DlgPayment::on_btnPrepaymentCash_2_clicked()
+{
+    if (DlgMessage::Msg(QString("%1").arg(tr("Confirm to cancel fiscal"))) != QDialog::Accepted) {
+        return;
+    }
+
+    MPTcpSocket fTcpSocket;
+    fTcpSocket.setServerIP(__cnfmaindb.fServerIP);
+    fTcpSocket.setValue("session", SESSIONID);
+    fTcpSocket.setValue("query", "taxcancel");
+    fTcpSocket.setValue("order", fDrv->m_header.f_id);
+    QJsonObject o = fTcpSocket.sendData();
+    if (o["reply"].toString() == "ok") {
+        msg(tr("Fiscal canceled"));
+    } else {
+        msg(o["reply"].toString());
+    }
+}
+
+void DlgPayment::on_btnChange_clicked()
+{
+    DlgCalcChange *d = new DlgCalcChange(fDrv->m_header.f_amount, this);
+    d->exec();
+    delete d;
 }

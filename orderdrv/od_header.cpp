@@ -47,7 +47,7 @@ int OD_Header::saveToDb(DbDriver &drv, const QString &orderPrefix)
         f_stateId = ORDER_STATE_OPEN;
         f_dateOpen = QDateTime::currentDateTime();
         f_dateClose = QDateTime::currentDateTime();
-        f_dateCash = QDate::currentDate();
+        f_dateCash = DbDriver::serverDate();
         f_staffId = f_currStaffId;
         f_staffName = f_currStaffName;
         f_printQty = 0;

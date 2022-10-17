@@ -170,7 +170,7 @@ void DlgCorrection::printRemoved(double qty)
 
 void DlgCorrection::requestForCorrection(double qty)
 {
-    setEnabled(false);
+    setEnabledWidget(false);
     m_ord->prepare("insert into o_request_correction (fstate, frecord, frequest, freason, fqty) values (0, :frecord, 0, :freason, :fqty)");
     m_ord->bindValue(":frecord", fDish->f_id);
     m_ord->bindValue(":freason", ui->ptReason->toPlainText());
@@ -194,7 +194,7 @@ void DlgCorrection::requestForCorrection(double qty)
 
 void DlgCorrection::checkResponse(int id)
 {
-    setEnabled(false);
+    setEnabledWidget(false);
     QNet *n = new QNet(this);
     connect(n, SIGNAL(getResponse(QString,bool)), SLOT(parseRequestResponse(QString,bool)));
     n->URL = "http://www.jazzve.am/cafe4/check_request_response.php";
@@ -222,6 +222,10 @@ void DlgCorrection::on_btnOk_clicked()
 {
     if (fQty < 0.001) {
         DlgMessage::Msg(tr("Incorrect qty to remove"));
+        return;
+    }
+    if (!ui->btnLossYes->isChecked() && !ui->btnLossNo->isChecked()) {
+        DlgMessage::Msg(tr("No one of loss option was selected"));
         return;
     }
     if (ui->ptReason->toPlainText().trimmed().isEmpty()) {
@@ -258,16 +262,20 @@ void DlgCorrection::on_btnOk_clicked()
             OD_Dish *dc = fDish->copy();
             dc->f_totalQty = fQty;
             dc->f_printedQty = fQty;
+            dc->f_storestate =ui->btnLossYes->isChecked() ? 1 : 0;
+            dc->f_removeReason = ui->ptReason->toPlainText();
             dc->f_stateId = DISH_STATE_REMOVED_PRINTED;
             m_ord->appendDish(dc);
         }
         LogThread::logOrderThread(m_ord->m_header.f_currStaffName, m_ord->m_header.f_id, QString::number(fDish->f_id), tr("Removed with print "), fDish->f_dishName + ": " + double_str(fQty) + ", " + ui->ptReason->toPlainText());
         printRemoved(fQty);
     }
-    m_ord->prepare("update o_dishes set state_id=:state_id, qty=:qty, printed_qty=:printed_qty where id=:id");
+    m_ord->prepare("update o_dishes set state_id=:state_id, qty=:qty, f_removereason=:f_removereason, f_storestate=:f_storestate, printed_qty=:printed_qty where id=:id");
     m_ord->bindValue(":state_id", fDish->f_stateId);
     m_ord->bindValue(":qty", fDish->f_totalQty);
     m_ord->bindValue(":printed_qty", fDish->f_printedQty);
+    m_ord->bindValue(":f_storestate", (fDish->f_stateId != DISH_STATE_NORMAL && ui->btnLossYes->isChecked()) ? 1 : 0);
+    m_ord->bindValue(":f_removereason", ui->ptReason->toPlainText());
     m_ord->bindValue(":id", fDish->f_id);
     m_ord->execSQL();
 
@@ -322,7 +330,7 @@ void DlgCorrection::on_tblLetter_itemClicked(QTableWidgetItem *item)
 
 void DlgCorrection::parseRequestForCorrection(const QString &response, bool result)
 {
-   setEnabled(true);
+   setEnabledWidget(true);
    int newID = response.toInt();
    if (newID == 0) {
        DlgMessage::Msg(tr("Request error") + "\r\n" + response);
@@ -382,9 +390,14 @@ void DlgCorrection::parseRequestResponse(const QString &response, bool result)
     d->exec();
     delete d;
     if (approve) {
+        ui->wButtons->setEnabled(true);
+        ui->btnClearWindow->setEnabled(false);
+        ui->btnCheckResponse->setEnabled(false);
+        ui->btnOk->setEnabled(true);
+        ui->btnReject->setEnabled(true);
         on_btnOk_clicked();
     } else {
-        setEnabled(true);
+        setEnabledWidget(true);
         setWaitMode();
     }
 }
@@ -403,4 +416,20 @@ void DlgCorrection::setWaitMode()
 void DlgCorrection::on_btnCheckResponse_clicked()
 {
     checkResponse(fRequestId);
+}
+void DlgCorrection::on_btnLossYes_clicked()
+{
+    ui->btnLossNo->setChecked(false);
+}
+
+void DlgCorrection::on_btnLossNo_clicked()
+{
+    ui->btnLossYes->setChecked(false);
+}
+
+void DlgCorrection::setEnabledWidget(bool v)
+{
+    ui->wButtons->setEnabled(v);
+    ui->wName->setEnabled(v);
+    ui->wReason->setEnabled(v);
 }

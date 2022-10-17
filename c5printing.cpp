@@ -1,5 +1,4 @@
 #include "c5printing.h"
-#include "mtfilelog.h"
 #include <QPainter>
 #include <QGraphicsItem>
 #include <QDebug>
@@ -272,7 +271,7 @@ void C5Printing::print(const QString &printername, QPrinter::PageSize pageSize)
             bool np = printer.newPage();
             QString fLog = np ? "New page = true" : "WARNING!!! New page = false";
             if (!np) {
-                MTFileLog::createLog(__LOG_PRINT, fLog);
+
             }
         }
         QPrinter::Orientation o = fCanvasOrientation[fCanvasList.at(i)];

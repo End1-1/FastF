@@ -16,8 +16,12 @@ DEFINES += _ORGANIZATION_=\\\"SmartHotel\\\"
 DEFINES += _APPLICATION_=\\\"SmartHotel\\\"
 
 SOURCES += menu_am.cpp \
+    ../../../Cafe5/Classes/c5printing.cpp \
     ../../../common/qsystem.cpp \
+    ../../dbmutexlocker.cpp \
+    ../../logthread.cpp \
     ../../orderdrv/od_base.cpp \
+    ../../orderdrv/od_config.cpp \
     ../../orderdrv/od_dish.cpp \
     ../../orderdrv/od_drv.cpp \
     ../../orderdrv/od_flags.cpp \
@@ -25,7 +29,6 @@ SOURCES += menu_am.cpp \
     ../../orderdrv/od_print.cpp \
     ../../dbdriver.cpp \
     ../../../CafeV4/core/printing.cpp \
-    ../../genqrcode.cpp \
     ../../../LibQREncode/bitstream.c \
     ../../../LibQREncode/mask.c \
     ../../../LibQREncode/mmask.c \
@@ -47,6 +50,9 @@ SOURCES += menu_am.cpp \
     ../../cnfmaindb.cpp
 
 HEADERS += menu_am.h \
+    ../../../Cafe5/Classes/c5printing.h \
+    ../../dbmutexlocker.h \
+    ../../logthread.h \
     ../../orderdrv/od.h \
     ../../orderdrv/od_base.h \
     ../../orderdrv/od_config.h \
@@ -58,7 +64,6 @@ HEADERS += menu_am.h \
     ../../dbdriver.h \
     ../../printing.h \
     ../../../CafeV4/core/printing.h \
-    ../../genqrcode.h \
     ../../../LibQREncode/bitstream.h \
     ../../../LibQREncode/config.h \
     ../../../LibQREncode/mask.h \

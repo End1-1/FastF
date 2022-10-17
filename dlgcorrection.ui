@@ -6,30 +6,119 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>722</width>
-    <height>625</height>
+    <width>891</width>
+    <height>673</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string/>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>3</number>
-   </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
-   <item>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="6" column="1">
+    <widget class="QWidget" name="widget_5" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>200</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="1" column="0">
+       <widget class="QToolButton" name="btnLossYes">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>YES</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QToolButton" name="btnLossNo">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>NO</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Loss?</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <widget class="QPlainTextEdit" name="ptReason">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>150</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>150</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+      </font>
+     </property>
+     <property name="plainText">
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string>Remove reason</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
@@ -47,205 +136,134 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item>
-       <widget class="QLabel" name="lbDishName">
-        <property name="font">
-         <font>
-          <pointsize>26</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Dish name</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="indent">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
-   <item>
-    <widget class="QWidget" name="widget_2" native="true">
-     <layout class="QGridLayout" name="gridLayout">
-      <property name="leftMargin">
-       <number>0</number>
+   <item row="6" column="0">
+    <widget class="QWidget" name="wButtons" native="true">
+     <widget class="QPushButton" name="btnClearWindow">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>4</y>
+        <width>75</width>
+        <height>50</height>
+       </rect>
       </property>
-      <property name="topMargin">
-       <number>0</number>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
       </property>
-      <property name="rightMargin">
-       <number>0</number>
+      <property name="text">
+       <string>Clear</string>
       </property>
-      <property name="bottomMargin">
-       <number>0</number>
+      <property name="icon">
+       <iconset resource="Res.qrc">
+        <normaloff>:/res/Delete_Icon.png</normaloff>:/res/Delete_Icon.png</iconset>
       </property>
-      <property name="spacing">
-       <number>0</number>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
       </property>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="btnPlus">
-        <property name="minimumSize">
-         <size>
-          <width>42</width>
-          <height>42</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>42</width>
-          <height>42</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/res/plus.png</normaloff>:/res/plus.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>40</width>
-          <height>40</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>188</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="5">
-       <widget class="QPushButton" name="btnMinus">
-        <property name="minimumSize">
-         <size>
-          <width>42</width>
-          <height>42</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>42</width>
-          <height>42</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/res/minus.png</normaloff>:/res/minus.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>40</width>
-          <height>40</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="lbQty_3">
-        <property name="font">
-         <font>
-          <pointsize>20</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Old qty</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>188</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="sdfg">
-        <property name="font">
-         <font>
-          <pointsize>20</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Qty to
-remove</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="lbQtyRemove">
-        <property name="font">
-         <font>
-          <pointsize>20</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>1.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="lbQty">
-        <property name="font">
-         <font>
-          <pointsize>20</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>1.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="Line" name="line">
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     </widget>
+     <widget class="QPushButton" name="btnOk">
+      <property name="geometry">
+       <rect>
+        <x>75</x>
+        <y>4</y>
+        <width>77</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Accept</string>
+      </property>
+      <property name="icon">
+       <iconset resource="Res.qrc">
+        <normaloff>:/res/ok.png</normaloff>:/res/ok.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btnCheckResponse">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>152</x>
+        <y>4</y>
+        <width>113</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Check request</string>
+      </property>
+      <property name="icon">
+       <iconset resource="Res.qrc">
+        <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btnReject">
+      <property name="geometry">
+       <rect>
+        <x>265</x>
+        <y>4</y>
+        <width>76</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Cancel</string>
+      </property>
+      <property name="icon">
+       <iconset resource="Res.qrc">
+        <normaloff>:/res/cancel.png</normaloff>:/res/cancel.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
     </widget>
    </item>
-   <item>
-    <widget class="QWidget" name="widget_4" native="true">
+   <item row="3" column="0" colspan="2">
+    <widget class="QWidget" name="wReason" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="spacing">
        <number>0</number>
@@ -378,34 +396,7 @@ remove</string>
      </layout>
     </widget>
    </item>
-   <item>
-    <widget class="QPlainTextEdit" name="ptReason">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>150</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>150</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>15</pointsize>
-      </font>
-     </property>
-     <property name="plainText">
-      <string/>
-     </property>
-     <property name="placeholderText">
-      <string>Remove reason</string>
-     </property>
-    </widget>
-   </item>
-   <item>
+   <item row="5" column="0" colspan="2">
     <widget class="QTableWidget" name="tblLetter">
      <property name="minimumSize">
       <size>
@@ -436,12 +427,9 @@ remove</string>
      </attribute>
     </widget>
    </item>
-   <item>
-    <widget class="QWidget" name="widget_3" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="spacing">
-       <number>0</number>
-      </property>
+   <item row="2" column="0" colspan="2">
+    <widget class="QWidget" name="wName" native="true">
+     <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -454,115 +442,174 @@ remove</string>
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item>
-       <widget class="QPushButton" name="btnClearWindow">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="btnPlus">
         <property name="minimumSize">
          <size>
-          <width>0</width>
-          <height>50</height>
+          <width>42</width>
+          <height>42</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>42</width>
+          <height>42</height>
          </size>
         </property>
         <property name="text">
-         <string>Clear</string>
+         <string/>
         </property>
         <property name="icon">
          <iconset resource="Res.qrc">
-          <normaloff>:/res/Delete_Icon.png</normaloff>:/res/Delete_Icon.png</iconset>
+          <normaloff>:/res/plus.png</normaloff>:/res/plus.png</iconset>
         </property>
         <property name="iconSize">
          <size>
-          <width>32</width>
-          <height>32</height>
+          <width>40</width>
+          <height>40</height>
          </size>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="btnOk">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>50</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Accept</string>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/res/ok.png</normaloff>:/res/ok.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnCheckResponse">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>50</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Check request</string>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnReject">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>50</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Cancel</string>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/res/cancel.png</normaloff>:/res/cancel.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
+      <item row="1" column="0">
+       <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>518</width>
+          <width>188</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
+      <item row="1" column="5">
+       <widget class="QPushButton" name="btnMinus">
+        <property name="minimumSize">
+         <size>
+          <width>42</width>
+          <height>42</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>42</width>
+          <height>42</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/res/minus.png</normaloff>:/res/minus.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>40</width>
+          <height>40</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="lbQty_3">
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Old qty</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="6">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>188</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="sdfg">
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Qty to
+remove</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLabel" name="lbQtyRemove">
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>1.0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="lbQty">
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>1.0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="Line" name="line">
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
      </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QLabel" name="lbDishName">
+     <property name="font">
+      <font>
+       <pointsize>26</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Dish name</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="indent">
+      <number>0</number>
+     </property>
     </widget>
    </item>
   </layout>

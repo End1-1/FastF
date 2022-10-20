@@ -21,6 +21,9 @@
 #include "cnfapp.h"
 #include <windows.h>
 #include <QWindow>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 #define TIMER_TIMEOUT 5000
 #define UPDATE_TIME_DEVIDER 30
@@ -134,6 +137,7 @@ void DlgFace::timer()
         return;
     }
     m_timeout++;
+    LOG(__cnfmaindb.fServerMode);
     if (__cnfmaindb.fServerMode.toInt() > 0) {
         if ((m_timeout % UPDATE_TIME_ONLINE) == 0) {
             onlineUp();
@@ -222,6 +226,7 @@ void DlgFace::correctTime()
 
 void DlgFace::onlineUp()
 {
+    LOG(__cnfapp.onlineReportAddress());
     if (__cnfapp.onlineReportAddress().length() == 0) {
         return;
     }
@@ -229,19 +234,29 @@ void DlgFace::onlineUp()
     QMap<QString, QVariant> v;
     DatabaseResult dr;
     db.select(QString("select date_cash, sum(amount) as amount, count(id) as qty from o_order where (date_cash between '%1' and '%2' and state_id=2) or (state_id=1) group by 1")
-              .arg(QDate::currentDate().addDays(-15).toString(DATE_FORMAT))
-              .arg(QDate::currentDate().toString(DATE_FORMAT)), v, dr);
+              .arg(QDate::currentDate().addDays(-15).toString(DATE_FORMAT),QDate::currentDate().toString(DATE_FORMAT)), v, dr);
 
     QNet *n = new QNet();
     connect(n, SIGNAL(getResponse(QString,bool)), this, SLOT(onlineUpReply(QString,bool)));
     n->URL = __cnfapp.onlineReportAddress();
     n->addData("cafe", __cnfapp.onlineReportCafeId());
     n->addData("cafe", __cnfapp.onlineReportCafeId());
+    n->addData("from", __cnfapp.onlineReportCafeId());
     n->addData("s", __cnfapp.onlineReportPassword());
+    n->addData("reqpass", __cnfapp.onlineReportPassword());
+    QJsonArray ja;
     for (int i = 0; i < dr.rowCount(); i++) {
-        n->addData("data[" + dr.value(i, "DATE_CASH").toDate().toString("yyyy-MM-dd") + "][amount]", dr.value(i, "AMOUNT").toString());
-        n->addData("data[" + dr.value(i, "DATE_CASH").toDate().toString("yyyy-MM-dd") + "][qty]", dr.value(i, "QTY").toString());
+        QJsonObject jo;
+        jo["date"] = dr.value(i, "DATE_CASH").toDate().toString("yyyy-MM-dd");
+        jo["amount"] =  dr.value(i, "AMOUNT").toString();
+        jo["qty"] = dr.value(i, "QTY").toString();
+        ja.append(jo);
+//        n->addData("data[" + dr.value(i, "DATE_CASH").toDate().toString("yyyy-MM-dd") + "][amount]", dr.value(i, "AMOUNT").toString());
+//        n->addData("data[" + dr.value(i, "DATE_CASH").toDate().toString("yyyy-MM-dd") + "][qty]", dr.value(i, "QTY").toString());
+//        n->addData("data[" + dr.value(i, "DATE_CASH").toDate().toString("yyyy-MM-dd") + "][from]", __cnfapp.onlineReportCafeId());
     }
+    n->addData("data", QJsonDocument(ja).toJson(QJsonDocument::Compact));
+
     n->goSSL();
 }
 
@@ -541,6 +556,9 @@ void DlgFace::onlineUpReply(const QString &data, bool isError)
 {
     Q_UNUSED(data);
     Q_UNUSED(isError);
+
+        LOG(data);
+
     sender()->deleteLater();
 }
 

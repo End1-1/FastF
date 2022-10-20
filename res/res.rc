@@ -8,7 +8,7 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "FileVersion", "4,5,34,440"
+            VALUE "FileVersion", "4,5,34,441"
             VALUE "FileDescription", "Cafe control programm\0"
             VALUE "LegalCopyright", "(C)2014-2022, JAZZVE LLC\0"
             VALUE "Email", "it@jazzve.am\0"

@@ -1,4 +1,5 @@
 #include "od_dish.h"
+#include "classes.h"
 
 OD_Dish::OD_Dish()
 {
@@ -10,6 +11,7 @@ OD_Dish::OD_Dish()
     m_saved = true;
     flag14 = 0;
     f_storestate = 0;
+    f_qr = 0;
 }
 
 OD_Dish *OD_Dish::copy()
@@ -37,6 +39,7 @@ OD_Dish *OD_Dish::copy()
     dish->m_saved = false;
     dish->flag14 = flag14;
     dish->f_storestate = f_storestate;
+    dish->f_qr = f_qr;
     return dish;
 }
 
@@ -64,6 +67,10 @@ void OD_Dish::loadFromDb(DbDriver &db)
     f_adgCode = db.v_str(i++);
     flag14 = db.v_int(i++);
     f_storestate = db.v_int(i++);
+    f_cancelrequest = db.v_int(i++);
+    f_removeReason = db.v_str(i++);
+    f_emarks = db.v_str(i++);
+    f_qr = db.v_int(i++);
 }
 
 bool OD_Dish::saveToDB(DbDriver &db)
@@ -84,7 +91,8 @@ bool OD_Dish::saveToDB(DbDriver &db)
                  "last_user=:last_user, store_id=:store_id, print_schema=:print_schema, comments=:comments,"
                  "print1=:print1, print2=:print2, f_removereason=:f_removereason, "
                  "payment_mod=:payment_mod, price_inc=:price_inc, price_dec=:price_dec, remind=:remind,"
-                 "flag14=:flag14, f_storestate=:f_storestate where id=:id"))
+                 "flag14=:flag14, f_storestate=:f_storestate, cancelrequest=:f_cancelrequest,"
+                 "emarks=:emarks, qr=:qr where id=:id"))
         return false;
     db.bindValue(":order_id", f_orderId);
     db.bindValue(":state_id", f_stateId);
@@ -105,6 +113,9 @@ bool OD_Dish::saveToDB(DbDriver &db)
     db.bindValue(":flag14", flag14);
     db.bindValue(":f_storestate", f_storestate);
     db.bindValue(":f_removereason", f_removeReason);
+    db.bindValue(":cancelrequest", f_cancelrequest);
+    db.bindValue(":emarks", f_emarks.isEmpty() ? QVariant() : f_emarks);
+    db.bindValue(":qr", f_qr);
     if (!db.execSQL())
         return false;
     m_saved = true;

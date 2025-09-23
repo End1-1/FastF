@@ -9,7 +9,6 @@
 #include "dlggetpassword.h"
 #include "dlgdishcomment.h"
 #include "cnfmaindb.h"
-#include "dlghistory.h"
 #include "dlgreportfilter.h"
 #include "dlglist.h"
 #include "dlgcorrection.h"
@@ -20,14 +19,15 @@
 #include "orderwindowdriver.h"
 #include "cnfmaindb.h"
 #include "dlgremovereason.h"
+#include "consts.h"
 #include "logthread.h"
-#include "dlg14.h"
+#include "dlgcardtips.h"
 #include <QException>
 #include <QScrollBar>
 #include <QDir>
 #include <QLibrary>
 #include <QPainter>
-#include <math.h>
+#include <QInputDialog>
 #include <QCryptographicHash>
 
 #define total_row_count 8
@@ -73,6 +73,10 @@ dlgorder::dlgorder(QWidget *parent) :
     m_ord->m_print.getPrinterSchema(m_ord);
     m_ord->closeDB();
     showFullScreen();
+    connect(&mTimer, &QTimer::timeout, this, [this](){
+        ui->leCmd->setFocus();
+    });
+    mTimer.start(1500);
 }
 
 dlgorder::~dlgorder()
@@ -169,6 +173,7 @@ bool dlgorder::setData(FF_User *user, FF_HallDrv *hallDrv, int tableId, QString 
 
     setButtonsState();
     ui->btnChangeStaff->setEnabled(m_user->roleRead(ROLE_ORDER_CHANGE_STAFF));
+    ui->btnRequestOrderRemove->setEnabled(m_user->roleRead(ROLE_ORDER_CHANGE_STAFF));
     buildDishesView();
 
     return true;
@@ -327,6 +332,16 @@ int dlgorder::dishIndexFromListWidget()
     return ui->lstOrder->item(row)->data(Qt::UserRole).toInt();
 }
 
+int dlgorder::listIndexOfDish(OD_Dish *d)
+{
+    for (int i = 0;i < ui->lstOrder->count(); i++) {
+        if (d == ui->lstOrder->item(i)->data(Qt::UserRole).value<OD_Dish*>()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 OD_Dish *dlgorder::dishFromListWidget()
 {
     int index = dishIndexFromListWidget();
@@ -398,17 +413,21 @@ void dlgorder::setButtonsState()
     if (m_ord->m_header.f_printQty > 0)
         ui->tblDishes->setEnabled(m_user->roleRead(ROLE_REMOVE_ORDER) && m_user->roleRead(ROLE_REMOVE_ORDER_AFTER_CHECKOUT));
 
+    ui->wdtOrderService->setEnabled(m_ord->m_header.f_requestremoveal != 1);
     bool enableControls = !(m_ord->m_header.f_printQty > 0) && !m_flagCashMode && !m_user->roleRead(ROLE_REMOVE_ORDER_AFTER_CHECKOUT);
+    enableControls = enableControls && (m_ord->m_header.f_requestremoveal != 1);
     ui->wdtDishQty->setEnabled(enableControls);
     ui->tblDishes->setEnabled(enableControls);
     ui->wdtDishBtn->setEnabled(enableControls && !m_flagCashMode);
     ui->wdtDishGroup->setEnabled(enableControls);
     ui->btnPlugins->setEnabled(m_user->roleRead(ROLE_W_SPESIAL_ACTIONS));
-    ui->wdtHdm->setEnabled(true);
+    ui->wdtHdm->setEnabled(m_ord->m_header.f_requestremoveal != 1);
+    ui->btnRmDish->setEnabled(btnRemoveDish);
     if (m_ord->m_header.f_printQty > 0) {
         ui->wdtDishQty->setEnabled(false);
+        ui->btnRmDish->setEnabled(false);
     }
-    ui->btnRmDish->setEnabled(btnRemoveDish);
+    ui->btnPayment->setEnabled(ui->btnPayment->isEnabled() && m_ord->m_header.f_requestremoveal != 1);
 }
 
 void dlgorder::moveDish(int index, int dtid, const QString &dtname)
@@ -660,7 +679,8 @@ void dlgorder::moveOrderDish(int index, int tableId, QString tableName)
             return;
         }
 
-        m_ord->prepare("update o_order set state_id=:state_id, table_id=:table_id, date_open=:date_open, date_close=:date_close, "
+        m_ord->prepare("update o_order set state_id=:state_id, table_id=:table_id, "
+                       "date_open=:date_open, date_close=:date_close, "
                      "date_cash=:date_cash, staff_id=:staff_id, print_qty=:print_qty, "
                      "amount=:amount, amount_inc=:amount_inc, amount_dec=:amount_dec, "
                      "amount_inc_value=:amount_inc_value, amount_dec_value=:amount_dec_value, payment=:payment, taxprint=:taxprint, "
@@ -697,97 +717,14 @@ void dlgorder::moveOrderDish(int index, int tableId, QString tableName)
     }
 }
 
-void dlgorder::buildDishesView()
+int dlgorder::addNewDish(int dishIndex)
 {
-    //Groups of groups
-    QFont f(qApp->font());
-    f.setPointSize(f.pointSize());
-    f.setBold(true);
-    ui->tblGroupOfGroup->setFont(f);
-    buildGroupOfGroups();
-
-    //Dishes groups
-    ui->tblDishGroup->setFont(f);
-    buildTypes(FF_SettingsDrv::value(SD_DEFAULT_MENU_ID).toInt(), 0);
-
-    //Dishes
-}
-
-void dlgorder::on_tblGroupOfGroup_clicked(const QModelIndex &index)
-{
-    if (!index.isValid())
-        return;
-    int groupId = index.data(Qt::UserRole).toInt();
-    buildTypes(m_currentMenu, groupId);
-}
-
-void dlgorder::on_btnClearGroupFilter_clicked()
-{
-    buildTypes(m_currentMenu, 0);
-}
-
-QDishTableItemDelegate::QDishTableItemDelegate(const FF_DishesDrv &data) :
-    QItemDelegate(),
-    m_data(data)
-{
-
-}
-
-void QDishTableItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-    if (!index.isValid()) {
-        QItemDelegate::paint(painter, option, index);
-        return;
+    if (m_dishesDrv->prop(dishIndex, "F_ADDBYMANAGER").toInt() > 0) {
+        if (!m_user->roleRead(ROLE_W_PRESENT)) {
+            message(tr("Access denied!"));
+            return -1;
+        }
     }
-
-    int dataIndex = index.data(Qt::UserRole).toInt() - 1;
-    if (dataIndex < 0)
-        return;
-
-    QFont font = qApp->font();
-    font.setPointSize(font.pointSize());
-    font.setBold(true);
-    painter->setFont(font);
-
-    QFontMetrics fm(font);
-
-    QPen pen(Qt::NoPen);
-    painter->setPen(pen);
-
-    QBrush brush(Qt::SolidPattern);
-    brush.setColor(QColor(m_data.prop(dataIndex, "COLOR").toInt()));
-    painter->setBrush(brush);
-
-    QRect rectName = option.rect;
-    rectName.adjust(3, 2, 2, 2);
-
-    QTextOption to;
-
-    painter->drawRect(option.rect);
-
-    pen.setStyle(Qt::SolidLine);
-    painter->setPen(pen);
-    painter->drawText(rectName, m_data.prop(dataIndex, "DISH_NAME").toString(), to);
-
-    QString price = QString::number(m_data.prop(dataIndex, "PRICE").toDouble(), 'f', 0);
-    font.setBold(true);
-    font.setPointSize(font.pointSize() - 1);
-    painter->setFont(font);
-    QRect rectPrice = option.rect;
-    rectPrice.adjust(rectPrice.width() - fm.width(price) - 5, rectPrice.height() - fm.height(), 2, 2);
-    //painter->drawRect(rectPrice);
-    painter->drawText(rectPrice, price);
-}
-
-void dlgorder::on_tblDishes_clicked(const QModelIndex &index)
-{
-    if (!index.isValid())
-        return;
-
-    int dishIndex = index.data(Qt::UserRole).toInt() - 1;
-    if (dishIndex < 0)
-        return;
-
     OD_Dish *dish = new OD_Dish();
     dish->f_id = 0;
     dish->f_stateId = DISH_STATE_NORMAL;
@@ -824,7 +761,7 @@ void dlgorder::on_tblDishes_clicked(const QModelIndex &index)
     int newDishIndex = m_ord->appendDish(dish);
     if (newDishIndex < 0) {
         DlgMessage::Msg(tr("Cannot append dish"));
-        return;
+        return -1;
     }
 
     LogThread::logOrderThread(m_ord->m_header.f_currStaffName, m_ord->m_header.f_id, QString::number(dish->f_id), tr("New dish "), dish->f_dishName + ": 1");
@@ -838,6 +775,110 @@ void dlgorder::on_tblDishes_clicked(const QModelIndex &index)
 
     ui->lstOrder->verticalScrollBar()->setValue(ui->lstOrder->verticalScrollBar()->maximum());
     ui->lstOrder->setCurrentRow(ui->lstOrder->count() - 1);
+    return newDishIndex;
+}
+
+void dlgorder::buildDishesView()
+{
+    //Groups of groups
+    QFont f(qApp->font());
+    f.setPointSize(f.pointSize());
+    f.setBold(true);
+    ui->tblGroupOfGroup->setFont(f);
+    buildGroupOfGroups();
+
+    //Dishes groups
+    ui->tblDishGroup->setFont(f);
+    buildTypes(FF_SettingsDrv::value(SD_DEFAULT_MENU_ID).toInt(), 0);
+
+    //Dishes
+}
+
+void dlgorder::on_tblGroupOfGroup_clicked(const QModelIndex &index)
+{
+    if (!index.isValid())
+        return;
+    int groupId = index.data(Qt::UserRole).toInt();
+    buildTypes(m_currentMenu, groupId);
+}
+
+QDishTableItemDelegate::QDishTableItemDelegate(const FF_DishesDrv &data) :
+    QItemDelegate(),
+    m_data(data)
+{
+
+}
+
+void QDishTableItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    if (!index.isValid()) {
+        QItemDelegate::paint(painter, option, index);
+        return;
+    }
+
+    int dataIndex = index.data(Qt::UserRole).toInt() - 1;
+    if (dataIndex < 0)
+        return;
+
+    QFont font = qApp->font();
+    font.setPointSize(font.pointSize());
+    font.setBold(true);
+    painter->setFont(font);
+
+    QFontMetrics fm(font);
+
+    QPen pen(Qt::NoPen);
+    painter->setPen(pen);
+
+    QBrush brush(Qt::SolidPattern);
+    brush.setColor(QColor(m_data.prop(dataIndex, "COLOR").toInt()));
+    if (m_data.prop(dataIndex, "CANCELREQUEST").toInt() > 0) {
+        brush.setColor(QColor::fromRgbF(200, 200, 200, 1));
+    }
+    painter->setBrush(brush);
+
+    QRect rectName = option.rect;
+    rectName.adjust(3, 2, 2, 2);
+
+    QTextOption to;
+
+    painter->drawRect(option.rect);
+
+    pen.setStyle(Qt::SolidLine);
+    painter->setPen(pen);
+    painter->drawText(rectName, m_data.prop(dataIndex, "DISH_NAME").toString(), to);
+
+    QString price = QString::number(m_data.prop(dataIndex, "PRICE").toDouble(), 'f', 0);
+    font.setBold(true);
+    font.setPointSize(font.pointSize() - 1);
+    painter->setFont(font);
+    QRect rectPrice = option.rect;
+    rectPrice.adjust(rectPrice.width() - fm.width(price) - 5, rectPrice.height() - fm.height(), 2, 2);
+    //painter->drawRect(rectPrice);
+    painter->drawText(rectPrice, price);
+}
+
+void dlgorder::on_tblDishes_clicked(const QModelIndex &index)
+{
+    if (!index.isValid())
+        return;
+
+    int dishIndex = index.data(Qt::UserRole).toInt() - 1;
+    if (dishIndex < 0)
+        return;
+
+    if (m_dishesDrv->prop(dishIndex, "QR").toInt() > 0) {
+        msg(tr("Available only with Emark code"));
+        return;
+    }
+
+    if (m_dishesDrv->prop(dishIndex, "F_ADDBYMANAGER").toInt() > 0) {
+        if (!m_user->roleRead(ROLE_W_PRESENT) ) {
+        msg(tr("Available for manager"));
+        return;
+        }
+    }
+    addNewDish(dishIndex);
 }
 
 
@@ -869,6 +910,9 @@ void QOrderItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
     brush.setColor(Qt::white);
     if (option.state & QStyle::State_Selected)
         brush.setColor(Qt::yellow);
+    if (dish->f_cancelrequest > 0) {
+        brush.setColor(QColor::fromRgb(200, 100, 100));
+    }
     painter->setBrush(brush);
     painter->drawRect(option.rect);
 
@@ -885,6 +929,9 @@ void QOrderItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
     QFont font = qApp->font();
     font.setBold(false);
     font.setPointSize(font.pointSize() - 1);
+    if (dish->f_stateId != DISH_STATE_NORMAL) {
+        font.setStrikeOut(true);
+    }
     painter->setFont(font);
 
     QRect nameRect = option.rect;
@@ -913,6 +960,12 @@ void QOrderItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
     qtypRect.setRight(option.rect.right() - 2);
     qtypRect.setBottom(middle - 2);
     painter->drawText(qtypRect, dts(dish->f_printedQty), to);
+
+    QRect emarkRect = option.rect;
+    emarkRect.adjust(emarkRect.right() - 116, 10, -72, -10);
+    if (dish->f_emarks.isEmpty() == false) {
+        painter->drawImage(emarkRect, QImage(":/res/qr_code.png"));
+    }
 
     QString amount = dts(dish->f_amount);
     QRect amountRect;
@@ -994,19 +1047,23 @@ void dlgorder::on_btnExit_clicked()
 
 void dlgorder::on_btnMoveOrder_clicked()
 {
+    if (m_ord->m_header.f_amount_dec_value > 0.001) {
+        message(tr("Cannot move the discounted order"));
+        return;
+    }
     moveDish(-1, 0, "");
 }
 
 void dlgorder::makeDishesList()
 {
     ui->lstOrder->clear();
-    for (int i = 0; i < m_ord->m_dishes.count(); i++)
-        if (m_ord->m_dishes[i]->f_stateId == DISH_STATE_NORMAL) {
+    for (int i = 0; i < m_ord->m_dishes.count(); i++) {
+
             QListWidgetItem *item = new QListWidgetItem(ui->lstOrder);
             item->setSizeHint(QSize(ui->lstOrder->width(), 50));
             item->setData(Qt::UserRole, i);
             ui->lstOrder->addItem(item);
-        }
+    }
 }
 
 void dlgorder::buildGroupOfGroups()
@@ -1082,12 +1139,17 @@ void dlgorder::on_btnChangeStaff_clicked()
     m_ord->m_header.f_staffId = d.m_query->value(0).toInt();
     m_ord->m_header.f_staffName = d.m_query->value(1).toString();
     m_ord->m_header.m_saved = false;
+    m_ord->saveAll();
 
     DlgMessage::Msg(tr("New owner of order") + "\n" + m_ord->m_header.f_staffName);
 }
 
 void dlgorder::on_btnMoveDish_clicked()
 {
+    if (m_ord->m_header.f_amount_dec_value > 0.001) {
+        message(tr("Cannot move the discounted order"));
+        return;
+    }
     int i = ui->lstOrder->currentRow();
     if (i < 0)
         return;
@@ -1147,21 +1209,6 @@ void dlgorder::on_tblDishGroup_clicked(const QModelIndex &index)
     if (!index.data(Qt::UserRole).toInt())
         return;
     buildDishes(index.data(Qt::UserRole).toInt());
-}
-
-void dlgorder::on_btnHistory_clicked()
-{
-    DlgHistory *d = new DlgHistory(m_ord->m_header.f_id, m_user->fullName, this);
-    d->exec();
-    delete d;
-}
-
-void dlgorder::on_btnChangeMenu_clicked()
-{
-    QVariant out;
-    if (!DlgList::value(m_dishesDrv->getMenuList(), out, this))
-        return;
-    buildTypes(out.toInt(), 0);
 }
 
 void dlgorder::on_btnPlugins_clicked()
@@ -1230,16 +1277,6 @@ void dlgorder::on_btnPlugins_clicked()
     DlgMessage::Msg(tr("Complete") + "\n" + msg);
 }
 
-void dlgorder::on_btnComment_2_clicked()
-{
-    DlgDishComment *d = new DlgDishComment(this);
-    if (d->exec() == QDialog::Accepted) {
-        m_ord->m_header.f_comment = d->result();
-        ui->tblTotal->item(RComment, 0)->setText(m_ord->m_header.f_comment);
-    }
-    delete d;
-}
-
 void dlgorder::on_btnCalculator_clicked()
 {
     DlgCalcChange *d = new DlgCalcChange(m_ord->m_header.f_amount, this);
@@ -1281,107 +1318,12 @@ void dlgorder::on_btnPresent_clicked()
     m_ord->countAmounts();
 }
 
-void dlgorder::on_btnOrange_clicked()
-{
-    return;
-    QList<int> dishes;
-    int flag = 0;
-    for (int i = 0; i < m_ord->m_dishes.count(); i++) {
-        if (m_ord->dish(i)->f_stateId != DISH_STATE_NORMAL) {
-            continue;
-        }
-        if (m_ord->dish(i)->flag14 > 0) {
-            flag = m_ord->dish(i)->flag14;
-            dishes.append(m_ord->dish(i)->f_dishId);
-        }
-    }
-    if (Dlg14::set14(dishes, flag)) {
-        foreach (int did, dishes) {
-            bool exists = false;
-            for (int i = 0; i < m_ord->m_dishes.count(); i++) {
-                if (m_ord->dish(i)->f_stateId != DISH_STATE_NORMAL) {
-                    continue;
-                }
-                if (did == m_ord->dish(i)->f_dishId) {
-                    exists = true;
-                }
-            }
-            if (exists) {
-                continue;
-            }
-            QSqlDrv drv("FFADMIN", "main");
-            drv.prepare("select name from me_dishes where id=:id");
-            drv.bind(":id", did);
-            drv.execSQL();
-            drv.next();
-            QString name = drv.val().toString();
-            drv.close();
-            OD_Dish *dish = new OD_Dish();
-            dish->f_id = 0;
-            dish->f_stateId = DISH_STATE_NORMAL;
-            dish->f_dishId = did;
-            dish->f_dishName = name;
-            dish->f_totalQty = 1;
-            dish->f_printedQty = 0;
-            dish->f_price = 0;
-            dish->f_priceInc = 0;
-            dish->f_priceDec = 0;
-            dish->f_storeId = 3;
-            dish->f_print1 = "kit";
-            dish->f_print2 = "local";
-            dish->f_lastUser = m_user->id;
-            dish->f_lastUserName = m_user->fullName;
-            dish->f_paymentMod = 2;
-            dish->f_comments = "";
-            dish->f_remind = 1;
-            dish->f_adgCode = "56.21";
-            dish->flag14 = flag;
-            dish->setPriceMod(0, 0);
-            connect(dish, SIGNAL(removed(int,float)), this, SLOT(printRemovedDish(int,float)));
-
-            int newDishIndex = m_ord->appendDish(dish);
-            if (newDishIndex < 0) {
-                DlgMessage::Msg(tr("Cannot append dish"));
-                return;
-            }
-
-            QListWidgetItem *item = new QListWidgetItem(ui->lstOrder);
-            item->setSizeHint(QSize(ui->lstOrder->width(), 50));
-            ui->lstOrder->addItem(item);
-            ui->lstOrder->setItemSelected(item, true);
-            item->setData(Qt::UserRole, newDishIndex);
-            setButtonsState();
-
-            ui->lstOrder->verticalScrollBar()->setValue(ui->lstOrder->verticalScrollBar()->maximum());
-            ui->lstOrder->setCurrentRow(ui->lstOrder->count() - 1);
-        }
-    }
-}
-
 void dlgorder::on_btnDiscount_2_clicked()
 {
-    QString cardCode;
-    if (!DlgInput::getString(cardCode, tr("Enter card code"), this))
-        return;
-    cardCode.replace(";", "").replace("?", "");
-    if (!fGiftCards.contains(cardCode)) {
-        message(tr("Invalid gift card"));
-        return;
+    DlgCardTips d(m_ord->m_header.f_id);
+    if (d.exec() == QDialog::Accepted) {
+
     }
-    DbDriver db;
-    db.configureDb("10.1.0.2", "maindb", "SYSDBA", "masterkey");
-    if (!db.openDB()) {
-        message("Cannot connect to main server!");
-        return;
-    }
-    db.prepare("select sum(f_amount) from o_gift_card where f_code=:f_code");
-    db.bindValue(":f_code", cardCode);
-    db.execSQL();
-    if (!db.next()) {
-        message(tr("Invalid gift card"));
-        return;
-    }
-    message(tr("Balance:") + "<br>" + db.v_str(0));
 }
 
 void dlgorder::on_btnPluse05_clicked()
@@ -1397,6 +1339,10 @@ void dlgorder::on_btnMinus05_clicked()
 void dlgorder::setQty(double qty)
 {
     if (OD_Dish *d = dishFromListWidget()) {
+        if (!d->f_emarks.isEmpty()) {
+            msg(tr("Cannot change quantity of dish thats contains emark"));
+            return;
+        }
         if (d->f_printedQty > qty) {
             return;
         }
@@ -1422,8 +1368,20 @@ void dlgorder::decQty(double qty)
             return;
         }
         if (d->f_totalQty - qty < 0.5) {
-            message(tr("Use removal tool or call to manager."));
-            return;
+            if (d->f_printedQty > 0.01) {
+                message(tr("Use removal tool or call to manager."));
+                return;
+            } else {
+                d->f_stateId = DISH_STATE_REMOVED_NORMAL;
+                d->f_emarks = "";
+                d->m_saved = false;
+                m_ord->saveAll();
+                ui->lstOrder->viewport()->update();
+                LogThread::logOrderThread(m_ord->m_header.f_currStaffName, m_ord->m_header.f_id,
+                                          QString::number(d->f_id), tr("Removed without print "),
+                                          d->f_dishName + ": " + double_str(d->f_totalQty));
+                return;
+            }
         }
         d->f_totalQty -= qty;
         d->m_saved = false;
@@ -1443,6 +1401,10 @@ void dlgorder::decQty(double qty)
 void dlgorder::incQty(double qty)
 {
     if(OD_Dish *d = dishFromListWidget()) {
+        if (!d->f_emarks.isEmpty()) {
+            msg(tr("Cannot change quantity of dish thats contains emark"));
+            return;
+        }
         if (d->f_remind > 0) {
             if (d->f_printedQty > 0.001) {
                 OD_Dish *nd = d->copy();
@@ -1481,24 +1443,29 @@ void dlgorder::on_btnMinus1_clicked()
 }
 
 void dlgorder::on_btnRmDish_clicked()
-{   
+{
     if (OD_Dish *d = dishFromListWidget()) {
-        DlgCorrection *dc = new DlgCorrection(m_ord, d, this);
-        if (dc->exec() == QDialog::Accepted) {
-            for (int i = 0; i < ui->lstOrder->count(); i++) {
-                OD_Dish *dd = m_ord->dish(ui->lstOrder->item(i)->data(Qt::UserRole).toInt());
-                if (dd == d) {
-                    if (d->f_totalQty < 0.001 || d->f_stateId != DISH_STATE_NORMAL) {
-                        delete ui->lstOrder->item(i);
-                        break;
-                    }
+        if (d->f_printedQty < 0.01) {
+            d->f_stateId = DISH_STATE_REMOVED_NORMAL;
+            d->f_emarks = "";
+            d->m_saved = false;
+            m_ord->saveAll();
+            LogThread::logOrderThread(m_ord->m_header.f_currStaffName, m_ord->m_header.f_id,
+                                      QString::number(d->f_id), tr("Removed without print "),
+                                      d->f_dishName + ": " + double_str(d->f_totalQty));
+        } else {
+            DlgCorrection *dc = new DlgCorrection(m_ord, d, this);
+            if (dc->exec() == QDialog::Accepted) {
+            if (d->f_totalQty < 0.001 || d->f_stateId != DISH_STATE_NORMAL) {
+                delete ui->lstOrder->item(listIndexOfDish(d));
                 }
             }
-            m_ord->countAmounts();
-            setButtonsState();
+            dc->deleteLater();
         }
-        dc->deleteLater();        
     }
+    ui->lstOrder->viewport()->update();
+    m_ord->countAmounts();
+    setButtonsState();
 }
 
 void dlgorder::on_btnAnyQty_clicked()
@@ -1508,3 +1475,122 @@ void dlgorder::on_btnAnyQty_clicked()
         setQty(qty);
     }
 }
+
+void dlgorder::on_btnRequestOrderRemove_clicked()
+{
+    if (m_ord->m_header.f_requestremoveal > 0) {
+        return;
+    }
+    if (msg(tr("Submit an order removal request?")) != QDialog::Accepted) {
+        return;
+    }
+    m_ord->m_header.f_requestremoveal = 1;
+    m_ord->m_header.m_saved = false;
+    m_ord->saveAll();
+    LogThread::logOrderThread(m_ord->m_header.f_currStaffName, m_ord->m_header.f_id,"", tr("Request order removal"), "");
+    setButtonsState();
+    msg(tr("Your request was sent to the responsible person"));
+}
+
+
+void dlgorder::on_btnEmark_clicked()
+{
+    if (auto *d = dishFromListWidget()) {
+        if (d->f_emarks.isEmpty()) {
+            bool ok;
+            QString emarks = QInputDialog::getText(this, tr("Emarks"), "", QLineEdit::Normal, "", &ok);
+            if (!ok) {
+                return;
+            }
+            if (emarks.isEmpty()) {
+                return;
+            }
+            if (emarks.length() < 29) {
+                msg(tr("Invalid emarks"));
+                return;
+            }
+
+            m_ord->prepare("select id from o_dishes where state_id=1 and emarks=:emarks");
+            m_ord->bindValue(":emarks", emarks);
+            m_ord->execSQL();
+            if (m_ord->next()) {
+                msg(tr("Used emarks detected"));
+                return;
+            }
+            d->f_emarks = emarks;
+            d->m_saved = false;
+            dishRepaint(0);
+            m_ord->saveAll();
+        } else {
+            if (msg(tr("Clear emarks?")) == QDialog::Accepted) {
+                d->f_emarks = "";
+                dishRepaint(0);
+                m_ord->saveAll();
+            }
+        }
+    }
+}
+void dlgorder::on_leCmd_returnPressed()
+{
+    QString code = ui->leCmd->text();
+    ui->leCmd->clear();
+    QString emarks;
+    int index = -1;
+    if (code.length() == 13 || code.length() == 8) {
+        index = m_dishesDrv->indexOfDishByBarcode(code);
+    } else  if (code.length() >= 29) {
+        QString barcode;
+        if (code.mid(0, 6) == "000000") {
+            barcode = code.mid(6, 8);
+        } else if (code.mid(0, 3) == "010") {
+            if (code.mid(0, 8) == "01000000") {
+            barcode = code.mid(8, 8);
+            } else {
+            barcode = code.mid(3, 13);
+            }
+        } else {
+            barcode = code.mid(1, 8);
+            index = m_dishesDrv->indexOfDishByBarcode(barcode);
+            if (index < 0) {
+                barcode.clear();
+            }
+            if (barcode.isEmpty()) {
+                barcode = code.mid(1, 13);
+                index = m_dishesDrv->indexOfDishByBarcode(barcode);
+                if (index < 0) {
+                    barcode.clear();
+                }
+            }
+        }
+
+        if (barcode.isEmpty()) {
+            msg(tr("Invalid emarks"));
+            return;
+        }
+        index = m_dishesDrv->indexOfDishByBarcode(barcode);
+
+        if (index < 0) {
+            msg(tr("Invalid barcode"));
+            return;
+        }
+
+        m_ord->prepare("select * from o_dishes where emarks=:emarks and state_id=1");
+        m_ord->bindValue(":emarks", code);
+        m_ord->execSQL();
+        if (m_ord->next()) {
+            msg(tr("Used emarks detected"));
+            return;
+        }
+        emarks = code;
+    }
+    if (index > -1) {
+        index = addNewDish(index);
+        OD_Dish *d = dishFromListWidget();
+        d->f_emarks = emarks;
+        d->m_saved = false;
+        dishRepaint(0);
+        m_ord->saveAll();
+    }
+
+}
+

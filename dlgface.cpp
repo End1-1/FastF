@@ -11,13 +11,16 @@
 #include "dlgchangepass.h"
 #include "dlglist.h"
 #include "dlgtimelimit.h"
+#include "dlgregistercard.h"
 #include "cnfmaindb.h"
 #include "ff_correcttime.h"
 #include "logthread.h"
 #include "msqldatabase.h"
 #include "dbdriver.h"
 #include "dlgkinoparkcall.h"
+#include "database.h"
 #include "dlgconfigmobile.h"
+#include "database.h"
 #include "cnfapp.h"
 #include <windows.h>
 #include <QWindow>
@@ -133,11 +136,12 @@ void DlgFace::toTableLocked(int tableId)
 
 void DlgFace::timer()
 {
+    startService();
     if (!__cnfmaindb.fOk) {
         return;
     }
     m_timeout++;
-    LOG(__cnfmaindb.fServerMode);
+    LOG("Server mode" + __cnfmaindb.fServerMode);
     if (__cnfmaindb.fServerMode.toInt() > 0) {
         if ((m_timeout % UPDATE_TIME_ONLINE) == 0) {
             onlineUp();
@@ -226,7 +230,7 @@ void DlgFace::correctTime()
 
 void DlgFace::onlineUp()
 {
-    LOG(__cnfapp.onlineReportAddress());
+    LOG("Online server:" + __cnfapp.onlineReportAddress());
     if (__cnfapp.onlineReportAddress().length() == 0) {
         return;
     }
@@ -258,6 +262,223 @@ void DlgFace::onlineUp()
     n->addData("data", QJsonDocument(ja).toJson(QJsonDocument::Compact));
 
     n->goSSL();
+}
+
+void DlgFace::startService()
+{
+            SERVICE_STATUS_PROCESS ssStatus;
+            DWORD dwOldCheckPoint;
+            DWORD dwStartTickCount;
+            DWORD dwWaitTime;
+            DWORD dwBytesNeeded;
+            LPCWSTR szSvcName = L"Breeze";
+
+            // Get a handle to the SCM database.
+
+            SC_HANDLE schSCManager = OpenSCManager(
+                NULL,                    // local computer
+                NULL,                    // servicesActive database
+                SC_MANAGER_ALL_ACCESS);  // full access rights
+
+            if (NULL == schSCManager)
+            {
+                qDebug() << "OpenSCManager failed (%d)\n" << GetLastError();
+                return;
+            }
+
+            // Get a handle to the service.
+
+            SC_HANDLE schService = OpenService(
+                schSCManager,         // SCM database
+                szSvcName,            // name of service
+                SERVICE_ALL_ACCESS);  // full access
+
+            if (schService == NULL)
+            {
+                qDebug() << "OpenService failed (%d)\n" << GetLastError();
+                CloseServiceHandle(schSCManager);
+                return;
+            }
+
+            // Check the status in case the service is not stopped.
+
+            if (!QueryServiceStatusEx(
+                    schService,                     // handle to service
+                    SC_STATUS_PROCESS_INFO,         // information level
+                    (LPBYTE) &ssStatus,             // address of structure
+                    sizeof(SERVICE_STATUS_PROCESS), // size of structure
+                    &dwBytesNeeded ) )              // size needed if buffer is too small
+            {
+                qDebug() << "QueryServiceStatusEx failed (%d)\n" << GetLastError();
+                CloseServiceHandle(schService);
+                CloseServiceHandle(schSCManager);
+                return;
+            }
+
+            // Check if the service is already running. It would be possible
+            // to stop the service here, but for simplicity this example just returns.
+
+            if(ssStatus.dwCurrentState != SERVICE_STOPPED && ssStatus.dwCurrentState != SERVICE_STOP_PENDING)
+            {
+                qDebug() << "Cannot start the service because it is already running\n";
+                CloseServiceHandle(schService);
+                CloseServiceHandle(schSCManager);
+                return;
+            }
+
+            // Save the tick count and initial checkpoint.
+
+            dwStartTickCount = GetTickCount();
+            dwOldCheckPoint = ssStatus.dwCheckPoint;
+
+            // Wait for the service to stop before attempting to start it.
+
+            while (ssStatus.dwCurrentState == SERVICE_STOP_PENDING)
+            {
+                // Do not wait longer than the wait hint. A good interval is
+                // one-tenth of the wait hint but not less than 1 second
+                // and not more than 10 seconds.
+
+                dwWaitTime = ssStatus.dwWaitHint / 10;
+
+                if( dwWaitTime < 1000 )
+                    dwWaitTime = 1000;
+                else if ( dwWaitTime > 10000 )
+                    dwWaitTime = 10000;
+
+                Sleep( dwWaitTime );
+
+                // Check the status until the service is no longer stop pending.
+
+                if (!QueryServiceStatusEx(
+                        schService,                     // handle to service
+                        SC_STATUS_PROCESS_INFO,         // information level
+                        (LPBYTE) &ssStatus,             // address of structure
+                        sizeof(SERVICE_STATUS_PROCESS), // size of structure
+                        &dwBytesNeeded ) )              // size needed if buffer is too small
+                {
+                    qDebug() << "QueryServiceStatusEx failed (%d)\n" << GetLastError();
+                    CloseServiceHandle(schService);
+                    CloseServiceHandle(schSCManager);
+                    return;
+                }
+
+                if ( ssStatus.dwCheckPoint > dwOldCheckPoint )
+                {
+                    // Continue to wait and check.
+
+                    dwStartTickCount = GetTickCount();
+                    dwOldCheckPoint = ssStatus.dwCheckPoint;
+                }
+                else
+                {
+                    if(GetTickCount()-dwStartTickCount > ssStatus.dwWaitHint)
+                    {
+                        qDebug() << "Timeout waiting for service to stop\n";
+                        CloseServiceHandle(schService);
+                        CloseServiceHandle(schSCManager);
+                        return;
+                    }
+                }
+            }
+
+            // Attempt to start the service.
+
+            if (!StartService(
+                    schService,  // handle to service
+                    0,           // number of arguments
+                    NULL) )      // no arguments
+            {
+                qDebug() << "StartService failed (%d)\n" << GetLastError();
+                CloseServiceHandle(schService);
+                CloseServiceHandle(schSCManager);
+                return;
+            }
+            else printf("Service start pending...\n");
+
+            // Check the status until the service is no longer start pending.
+
+            if (!QueryServiceStatusEx(
+                    schService,                     // handle to service
+                    SC_STATUS_PROCESS_INFO,         // info level
+                    (LPBYTE) &ssStatus,             // address of structure
+                    sizeof(SERVICE_STATUS_PROCESS), // size of structure
+                    &dwBytesNeeded ) )              // if buffer too small
+            {
+                qDebug() << "QueryServiceStatusEx failed (%d)\n" << GetLastError();
+                CloseServiceHandle(schService);
+                CloseServiceHandle(schSCManager);
+                return;
+            }
+
+            // Save the tick count and initial checkpoint.
+
+            dwStartTickCount = GetTickCount();
+            dwOldCheckPoint = ssStatus.dwCheckPoint;
+
+            while (ssStatus.dwCurrentState == SERVICE_START_PENDING)
+            {
+                // Do not wait longer than the wait hint. A good interval is
+                // one-tenth the wait hint, but no less than 1 second and no
+                // more than 10 seconds.
+
+                dwWaitTime = ssStatus.dwWaitHint / 10;
+
+                if( dwWaitTime < 1000 )
+                    dwWaitTime = 1000;
+                else if ( dwWaitTime > 10000 )
+                    dwWaitTime = 10000;
+
+                Sleep( dwWaitTime );
+
+                // Check the status again.
+
+                if (!QueryServiceStatusEx(
+                    schService,             // handle to service
+                    SC_STATUS_PROCESS_INFO, // info level
+                    (LPBYTE) &ssStatus,             // address of structure
+                    sizeof(SERVICE_STATUS_PROCESS), // size of structure
+                    &dwBytesNeeded ) )              // if buffer too small
+                {
+                    qDebug() << "QueryServiceStatusEx failed (%d)\n" << GetLastError();
+                    break;
+                }
+
+                if ( ssStatus.dwCheckPoint > dwOldCheckPoint )
+                {
+                    // Continue to wait and check.
+
+                    dwStartTickCount = GetTickCount();
+                    dwOldCheckPoint = ssStatus.dwCheckPoint;
+                }
+                else
+                {
+                    if(GetTickCount()-dwStartTickCount > ssStatus.dwWaitHint)
+                    {
+                        // No progress made within the wait hint.
+                        break;
+                    }
+                }
+            }
+
+            // Determine whether the service is running.
+
+            if (ssStatus.dwCurrentState == SERVICE_RUNNING)
+            {
+                qDebug() << "Service started successfully.\n";
+            }
+            else
+            {
+                qDebug() << ("Service not started. \n")
+                << "  Current State: %d\n"  << ssStatus.dwCurrentState
+                << "  Exit Code: %d\n"      << ssStatus.dwWin32ExitCode
+                << "  Check Point: %d\n"    << ssStatus.dwCheckPoint
+                << "  Wait Hint: %d\n"      << ssStatus.dwWaitHint;
+            }
+
+            CloseServiceHandle(schService);
+            CloseServiceHandle(schSCManager);
+
 }
 
 HallItemDelegate::HallItemDelegate(FF_HallDrv *hallDrv)
@@ -557,7 +778,7 @@ void DlgFace::onlineUpReply(const QString &data, bool isError)
     Q_UNUSED(data);
     Q_UNUSED(isError);
 
-        LOG(data);
+    LOG(data);
 
     sender()->deleteLater();
 }
@@ -567,4 +788,121 @@ void DlgFace::on_btnConfigMobile_clicked()
 {
     DlgConfigMobile d;
     d.exec();
+}
+
+void DlgFace::on_btnRegisterCard_clicked()
+{
+    QString pass;
+    if (!DlgGetPassword::password(tr("Change password"), pass, true, this))
+        return;
+
+    m_timer.stop();
+    FF_User *user = new FF_User("main");
+    user->setCredentails("", pass);
+    if (user->auth1() && user->roleRead(ROLE_CHANGE_PASSWORD)) {
+        DlgRegisterCard(false, this).exec();
+    } else
+        DlgMessage::Msg(tr("Invalid password"));
+
+    delete user;
+    m_timer.start(TIMER_TIMEOUT);
+}
+
+void DlgFace::on_btnIn_clicked()
+{
+    QSqlDrv m_sqlDrv("", "main");
+    if (!m_sqlDrv.prepare("select department_id from sys_app "))
+        return;
+    if (!m_sqlDrv.execSQL())
+        return;
+    m_sqlDrv.next();
+    int department = m_sqlDrv.m_query->value(0).toInt();
+
+    QString pass;
+    if (!DlgGetPassword::password(tr("Login"), pass, true, this))
+        return;
+
+    if (pass.length() < 4) {
+        DlgMessage::Msg(tr("The password is too short"));
+        return;
+    }
+    Database db("QIBASE");
+    if (!db.open("10.1.0.4", "maindb", "SYSDBA", "Inter_OneStep")){
+       DlgMessage::Msg(tr("Cannot connect to database"));
+       return;
+    }
+    db[":acard"] = pass;
+    db.exec("select * from employes where acard=:acard");
+    if (db.next() == false) {
+        DlgMessage::Msg(tr("Card not registered"));
+        return;
+    }
+    int id = db.integer("id");
+    QString username = db.string("lname") + " " + db.string("fname");
+    db[":user_id"] = id;
+    db.exec("select * from attendance where user_id=:user_id and dateout is null");
+    if (db.next()) {
+        DlgMessage::Msg(tr("Your are already registered"));
+        return;
+    }
+
+    db[":department_id"] = department;
+    db[":user_id"] = id;
+    db[":datein"] = QDateTime::currentDateTime();
+    db.insert("attendance");
+    DlgMessage::Msg(tr("Welcome") + "\r\n" + username);
+}
+
+void DlgFace::on_btnOut_clicked()
+{
+    QString pass;
+    if (!DlgGetPassword::password(tr("Login"), pass, true, this))
+        return;
+
+    if (pass.length() < 4) {
+        DlgMessage::Msg(tr("The password is too short"));
+        return;
+    }
+    Database db("QIBASE");
+    if (!db.open("10.1.0.4", "maindb", "SYSDBA", "Inter_OneStep")){
+       DlgMessage::Msg(tr("Cannot connect to database"));
+       return;
+    }
+    db[":acard"] = pass;
+    db.exec("select * from employes where acard=:acard");
+    if (db.next() == false) {
+        DlgMessage::Msg(tr("Card not registered"));
+        return;
+    }
+    int id = db.integer("id");
+    QString username = db.string("lname") + " " + db.string("fname");
+    db[":user_id"] = id;
+    db.exec("select * from attendance where user_id=:user_id and dateout is null");
+    if (db.next() == false) {
+        DlgMessage::Msg(tr("Your are not registered"));
+        return;
+    }
+
+    db[":user_id"] = id;
+    db[":dateout"] = QDateTime::currentDateTime();
+    db.exec("update attendance set dateout=:dateout where user_id=:user_id and dateout is null");
+    DlgMessage::Msg(tr("Goods bye") + "\r\n" + username);
+}
+
+void DlgFace::on_btnListOfWorkers_clicked()
+{
+    QString pass;
+    if (!DlgGetPassword::password(tr("Change password"), pass, true, this))
+        return;
+
+    m_timer.stop();
+    FF_User *user = new FF_User("main");
+    user->setCredentails("", pass);
+    if (user->auth1() && user->roleRead(ROLE_CHANGE_PASSWORD)) {
+        DlgRegisterCard(true, this).exec();
+    } else
+        DlgMessage::Msg(tr("Invalid password"));
+
+    delete user;
+    m_timer.start(TIMER_TIMEOUT);
 }

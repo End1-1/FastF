@@ -17,15 +17,20 @@ INCLUDEPATH += C:/Soft/OpenSSL-Win32/include
 INCLUDEPATH += C:/Soft/OpenSSL-Win32/include/openssl
 INCLUDEPATH += C:/projects/common
 INCLUDEPATH += C:/projects/FastF/orderdrv
+INCLUDEPATH += ../CafeV4/core/
 
 SOURCES += main.cpp\
+    ../common/qlogwindow.cpp \
     c5printing.cpp \
     configmobilewidget.cpp \
+    database.cpp \
     dbmutexlocker.cpp \
     dlgapprovecorrectionmessage.cpp \
+    dlgcardtips.cpp \
     dlgconfigmobile.cpp \
     dlgcorrection.cpp \
     dlgqty.cpp \
+    dlgregistercard.cpp \
     dlgselecttaxreport.cpp \
     orderdrv/od_config.cpp \
     qelineedit.cpp \
@@ -37,7 +42,6 @@ SOURCES += main.cpp\
     ff_halldrv.cpp \
     ../CafeV4/core/printing.cpp \
     dlgface.cpp \
-    ../common/qlogwindow.cpp \
     ../common/qsqldrv.cpp \
     ../common/qsystem.cpp \
     ../common/dlgconnection.cpp \
@@ -51,7 +55,6 @@ SOURCES += main.cpp\
     dlgchangepass.cpp \
     dlgreportfilter.cpp \
     dlgdishcomment.cpp \
-    dlghistory.cpp \
     ../common/qsqldb.cpp \
     dlglist.cpp \
     dlgcalcchange.cpp \
@@ -84,7 +87,6 @@ SOURCES += main.cpp\
     dlgremovereason.cpp \
     dlgkinoparkcall.cpp \
     logthread.cpp \
-    dlg14.cpp \
     dlgpaymentjazzve.cpp \
     ../MobilePointServer/msqldatabase.cpp \
     ../MobilePointServer/mtcpserver.cpp \
@@ -107,14 +109,20 @@ SOURCES += main.cpp\
     classes.cpp
 
 HEADERS  += \
+    ../CafeV4/CafeV4_Manager/printing.h \
     ../common/fastfprotocol.h \
+    ../common/qlogwindow.h \
     c5printing.h \
     configmobilewidget.h \
+    consts.h \
+    database.h \
     dbmutexlocker.h \
     dlgapprovecorrectionmessage.h \
+    dlgcardtips.h \
     dlgconfigmobile.h \
     dlgcorrection.h \
     dlgqty.h \
+    dlgregistercard.h \
     dlgselecttaxreport.h \
     qelineedit.h \
     ff_user.h \
@@ -126,7 +134,6 @@ HEADERS  += \
     ../CafeV4/core/printing.h \
     dlgface.h \
     qsqldrv.h \
-    ../common/qlogwindow.h \
     ../common/qsqldrv.h \
     ../common/qsystem.h \
     qsystem.h \
@@ -147,10 +154,8 @@ HEADERS  += \
     tableordersocket.h \
     wdtnumpad.h \
     dlgdishcomment.h \
-    dlghistory.h \
     qsqldb.h \
     ../common/qsqldb.h \
-    printing.h \
     dlglist.h \
     dlgcalcchange.h \
     ../CafeV4/CafeV4_Manager/logwriter.h \
@@ -185,7 +190,6 @@ HEADERS  += \
     dlgremovereason.h \
     dlgkinoparkcall.h \
     logthread.h \
-    dlg14.h \
     dlgpaymentjazzve.h \
     ../MobilePointServer/msqldatabase.h \
     ../MobilePointServer/mtcpserver.h \
@@ -210,16 +214,18 @@ HEADERS  += \
 
 
 FORMS    += \
+    ../common/qlogwindow.ui \
     configmobilewidget.ui \
     dlgapprovecorrectionmessage.ui \
+    dlgcardtips.ui \
     dlgconfigmobile.ui \
     dlgcorrection.ui \
     dlgorder.ui \
     dlgmessage.ui \
     dlgface.ui \
-    ../common/qlogwindow.ui \
     ../common/dlgconnection.ui \
     dlgqty.ui \
+    dlgregistercard.ui \
     dlgselecttaxreport.ui \
     dlgtableformovement.ui \
     ../common/dlginput.ui \
@@ -229,14 +235,12 @@ FORMS    += \
     dlgchangepass.ui \
     dlgreportfilter.ui \
     dlgdishcomment.ui \
-    dlghistory.ui \
     dlglist.ui \
     dlgcalcchange.ui \
     dlgtimelimit.ui \
     dlgsplash.ui \
     dlgremovereason.ui \
     dlgkinoparkcall.ui \
-    dlg14.ui \
     dlgpaymentjazzve.ui \
     dlgpayment.ui
 
@@ -256,6 +260,9 @@ LIBS += -lopenssl
 LIBS += -llibcrypto
 LIBS += -ladvapi32
 LIBS += -lwsock32
+
+SUBDIRS += \
+    ../FastFServer/FastFServer.pro
 
 
 

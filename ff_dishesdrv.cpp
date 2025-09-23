@@ -59,6 +59,16 @@ void FF_DishesDrv::filterDishes(int typeId)
     }
 }
 
+int FF_DishesDrv::indexOfDishByBarcode(const QString &barcode)
+{
+    for (int i = 0; i < m_fullMenu.count(); i++) {
+        if (prop(i, "BARCODE").toString() == barcode) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void FF_DishesDrv::refreshData()
 {
     //Groups of groups
@@ -100,7 +110,7 @@ void FF_DishesDrv::refreshData()
             "mt.id as type_id, mt.name as type_name, "
             "md.id as dish_id, md.name as dish_name, md.payment_mod, md.color, md.queue, "
             "m.price, m.store_id, m.print_schema, md.remind, mt.adgcode, "
-            "m.print1, m.print2 "
+            "m.print1, m.print2, md.barcode, md.qr, md.f_addbymanager "
             "from me_dishes_menu m "
             "left join me_menus mm on mm.id=m.menu_id "
             "left join me_dishes md on md.id=m.dish_id "

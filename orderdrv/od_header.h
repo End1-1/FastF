@@ -24,6 +24,7 @@ public:
     float f_amount_dec_value;
     int f_payment;
     int f_taxPrint;
+    int f_requestremoveal = 0;
     QString f_comment;
     QString f_gat;
 

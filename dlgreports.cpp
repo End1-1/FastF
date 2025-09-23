@@ -298,6 +298,10 @@ void dlgreports::on_btnDailySale_clicked()
     QMap<QString, double> other_qty;
     QMap<QString, double> icev_qty;
     QMap<QString, double> icev_qtyDish;
+    QMap<QString, double> cash;
+    QMap<QString, double> cash_qty;
+    QMap<QString, double> card;
+    QMap<QString, double> card_qty;
     QStringList staff;
 
 
@@ -317,15 +321,22 @@ void dlgreports::on_btnDailySale_clicked()
         idram_qty[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("qty");
     }
 
-    m_sqlDrv->prepare("select e.lname || ' ' || e.fname as ename, count(o.id) as qty, sum(o.amount) as amount "
-                      "from o_order o, employes e "
-                      "where o.staff_id=e.id and o.state_id=2 and o.date_cash between :date1 and :date2 "
+    m_sqlDrv->prepare("select e.lname || ' ' || e.fname as ename, count(o.id) as qty, "
+                      "sum(o.amount)+sum(COALESCE(oc.FAMOUNT, 0)) as amount, "
+                      "sum(ot.fcash) as cash, sum(ot.fcard) as card "
+                      "from o_order o "
+                      "left join o_tax ot on ot.fid=o.id "
+                      "LEFT JOIN employes e on o.staff_id=e.id "
+                      "LEFT JOIN O_CARD_TIPS oc ON o.id=oc.FORDER "
+                      "where o.state_id=2 and o.date_cash between :date1 and :date2 "
                       "  "
                       "group by 1 ");
     m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
     m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
     m_sqlDrv->execSQL();
     while (m_sqlDrv->next()) {
+        cash[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("cash");
+        card[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("card");
         other[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("amount")
                 - twoGo[m_sqlDrv->valStr("ename")]
                 - idram[m_sqlDrv->valStr("ename")]
@@ -374,7 +385,7 @@ void dlgreports::on_btnDailySale_clicked()
     pm.line(1, top, report_page_width, top);
     top++;
 
-    for (QStringList::const_iterator s = staff.begin(); s != staff.end(); s++) {
+    for (QStringList::const_iterator s = staff.constBegin(); s != staff.constEnd(); s++) {
         if (!twoGo.contains(*s))
             twoGo[*s] = 0;
         if (!twoGo_qty.contains(*s))
@@ -406,7 +417,7 @@ void dlgreports::on_btnDailySale_clicked()
         top += pm.lastTextHeight();
         pm.text(tr("Total"), 2, top);
         pm.textRightAlign(QString("%1 / %2")
-                          .arg(QString::number(st, 'f', 0))
+                          .arg(QLocale().toString(st, 'f', 0))
                           .arg(QString::number(sq, 'f', 0)),
                            report_page_width, top);
         top += pm.lastTextHeight();
@@ -416,6 +427,22 @@ void dlgreports::on_btnDailySale_clicked()
             pm.textRightAlign(QString("%1 / %2")
                               .arg(QString::number(twoGo[*s], 'f', 0))
                               .arg(QString::number(twoGo_qty[*s], 'f', 0)),
+                              report_page_width, top);
+            top += pm.lastTextHeight();
+            pm.checkForNewPage(top);
+        }
+        if (cash[*s] > 1) {
+            pm.text(tr("Cash"), 2, top);
+            pm.textRightAlign(QString("%1")
+                                  .arg(QLocale().toString(cash[*s], 'f', 0)),
+                              report_page_width, top);
+            top += pm.lastTextHeight();
+            pm.checkForNewPage(top);
+        }
+        if (card[*s] > 1) {
+            pm.text(tr("Card"), 2, top);
+            pm.textRightAlign(QString("%1")
+                                  .arg(QLocale().toString(card[*s], 'f', 0)),
                               report_page_width, top);
             top += pm.lastTextHeight();
             pm.checkForNewPage(top);
@@ -444,28 +471,6 @@ void dlgreports::on_btnDailySale_clicked()
         top ++;
     }
 
-
-
-//    /* Total sales */
-//    m_sqlDrv->prepare("select e.lname || ' ' || e.fname as fname, count(o.id) as qnt, sum(o.amount) as amount "
-//                      "from o_order o, employes e "
-//                      "where o.staff_id=e.id and o.state_id=2 and o.date_cash between :date1 and :date2 "
-//                      "group by 1 ");
-//    m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
-//    m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
-//    m_sqlDrv->execSQL();
-//    double total = 0;
-//    while (m_sqlDrv->next()) {
-//        pm.text(m_sqlDrv->val().toString(), 2, top);
-//        top += pm.lastTextHeight() + 2;
-//        pm.text(QString::number(m_sqlDrv->valInt("QNT")), 2, top);
-//        pm.textRightAlign(QString::number(m_sqlDrv->valFloat("amount"), 'f', 2), report_page_width, top);
-//        top += pm.lastTextHeight() + 2;
-//        pm.line(2, top, report_page_width, top);
-//        top ++;
-//        total += m_sqlDrv->valFloat("amount");
-//        pm.checkForNewPage(top);
-//    }
     top ++;
     pm.checkForNewPage(top);
     pm.line(0, top, report_page_width, top);
@@ -517,103 +522,7 @@ void dlgreports::on_btnDailySale_clicked()
     top += pm.lastTextHeight() + 2;
     pm.setFontBold(false);
     pm.setFontSize(10);
-    /*
-    m_sqlDrv->prepare("select * from IDRAM (:date1, :date2)");
-    m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
-    m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
-    m_sqlDrv->execSQL();
-    bool another = false;
-    bool firstIdram = true;
-    float totalIdram = 0.0;
-    while (m_sqlDrv->next()) {
-        if (!another) {
-            pm.checkForNewPage(top);
-            top += 20;
-            pm.setFontBold(true);
-            pm.text(tr("Other information"), 2, top);
-            pm.setFontBold(false);
-            top += pm.lastTextHeight() + 1;
-            pm.line(2, top, report_page_width, top);
-            top ++;
-            pm.line(2, top, report_page_width, top);
-            top ++;
-            another = true;
-        }
-        if (firstIdram) {
-            pm.checkForNewPage(top);
-            pm.text(tr("IDram"), 2, top);
-            top += pm.lastTextHeight() + 2;
-            pm.line(2, top, report_page_width, top);
-            top ++;
-            firstIdram = false;
-        }
-        pm.checkForNewPage(top);
-        pm.text(m_sqlDrv->val().toString(), 2, top);
-        top += pm.lastTextHeight() + 2;
-        pm.textRightAlign(QString("%1 - %2")
-                          .arg(m_sqlDrv->val().toInt())
-                          .arg(QString::number(m_sqlDrv->val().toFloat(), 'f', 2)),
-                          report_page_width, top);
-        top += pm.lastTextHeight() + 2;
-        pm.line(2, top, report_page_width, top);
-        totalIdram += m_sqlDrv->valFloat("AMOUNT");
-    }
-    if (totalIdram > 1) {
-        pm.checkForNewPage(top);
-        pm.text(tr("IDram total"), 2, top);
-        pm.textRightAlign(QString::number(totalIdram, 'f', 2), report_page_width, top);
-    }
 
-     Jazzve
-    m_sqlDrv->prepare("select md.name, sum(od.qty) as qty, sum(od.qty*od.price) as amount "
-                      "from o_order o, o_dishes od, me_dishes md "
-                      "where o.id=od.order_id and od.dish_id=md.id and o.state_id=2 and od.state_id=1 "
-                      "and o.date_cash between :date1 and :date2 "
-                      "and od.dish_id in (86049, 86050, 83822, 90460, 83823, 90461) "
-                      "group by 1 ");
-    m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
-    m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
-    m_sqlDrv->execSQL();
-    bool firstJazzve = true;
-    float totalJazzve = 0.0;
-    while (m_sqlDrv->next()) {
-        if (!another) {
-            pm.checkForNewPage(top);
-            top += 20;
-            pm.setFontBold(true);
-            pm.text(tr("Other information"), 2, top);
-            pm.setFontBold(false);
-            top += pm.lastTextHeight() + 1;
-            pm.line(2, top, report_page_width, top);
-            top ++;
-            pm.line(2, top, report_page_width, top);
-            top ++;
-            another = true;
-        }
-        if (firstJazzve) {
-            pm.checkForNewPage(top);
-            top += pm.lastTextHeight() + 20;
-            pm.text(tr("Jazzve"), 2, top);
-            top += pm.lastTextHeight() + 2;
-            pm.line(2, top, report_page_width, top);
-            top ++;
-            firstJazzve = false;
-        }
-        pm.checkForNewPage(top);
-        pm.text(m_sqlDrv->valStr("NAME"), 2, top);
-        top += pm.lastTextHeight() + 2;
-        pm.text(QString::number(m_sqlDrv->valFloat("QTY"), 'f', 2), 2, top);
-        pm.textRightAlign(QString::number(m_sqlDrv->valFloat("AMOUNT"), 'f', 2), report_page_width, top);
-        top += pm.lastTextHeight() + 2;
-        pm.line(2, top, report_page_width, top);
-        totalJazzve += m_sqlDrv->valFloat("AMOUNT");
-    }
-    if (totalJazzve > 1) {
-        pm.checkForNewPage(top);
-        pm.text(tr("Jazzve total"), 2, top);
-        pm.textRightAlign(QString::number(totalJazzve, 'f', 2), report_page_width, top);
-    }
-    */
     top += 20;
     pm.checkForNewPage(top);
     pm.setFontSize(8);

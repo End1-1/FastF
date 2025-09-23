@@ -1,18 +1,18 @@
 #ifndef OD_CONFIG
 #define OD_CONFIG
 
-#include "../dbdriver.h"
+#include <QString>
 
 #define SQL_ODISHES "select od.id, od.order_id, od.state_id, od.dish_id, md.name, od.qty, od.printed_qty, od.price, od.last_user, " \
     "e.fname || ' ' || e.lname as lastusername, od.store_id, od.payment_mod, od.print1, od.print2, od.comments, od.remind, od.price_inc, od.price_dec, " \
-    "mt.adgcode, od.flag14, od.f_storestate " \
+    "mt.adgcode, od.flag14, od.f_storestate, od.cancelrequest, od.f_removereason, od.emarks, od.qr " \
     "from o_dishes od, employes e, me_dishes md, me_types mt " \
     "where od.dish_id=md.id and od.last_user=e.id and od.order_id=:order_id and md.type_id=mt.id " \
     "order by od.id "
 
 #define SQL_OORDER "select o.id, o.state_id, o.table_id, t.name, o.date_open, o.date_close, o.date_cash, " \
     "staff_id, e.fname || ' ' || e.lname, print_qty, amount, amount_inc, amount_dec, " \
-    "amount_inc_value, amount_dec_value, payment, taxprint, comment " \
+    "amount_inc_value, amount_dec_value, payment, taxprint, comment, cancelrequest " \
     "from o_order o, employes e, h_table t " \
     "where o.staff_id=e.id and o.id=:id and o.table_id=t.id "
 

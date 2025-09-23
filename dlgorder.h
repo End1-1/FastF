@@ -8,6 +8,7 @@
 #include "ff_halldrv.h"
 #include "orderwindowdriver.h"
 #include "qnet.h"
+#include <QTimer>
 #include <QListWidgetItem>
 
 namespace Ui {
@@ -62,7 +63,6 @@ private slots:
     void orderCounted(const QMap<QString, QString> &values);
     void dishRepaint(int dishIndex);
     void on_tblGroupOfGroup_clicked(const QModelIndex &index);
-    void on_btnClearGroupFilter_clicked();
     void on_tblDishes_clicked(const QModelIndex &index);
     void on_btn1_clicked();
     void on_btn2_clicked();
@@ -85,15 +85,11 @@ private slots:
     void on_btnDishUp_clicked();
     void on_btnComment_clicked();
     void on_tblDishGroup_clicked(const QModelIndex &index);
-    void on_btnHistory_clicked();
-    void on_btnChangeMenu_clicked();
     void on_btnPlugins_clicked();
-    void on_btnComment_2_clicked();
     void on_btnCalculator_clicked();
     void on_pushButton_2_clicked();
     void on_lstOrder_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
     void on_btnPresent_clicked();
-    void on_btnOrange_clicked();
     void on_btnDiscount_2_clicked();
     void on_btnPluse05_clicked();
     void on_btnMinus05_clicked();
@@ -101,6 +97,9 @@ private slots:
     void on_btnMinus1_clicked();
     void on_btnRmDish_clicked();
     void on_btnAnyQty_clicked();
+    void on_btnRequestOrderRemove_clicked();
+    void on_btnEmark_clicked();
+    void on_leCmd_returnPressed();
 
 private:
     OD_Drv *m_ord;
@@ -111,6 +110,7 @@ private:
     QList<QWidget*> m_widgetsSet;
     FF_HallDrv *m_hallDrv;
     TableOrderSocket *ftoSocket;
+    QTimer mTimer;
     int m_currentMenu;
     bool m_flagCashMode;
     void setQty(double qty);
@@ -122,6 +122,7 @@ private:
     void buildTypes(int menuId, int groupId);
     void buildDishes(int typeId);
     int dishIndexFromListWidget();
+    int listIndexOfDish(OD_Dish *d);
     OD_Dish *dishFromListWidget();
     void setButtonsState();
     void moveDish(int index, int dtid, const QString &dtname);
@@ -129,6 +130,7 @@ private:
     void beforeClose();
     void giftCard(const QString &code);
     void moveOrderDish(int index, int tableId, QString tableName);
+    int addNewDish(int dishIndex);
 };
 
 #endif // DLGORDER_H

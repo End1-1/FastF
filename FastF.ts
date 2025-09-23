@@ -5,26 +5,11 @@
     <name>ConfigMobileWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Dlg14</name>
-    <message>
-        <source>Dialog</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>1</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>1/2</source>
-        <translation></translation>
+        <translation>Անուն</translation>
     </message>
 </context>
 <context>
@@ -138,6 +123,17 @@
     </message>
 </context>
 <context>
+    <name>DlgCardTips</name>
+    <message>
+        <source>Անկանխիկ թեավճար</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>0</source>
+        <translation></translation>
+    </message>
+</context>
+<context>
     <name>DlgChangePass</name>
     <message>
         <source>Close</source>
@@ -160,7 +156,7 @@
     <name>DlgConfigMobile</name>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -230,16 +226,12 @@
     </message>
     <message>
         <source>Old qty</source>
-        <translation>ՔԱՆԱԿ</translation>
+        <translation type="vanished">ՔԱՆԱԿ</translation>
     </message>
     <message>
         <source>Qty to
 remove</source>
-        <translation>ՀԵՌԱՑՆԵԼ</translation>
-    </message>
-    <message>
-        <source>1.0</source>
-        <translation></translation>
+        <translation type="vanished">ՀԵՌԱՑՆԵԼ</translation>
     </message>
     <message>
         <source>Remove reason</source>
@@ -276,7 +268,7 @@ remove</source>
     </message>
     <message>
         <source>Incorrect qty to remove</source>
-        <translation>Հեռացման քանակը սխալ է</translation>
+        <translation type="vanished">Հեռացման քանակը սխալ է</translation>
     </message>
     <message>
         <source>Reason cannot be empty</source>
@@ -284,7 +276,7 @@ remove</source>
     </message>
     <message>
         <source>Removed without print</source>
-        <translation>Հեռացված է արանց տպելու</translation>
+        <translation type="vanished">Հեռացված է արանց տպելու</translation>
     </message>
     <message>
         <source>Removed with print </source>
@@ -304,19 +296,19 @@ remove</source>
     </message>
     <message>
         <source>Request error</source>
-        <translation>Հարցման սխալ</translation>
+        <translation type="vanished">Հարցման սխալ</translation>
     </message>
     <message>
         <source>Request created. Wait for response.</source>
-        <translation>Հարցումը գրանցված է։ Սպասեք պատասխանին</translation>
+        <translation type="vanished">Հարցումը գրանցված է։ Սպասեք պատասխանին</translation>
     </message>
     <message>
         <source>Response error.</source>
-        <translation>Հարցման սխալ</translation>
+        <translation type="vanished">Հարցման սխալ</translation>
     </message>
     <message>
         <source>Request for correction</source>
-        <translation>Հեռացման հարցում</translation>
+        <translation type="vanished">Հեռացման հարցում</translation>
     </message>
     <message>
         <source>Loss?</source>
@@ -332,7 +324,27 @@ remove</source>
     </message>
     <message>
         <source>No one of loss option was selected</source>
-        <translation>Նշեք, կորուստ է թե ոչ</translation>
+        <translation type="vanished">Նշեք, կորուստ է թե ոչ</translation>
+    </message>
+    <message>
+        <source>0</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>ՀԵՌԱՑՈՒՄԸ ՀԱՍՏԱՏՎԱՑ Է</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Your request was accepted</source>
+        <translation>Ձեր հայտը հաստատված է</translation>
+    </message>
+    <message>
+        <source>No one of loss option was seLlected</source>
+        <translation>Նշեք կորուստով է թե ոչ</translation>
+    </message>
+    <message>
+        <source>Your request wasnt approved</source>
+        <translation>Ձեր հայտը հաստատված է</translation>
     </message>
 </context>
 <context>
@@ -400,6 +412,38 @@ remove</source>
         <source>50000/100</source>
         <translation></translation>
     </message>
+    <message>
+        <source>Login</source>
+        <translation>Մուտք</translation>
+    </message>
+    <message>
+        <source>The password is too short</source>
+        <translation>Գախտնաբառը կարճ է</translation>
+    </message>
+    <message>
+        <source>Cannot connect to database</source>
+        <translation>Հնարավոր չէ հաստատել կապ տվյալների պահոցների հետ</translation>
+    </message>
+    <message>
+        <source>Card not registered</source>
+        <translation>Քարտը ակտիվ չէ</translation>
+    </message>
+    <message>
+        <source>Your are already registered</source>
+        <translation>Դուք արդեն գրանցված էք</translation>
+    </message>
+    <message>
+        <source>Welcome</source>
+        <translation>Բարի գալուստ</translation>
+    </message>
+    <message>
+        <source>Your are not registered</source>
+        <translation>Դուք գրանցված չէք</translation>
+    </message>
+    <message>
+        <source>Goods bye</source>
+        <translation>Ստեսություն</translation>
+    </message>
 </context>
 <context>
     <name>DlgGatReader</name>
@@ -431,31 +475,27 @@ remove</source>
     <name>DlgHistory</name>
     <message>
         <source>Close</source>
-        <translation>Փակել</translation>
+        <translation type="vanished">Փակել</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Ամսաթիվ</translation>
+        <translation type="vanished">Ամսաթիվ</translation>
     </message>
     <message>
         <source>Host</source>
-        <translation>Համակարգիչ</translation>
+        <translation type="vanished">Համակարգիչ</translation>
     </message>
     <message>
         <source>Staff</source>
-        <translation>Սպասարկող</translation>
+        <translation type="vanished">Սպասարկող</translation>
     </message>
     <message>
         <source>Action</source>
-        <translation>Գործողություն</translation>
+        <translation type="vanished">Գործողություն</translation>
     </message>
     <message>
         <source>Additional</source>
-        <translation>Լրացուցիչ</translation>
-    </message>
-    <message>
-        <source>Dialog</source>
-        <translation></translation>
+        <translation type="vanished">Լրացուցիչ</translation>
     </message>
 </context>
 <context>
@@ -629,6 +669,10 @@ remove</source>
         <source>Fiscal cancel</source>
         <translation>ՀԴՄ հետվերադարձ</translation>
     </message>
+    <message>
+        <source>Change</source>
+        <translation>Մանր</translation>
+    </message>
 </context>
 <context>
     <name>DlgPaymentJazzve</name>
@@ -694,6 +738,41 @@ remove</source>
     <message>
         <source>0</source>
         <translation></translation>
+    </message>
+</context>
+<context>
+    <name>DlgRegisterCard</name>
+    <message>
+        <source>Dialog</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Փնտրել</translation>
+    </message>
+    <message>
+        <source>ID</source>
+        <translation>Համար</translation>
+    </message>
+    <message>
+        <source>Group</source>
+        <translation>Հաստիկ</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Անուն</translation>
+    </message>
+    <message>
+        <source>Cannot connect to database</source>
+        <translation>Հնարավոր չէ հաստատել կապ տվյալների պահոցների հետ</translation>
+    </message>
+    <message>
+        <source>The password is too short</source>
+        <translation>Գախտնաբառը կարճ է</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Պատրաստ է</translation>
     </message>
 </context>
 <context>
@@ -776,7 +855,7 @@ remove</source>
     </message>
     <message>
         <source>TextLabel</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -807,7 +886,7 @@ remove</source>
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1242,10 +1321,6 @@ remove</source>
         <translation></translation>
     </message>
     <message>
-        <source>You should to setup cashier and pin before to use fiscal printer</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>Connection error</source>
         <translation>Կապի սխալ</translation>
     </message>
@@ -1553,55 +1628,55 @@ remove</source>
     <name>WdtNumpad</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>8</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>7</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>5</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>9</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>3</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>2</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>&lt;</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>4</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>6</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1620,11 +1695,11 @@ remove</source>
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>TextLabel</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1647,7 +1722,7 @@ remove</source>
     </message>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1938,7 +2013,7 @@ remove</source>
     </message>
     <message>
         <source>Balance:</source>
-        <translation>Բալանս՝</translation>
+        <translation type="vanished">Բալանս՝</translation>
     </message>
     <message>
         <source>+1</source>
@@ -1995,6 +2070,54 @@ remove</source>
     <message>
         <source>Use removal tool or call to manager.</source>
         <translation>Օգտագործեկ հեռացման կոճակը կամ կանչ տվեք մենեջերին</translation>
+    </message>
+    <message>
+        <source>Cannot move the discounted order</source>
+        <translation>Հնարավոր չէ տեղափոխել զեղջված պատվերը</translation>
+    </message>
+    <message>
+        <source>Removed without print </source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Submit an order removal request?</source>
+        <translation>Ցանկանում՞ եք ստեղծել պատվերի հեռացման հայտ</translation>
+    </message>
+    <message>
+        <source>Request order removal</source>
+        <translation>Պատվերի հեռացման հայտ</translation>
+    </message>
+    <message>
+        <source>Your request was sent to the responsible person</source>
+        <translation>Ձեր հայտը ուղարկվել է դիտարկման</translation>
+    </message>
+    <message>
+        <source>Emarks</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Invalid emarks</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Clear emarks?</source>
+        <translation>Մաքրել Emarks?</translation>
+    </message>
+    <message>
+        <source>Available only with Emark code</source>
+        <translation>Ավելացումը Emark կոդի միջոցով</translation>
+    </message>
+    <message>
+        <source>Cannot change quantity of dish thats contains emark</source>
+        <translation>Այս ապրանքի քանակը փոփոխման ենթակա չէ</translation>
+    </message>
+    <message>
+        <source>Used emarks detected</source>
+        <translation>Emark կոդը օգտագործվել է</translation>
+    </message>
+    <message>
+        <source>Invalid barcode</source>
+        <translation>Սխալ բարկոդ</translation>
     </message>
 </context>
 <context>
@@ -2126,6 +2249,14 @@ remove</source>
     <message>
         <source>Fiscal canceled</source>
         <translation>Հետվարադարձը կատարվեց</translation>
+    </message>
+    <message>
+        <source>Cash</source>
+        <translation>Կանխիկ</translation>
+    </message>
+    <message>
+        <source>Card</source>
+        <translation>Քարտ</translation>
     </message>
 </context>
 </TS>

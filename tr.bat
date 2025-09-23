@@ -1,0 +1,1 @@
+lupdate FastF.pro -ts FastF.ts

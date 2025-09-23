@@ -130,8 +130,6 @@ bool OD_Drv::discount(int id, float value)
 
 void OD_Drv::countAmounts()
 {
-    bool flag14_1 = false;
-    bool flag14_2 = false;
     QMap<QString, QString> values;
     m_header.f_amount = 0;
     m_header.f_amount_inc = 0;
@@ -139,18 +137,7 @@ void OD_Drv::countAmounts()
     for (QList<OD_Dish*>::iterator it = m_dishes.begin(); it != m_dishes.end(); it++) {
         if ((*it)->f_stateId != DISH_STATE_NORMAL)
             continue;
-        if ((*it)->flag14 > 0) {
-            if (!flag14_1 && !flag14_2) {
-                flag14_1 = (*it)->flag14 == 1;
-                flag14_2 = (*it)->flag14 == 2;
-                if (flag14_1) {
-                    m_header.f_amount += 14000;
-                }
-                if (flag14_2) {
-                    m_header.f_amount += 7000;
-                }
-            }
-        }
+
         m_header.f_amount += (*it)->getTotal();
         m_header.f_amount_inc += (*it)->getTotalInc();
         m_header.f_amount_dec += (*it)->getTotalDec();

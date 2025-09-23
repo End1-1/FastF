@@ -19,7 +19,8 @@ void OrderWindowDriver::checkOnlinePayment(OD_Drv *o)
     m_drv = o;
     QNet *n = new QNet(this);
     connect(n, SIGNAL(getResponse(QString,bool)), SLOT(parseOnlinePaymentResponse(QString,bool)));
-    n->URL = "https://money.idram.am/api/History/Search";
+    qDebug() << FF_SettingsDrv::value(SD_IDRAM_SESSION_ID).toString();
+    n->URL = "https://cashback.idram.am/api/history/searchbyorder";
     n->rawHeader.insert("_SessionId_", FF_SettingsDrv::value(SD_IDRAM_SESSION_ID).toString()); //"3497ae22-8623-45be-84d9-f9f9671b0628");
     n->rawHeader.insert("_EncMethod_", "NONE");
     n->ContentType = "application/json";

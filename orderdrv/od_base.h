@@ -1,8 +1,9 @@
 #ifndef OD_BASE_H
 #define OD_BASE_H
 
+#include "dbdriver.h"
 #include "od_config.h"
-//#include "logthread.h"
+#include <QObject>
 
 class OD_Base : public QObject
 {

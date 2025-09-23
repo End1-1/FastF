@@ -1,7 +1,7 @@
 #ifndef OD_DISH_H
 #define OD_DISH_H
 
-#include "od_base.h"
+#include "dbdriver.h"
 
 class OD_Dish : public QObject
 {
@@ -36,6 +36,9 @@ public:
     QString f_print1;
     QString f_print2;
     int flag14;
+    int f_cancelrequest = 0;
+    QString f_emarks;
+    int f_qr;
 
     OD_Dish();
     OD_Dish *copy();

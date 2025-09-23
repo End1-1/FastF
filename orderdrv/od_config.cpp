@@ -1,5 +1,7 @@
 #include "od_config.h"
 
+#include <QLocale>
+
 static const QLocale locale = QLocale();
 static const QString DecimalPoint = QLocale().decimalPoint();
 static const QRegExp reZero = QRegExp("(?!\\d[\\" + DecimalPoint +"][1-9]+)0+$");

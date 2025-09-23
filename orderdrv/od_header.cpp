@@ -27,6 +27,7 @@ void OD_Header::loadFromDb(DbDriver &drv)
     f_payment = drv.v_int(i++);
     f_taxPrint = drv.v_int(i++);
     f_comment = drv.v_str(i++);
+    f_requestremoveal = drv.v_int(i++);
 }
 
 int OD_Header::saveToDb(DbDriver &drv, const QString &orderPrefix)
@@ -58,7 +59,7 @@ int OD_Header::saveToDb(DbDriver &drv, const QString &orderPrefix)
                  "date_cash=:date_cash, staff_id=:staff_id, print_qty=:print_qty, "
                  "amount=:amount, amount_inc=:amount_inc, amount_dec=:amount_dec, "
                  "amount_inc_value=:amount_inc_value, amount_dec_value=:amount_dec_value, payment=:payment, taxprint=:taxprint, "
-                 "comment=:comment where id=:id"))
+                 "comment=:comment, cancelrequest=:cancelrequest where id=:id"))
         return -1;
     drv.bindValue(":state_id", f_stateId);
     drv.bindValue(":table_id", f_tableId);
@@ -75,6 +76,7 @@ int OD_Header::saveToDb(DbDriver &drv, const QString &orderPrefix)
     drv.bindValue(":amount_inc_value", f_amount_inc_value);
     drv.bindValue(":amount_dec_value", f_amount_dec_value);
     drv.bindValue(":comment", f_comment);
+    drv.bindValue(":cancelrequest", f_requestremoveal);
     drv.bindValue(":id", f_id);
     if (!drv.execSQL())
         return -1;

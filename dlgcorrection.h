@@ -21,16 +21,12 @@ public:
     ~DlgCorrection();
 
 private slots:
-    void on_btnMinus_clicked();
-    void on_btnPlus_clicked();
     void on_btnReject_clicked();
     void on_btnOk_clicked();
     void on_btnRemoveReason_clicked();
     void on_btnClearWindow_clicked();
     void on_btnKeyboard_clicked();
     void on_tblLetter_itemClicked(QTableWidgetItem *item);
-    void parseRequestForCorrection(const QString &response, bool result);
-    void parseRequestResponse(const QString &response, bool result);
     void on_btnCheckResponse_clicked();
     void on_btnLossYes_clicked();
     void on_btnLossNo_clicked();
@@ -40,14 +36,11 @@ private:
     OD_Dish *fDish;
     OD_Drv *m_ord;
     int fRequestId;
-    double fQty;
     void setEnabledWidget(bool v);
     void setWaitMode();
-    void setQtyRemove();
     void printRemoved(double qty);
     QMap<int, QStringList> fLetters;
     void requestForCorrection(double qty);
-    void checkResponse(int id);
 };
 
 #endif // DLGCORRECTION_H

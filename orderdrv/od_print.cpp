@@ -1,6 +1,5 @@
 #include "od_print.h"
 #include <QProcess>
-#include "../printing.h"
 #include "../qsystem.h"
 #include <math.h>
 #include <QHostInfo>
@@ -8,6 +7,8 @@
 #include "ff_settingsdrv.h"
 #include <QMessageBox>
 #include "c5printing.h"
+#include <QFile>
+#include <QPrinterInfo>
 #include <QApplication>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -101,12 +102,10 @@ bool OD_Print::printService(int remind, const QString &objName, QList<OD_Dish *>
         }
     }
 
+    QPrinterInfo ___printerInfo;
     for (QMap<QString, QList<int> >::const_iterator it = printSchema.begin(); it != printSchema.end(); it++) {
-        if (!___printerInfo->printerExists(it.key())) {
+        if (!___printerInfo.availablePrinterNames().contains(it.key())) {
             LOG("Printer " + it.key()  + " not exists");
-            foreach (QPrinterInfo pi, ___printerInfo->m_printers) {
-                LOG(pi.printerName());
-            }
             continue;
         }
 

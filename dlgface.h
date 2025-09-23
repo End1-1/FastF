@@ -54,6 +54,14 @@ private slots:
     void onlineUpReply(const QString &data, bool isError);
     void on_btnConfigMobile_clicked();
 
+    void on_btnRegisterCard_clicked();
+
+    void on_btnIn_clicked();
+
+    void on_btnOut_clicked();
+
+    void on_btnListOfWorkers_clicked();
+
 private:
     int m_timeout;
     int m_filterHall;
@@ -66,6 +74,7 @@ private:
     void loadReadyDishes();
     void correctTime();
     void onlineUp();
+    void startService();
 };
 
 #endif // DLGFACE_H

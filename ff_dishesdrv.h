@@ -31,6 +31,7 @@ public:
     QMap<QString, int> m_proxyDishes;
     void filterTypes(int menuId, int groupId);
     void filterDishes(int typeId);
+    int indexOfDishByBarcode(const QString &barcode);
     void refreshData();
     QVariant prop(int index, const QString &name) const;
     QMap<QString, QVariant> getMenuList();

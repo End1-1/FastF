@@ -3,6 +3,7 @@
 
 #include "od_header.h"
 #include "od_dish.h"
+#include "od_base.h"
 
 class OD_Drv;
 

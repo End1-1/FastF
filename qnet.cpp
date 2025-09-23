@@ -39,7 +39,7 @@ void QNet::go()
     nr.setRawHeader("Cache-Control", "no-cache");
     nr.setRawHeader("Accept", "*/*");
 
-    for (QMap<QString, QString>::const_iterator it = rawHeader.begin(); it != rawHeader.end(); it++)
+    for (QMap<QString, QString>::const_iterator it = rawHeader.constBegin(); it != rawHeader.constEnd(); it++)
         nr.setRawHeader(it.key().toLatin1(), it.value().toLatin1());
     post(nr, m_data);
 }

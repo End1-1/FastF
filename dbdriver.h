@@ -20,7 +20,7 @@ class DbDriver : public QObject
     Q_OBJECT
 
 private:
-    QSqlQuery *m_query;
+    QSqlQuery* m_query;
     bool m_errorFlag;
     int m_dbnumber;
     static int m_number;
@@ -48,7 +48,6 @@ public:
     double v_dbl(int index);
     QDateTime v_dateTime(int index);
     QDate v_date(int index);
-    QString lastQuery();
     void commit();
     static QDate serverDate();
     static QDateTime serverDateTime();

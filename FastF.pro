@@ -11,16 +11,16 @@ TEMPLATE = app
 
 RC_FILE = res/res.rc
 
-INCLUDEPATH += C:/projects/MobilePointServer
 INCLUDEPATH += C:/projects/NewTax/Src
-INCLUDEPATH += C:/Soft/OpenSSL-Win32/include
-INCLUDEPATH += C:/Soft/OpenSSL-Win32/include/openssl
-INCLUDEPATH += C:/projects/common
-INCLUDEPATH += C:/projects/FastF/orderdrv
-INCLUDEPATH += ../CafeV4/core/
+INCLUDEPATH += C:/Soft/OpenSSLWin64/include
+INCLUDEPATH += C:/Soft/OpenSSLWin64/include/openssl
+INCLUDEPATH += ./common
+INCLUDEPATH += ./orderdrv
+INCLUDEPATH += ./MobilePointServer
 
 SOURCES += main.cpp\
-    ../common/qlogwindow.cpp \
+    QRCodeGenerator.cpp \
+    common/qlogwindow.cpp \
     c5printing.cpp \
     configmobilewidget.cpp \
     database.cpp \
@@ -32,6 +32,9 @@ SOURCES += main.cpp\
     dlgqty.cpp \
     dlgregistercard.cpp \
     dlgselecttaxreport.cpp \
+    fastfdialog.cpp \
+    htable.cpp \
+    logwriter.cpp \
     orderdrv/od_config.cpp \
     qelineedit.cpp \
     ff_user.cpp \
@@ -40,39 +43,35 @@ SOURCES += main.cpp\
     dlgmessage.cpp \
     ff_settingsdrv.cpp \
     ff_halldrv.cpp \
-    ../CafeV4/core/printing.cpp \
     dlgface.cpp \
-    ../common/qsqldrv.cpp \
-    ../common/qsystem.cpp \
-    ../common/dlgconnection.cpp \
+    common/qsqldrv.cpp \
+    common/qsystem.cpp \
+    common/dlgconnection.cpp \
     dlgtableformovement.cpp \
-    ../common/qetablewidget.cpp \
-    ../common/dlginput.cpp \
+    common/qetablewidget.cpp \
+    common/dlginput.cpp \
     ff_discountdrv.cpp \
     dlgreports.cpp \
-    ../common/dlggetpassword.cpp \
-    ../common/wdtnumpad.cpp \
+    common/dlggetpassword.cpp \
+    common/wdtnumpad.cpp \
     dlgchangepass.cpp \
     dlgreportfilter.cpp \
     dlgdishcomment.cpp \
-    ../common/qsqldb.cpp \
+    common/qsqldb.cpp \
     dlglist.cpp \
     dlgcalcchange.cpp \
-    ../CafeV4/CafeV4_Manager/logwriter.cpp \
-    ../common/qqrengine.cpp \
-    orderwindowdriver.cpp \
+    common/qqrengine.cpp \
     qnet.cpp \
-    ../LibQREncode/bitstream.c \
-    ../LibQREncode/mask.c \
-    ../LibQREncode/mmask.c \
-    ../LibQREncode/mqrspec.c \
-    ../LibQREncode/qrenc.c \
-    ../LibQREncode/qrencode.c \
-    ../LibQREncode/qrinput.c \
-    ../LibQREncode/qrspec.c \
-    ../LibQREncode/rscode.c \
-    ../LibQREncode/split.c \
-    dlgtimelimit.cpp \
+    LibQREncode/bitstream.c \
+    LibQREncode/mask.c \
+    LibQREncode/mmask.c \
+    LibQREncode/mqrspec.c \
+    LibQREncode/qrenc.c \
+    LibQREncode/qrencode.c \
+    LibQREncode/qrinput.c \
+    LibQREncode/qrspec.c \
+    LibQREncode/rscode.c \
+    LibQREncode/split.c \
     dlgsplash.cpp \
     orderdrv/od_dish.cpp \
     orderdrv/od_base.cpp \
@@ -82,25 +81,20 @@ SOURCES += main.cpp\
     orderdrv/od_print.cpp \
     dbdriver.cpp \
     ff_correcttime.cpp \
-    tableordersocket.cpp \
     taxcheckout.cpp \
     dlgremovereason.cpp \
     dlgkinoparkcall.cpp \
     logthread.cpp \
     dlgpaymentjazzve.cpp \
-    ../MobilePointServer/msqldatabase.cpp \
-    ../MobilePointServer/mtcpserver.cpp \
+    MobilePointServer/msqldatabase.cpp \
     cnfmaindb.cpp \
-    ../MobilePointServer/mjsonhandler.cpp \
-    ../MobilePointServer/databaseresult.cpp \
-    ../MobilePointServer/mtcpsocketthread.cpp \
-    ../MobilePointServer/mtprintkitchen.cpp \
+    MobilePointServer/mjsonhandler.cpp \
+    MobilePointServer/databaseresult.cpp \
+    MobilePointServer/mtprintkitchen.cpp \
     ../NewTax/Src/printtaxn.cpp \
-    ../MobilePointServer/pimage.cpp \
-    ../MobilePointServer/pprintscene.cpp \
-    ../MobilePointServer/ptextrect.cpp \
-    ../MobilePointServer/QRCodeGenerator.cpp \
-    ../MobilePointServer/mtfilelog.cpp \
+    MobilePointServer/pimage.cpp \
+    MobilePointServer/ptextrect.cpp \
+    MobilePointServer/mtfilelog.cpp \
     dlgpayment.cpp \
     elineedit.cpp \
     utils.cpp \
@@ -109,9 +103,9 @@ SOURCES += main.cpp\
     classes.cpp
 
 HEADERS  += \
-    ../CafeV4/CafeV4_Manager/printing.h \
-    ../common/fastfprotocol.h \
-    ../common/qlogwindow.h \
+    QRCodeGenerator.h \
+    common/fastfprotocol.h \
+    common/qlogwindow.h \
     c5printing.h \
     configmobilewidget.h \
     consts.h \
@@ -124,6 +118,8 @@ HEADERS  += \
     dlgqty.h \
     dlgregistercard.h \
     dlgselecttaxreport.h \
+    fastfdialog.h \
+    htable.h \
     qelineedit.h \
     ff_user.h \
     dlgorder.h \
@@ -131,50 +127,45 @@ HEADERS  += \
     dlgmessage.h \
     ff_settingsdrv.h \
     ff_halldrv.h \
-    ../CafeV4/core/printing.h \
     dlgface.h \
     qsqldrv.h \
-    ../common/qsqldrv.h \
-    ../common/qsystem.h \
+    common/qsqldrv.h \
+    common/qsystem.h \
     qsystem.h \
-    ../common/dlgconnection.h \
+    common/dlgconnection.h \
     dlgconnection.h \
     dlgtableformovement.h \
     qetablewidget.h \
-    ../common/qetablewidget.h \
+    common/qetablewidget.h \
     dlginput.h \
-    ../common/dlginput.h \
+    common/dlginput.h \
     ff_discountdrv.h \
     dlgreports.h \
     dlggetpassword.h \
-    ../common/dlggetpassword.h \
-    ../common/wdtnumpad.h \
+    common/dlggetpassword.h \
+    common/wdtnumpad.h \
     dlgchangepass.h \
     dlgreportfilter.h \
-    tableordersocket.h \
     wdtnumpad.h \
     dlgdishcomment.h \
     qsqldb.h \
-    ../common/qsqldb.h \
+    common/qsqldb.h \
     dlglist.h \
     dlgcalcchange.h \
-    ../CafeV4/CafeV4_Manager/logwriter.h \
     logwriter.h \
-    ../common/qqrengine.h \
-    orderwindowdriver.h \
+    common/qqrengine.h \
     qnet.h \
-    ../LibQREncode/bitstream.h \
-    ../LibQREncode/config.h \
-    ../LibQREncode/mask.h \
-    ../LibQREncode/mmask.h \
-    ../LibQREncode/mqrspec.h \
-    ../LibQREncode/qrencode.h \
-    ../LibQREncode/qrencode_inner.h \
-    ../LibQREncode/qrinput.h \
-    ../LibQREncode/qrspec.h \
-    ../LibQREncode/rscode.h \
-    ../LibQREncode/split.h \
-    dlgtimelimit.h \
+    LibQREncode/bitstream.h \
+    LibQREncode/config.h \
+    LibQREncode/mask.h \
+    LibQREncode/mmask.h \
+    LibQREncode/mqrspec.h \
+    LibQREncode/qrencode.h \
+    LibQREncode/qrencode_inner.h \
+    LibQREncode/qrinput.h \
+    LibQREncode/qrspec.h \
+    LibQREncode/rscode.h \
+    LibQREncode/split.h \
     dlgsplash.h \
     orderdrv/od_dish.h \
     orderdrv/od_base.h \
@@ -191,30 +182,26 @@ HEADERS  += \
     dlgkinoparkcall.h \
     logthread.h \
     dlgpaymentjazzve.h \
-    ../MobilePointServer/msqldatabase.h \
-    ../MobilePointServer/mtcpserver.h \
+    MobilePointServer/msqldatabase.h \
     cnfmaindb.h \
-    ../MobilePointServer/mjsonhandler.h \
-    ../MobilePointServer/databaseresult.h \
-    ../MobilePointServer/mtcpsocketthread.h \
-    ../MobilePointServer/mtprintkitchen.h \
+    MobilePointServer/mjsonhandler.h \
+    MobilePointServer/databaseresult.h \
+    MobilePointServer/mtprintkitchen.h \
     ../NewTax/Src/printtaxn.h \
-    ../MobilePointServer/pimage.h \
-    ../MobilePointServer/pprintscene.h \
-    ../MobilePointServer/ptextrect.h \
-    ../MobilePointServer/QRCodeGenerator.h \
-    ../MobilePointServer/mtfilelog.h \
+    MobilePointServer/pimage.h \
+    MobilePointServer/ptextrect.h \
+    MobilePointServer/mtfilelog.h \
     dlgpayment.h \
     elineedit.h \
     utils.h \
     cnfapp.h \
-    ../LibQREncode/getopt.h \
+    LibQREncode/getopt.h \
     mptcpsocket.h \
     classes.h
 
 
 FORMS    += \
-    ../common/qlogwindow.ui \
+    common/qlogwindow.ui \
     configmobilewidget.ui \
     dlgapprovecorrectionmessage.ui \
     dlgcardtips.ui \
@@ -223,21 +210,20 @@ FORMS    += \
     dlgorder.ui \
     dlgmessage.ui \
     dlgface.ui \
-    ../common/dlgconnection.ui \
+    common/dlgconnection.ui \
     dlgqty.ui \
     dlgregistercard.ui \
     dlgselecttaxreport.ui \
     dlgtableformovement.ui \
-    ../common/dlginput.ui \
+    common/dlginput.ui \
     dlgreports.ui \
-    ../common/dlggetpassword.ui \
-    ../common/wdtnumpad.ui \
+    common/dlggetpassword.ui \
+    common/wdtnumpad.ui \
     dlgchangepass.ui \
     dlgreportfilter.ui \
     dlgdishcomment.ui \
     dlglist.ui \
     dlgcalcchange.ui \
-    dlgtimelimit.ui \
     dlgsplash.ui \
     dlgremovereason.ui \
     dlgkinoparkcall.ui \
@@ -252,17 +238,16 @@ ICON = res/app.ico
 DEFINES += FASTF
 DEFINES += _ORGANIZATION_=\\\"Jazzve\\\"
 DEFINES += _APPLICATION_=\\\"FastF\\\"
+DEFINES += _MODULE_=\\\"FASTf\\\"
 
 LIBS += -lVersion
 
-LIBS += -LC:/Soft/OpenSSL-Win64/lib
+LIBS += -LC:/soft/OpenSSLWin64/lib/VC/x64/MD
 LIBS += -lopenssl
 LIBS += -llibcrypto
 LIBS += -ladvapi32
 LIBS += -lwsock32
 
-SUBDIRS += \
-    ../FastFServer/FastFServer.pro
 
 
 

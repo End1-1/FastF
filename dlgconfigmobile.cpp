@@ -11,9 +11,9 @@ DlgConfigMobile::DlgConfigMobile(QWidget *parent) :
     ui->setupUi(this);
     setWindowState(Qt::WindowFullScreen);
     QStringList qrList = __cnfapp.mobileConfigString().split("|", Qt::SkipEmptyParts);
-
     ui->hl->addStretch(1);
-    for (const QString &configString: qrList) {
+
+    for(const QString &configString : qrList) {
         int levelIndex = 1;
         int versionIndex = 0;
         bool bExtent = true;
@@ -22,18 +22,20 @@ DlgConfigMobile::DlgConfigMobile(QWidget *parent) :
         QString storageName = configString.mid(0, configString.indexOf(";"));
         QString encodeString = QString(configString).remove(0, configString.indexOf(";") + 1);
         CQR_Encode qrEncode;
-        bool successfulEncoding = qrEncode.EncodeData(levelIndex, versionIndex, bExtent, maskIndex, encodeString.toUtf8().data() );
-        if (!successfulEncoding) {
+        bool successfulEncoding = qrEncode.EncodeData(levelIndex, versionIndex, bExtent, maskIndex, encodeString.toUtf8().data());
+
+        if(!successfulEncoding) {
             //fLog.append("Cannot encode qr image");
         }
+
         int qrImageSize = qrEncode.m_nSymbleSize;
-        int encodeImageSize = qrImageSize + ( QR_MARGIN * 2 );
+        int encodeImageSize = qrImageSize + (QR_MARGIN * 2);
         QImage encodeImage(encodeImageSize, encodeImageSize, QImage::Format_Mono);
         encodeImage.fill(1);
 
-        for ( int i = 0; i < qrImageSize; i++ ) {
-            for ( int j = 0; j < qrImageSize; j++ ) {
-                if ( qrEncode.m_byModuleData[i][j] ) {
+        for(int i = 0; i < qrImageSize; i++) {
+            for(int j = 0; j < qrImageSize; j++) {
+                if(qrEncode.m_byModuleData[i][j]) {
                     encodeImage.setPixel(i + QR_MARGIN, j + QR_MARGIN, 0);
                 }
             }
@@ -43,6 +45,7 @@ DlgConfigMobile::DlgConfigMobile(QWidget *parent) :
         auto *w = new ConfigMobileWidget(pix, storageName);
         ui->hl->addWidget(w);
     }
+
     ui->hl->addStretch(1);
 }
 

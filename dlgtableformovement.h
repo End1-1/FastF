@@ -3,9 +3,9 @@
 
 #include <QDialog>
 #include "ff_halldrv.h"
-#include "tableordersocket.h"
 
-namespace Ui {
+namespace Ui
+{
 class DlgTableForMovement;
 }
 
@@ -16,7 +16,7 @@ class DlgTableForMovement : public QDialog
 public:
     explicit DlgTableForMovement(QWidget *parent = 0);
     ~DlgTableForMovement();
-    static int getTable(int &tableId, QWidget *parent, FF_HallDrv *hallDrv);
+    static int getTable(int& tableId, QWidget *parent, FF_HallDrv *hallDrv);
 
 private slots:
     void err(const QString &msg);
@@ -27,9 +27,8 @@ private slots:
     void on_btnFilter_clicked();
 
 private:
-    Ui::DlgTableForMovement *ui;
-    TableOrderSocket *ftoSocket;
-    FF_HallDrv *m_hallDrv;
+    Ui::DlgTableForMovement* ui;
+    FF_HallDrv* m_hallDrv;
     int m_currentTableId;
     int fNewTableId;
     int m_currentHallId;

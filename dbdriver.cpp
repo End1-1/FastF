@@ -4,6 +4,10 @@
 #include <QMapIterator>
 #include <QMutex>
 
+#ifdef QT_DEBUG
+#include "logwriter.h"
+#endif
+
 int DbDriver::m_number = 100000;
 QStringList m_lastQuery;
 
@@ -16,7 +20,8 @@ void DbDriver::log(const QString &message)
 #else
     Q_UNUSED(finalMessage)
 #endif
-    if (m_errorFlag) {
+
+    if(m_errorFlag) {
         emit errorMsg(message);
     }
 }
@@ -31,12 +36,15 @@ DbDriver::DbDriver()
 
 DbDriver::~DbDriver()
 {
-    if (m_db.isOpen()) {
+    if(m_db.isOpen()) {
         m_db.close();
     }
+
     m_db = QSqlDatabase::addDatabase("QIBASE");
-    if (m_query)
+
+    if(m_query)
         delete m_query;
+
     QSqlDatabase::removeDatabase(QString::number(m_dbnumber));
 }
 
@@ -46,13 +54,15 @@ void DbDriver::configureDb(const QString &dbHost, const QString &dbPath, const Q
     m_db.setDatabaseName(dbPath);
     m_db.setUserName(dbUser);
     m_db.setPassword(dbPass);
+    m_db.setConnectOptions("lc_ctype=UTF-8");
 }
 
 bool DbDriver::openDB()
 {
-    if (m_db.isOpen())
+    if(m_db.isOpen())
         closeDB();
-    if (m_db.open()) {
+
+    if(m_db.open()) {
         m_errorFlag = false;
         m_db.transaction();
         m_query = new QSqlQuery(m_db);
@@ -66,10 +76,11 @@ bool DbDriver::openDB()
 
 void DbDriver::closeDB()
 {
-    if (m_errorFlag)
+    if(m_errorFlag)
         m_db.rollback();
     else
         m_db.commit();
+
     delete m_query;
     m_query = nullptr;
     m_db.close();
@@ -77,13 +88,18 @@ void DbDriver::closeDB()
 
 bool DbDriver::prepare(const QString &sql)
 {
-    if (!m_query) {
-        if (!openDB()) {
+    if(!m_query) {
+        if(!openDB()) {
             log(m_db.lastError().databaseText());
             return false;
         }
     }
-    if (m_query->prepare(sql)) {
+
+#ifdef QT_DEBUG
+    LogWriter::write(LogWriterLevel::errors, "prepare sql:", sql);
+#endif
+
+    if(m_query->prepare(sql)) {
         return true;
     } else {
         m_errorFlag = true;
@@ -96,25 +112,26 @@ bool DbDriver::prepare(const QString &sql)
 
 bool DbDriver::bindValue(const QString &name, const QVariant &value)
 {
-    if (!m_query) {
+    if(!m_query) {
         m_errorFlag = true;
         log("Cannot bind value. Database is not opened");
         return false;
     }
+
     m_query->bindValue(name, value);
     return true;
 }
 
 bool DbDriver::execSQL()
 {
-    if (!m_query)
+    if(!m_query) {
         return false;
-    if (m_query->exec()) {
-        log(lastQuery());
+    }
+
+    if(m_query->exec()) {
         return true;
     } else {
         m_errorFlag = true;
-        log(lastQuery());
         log(m_query->lastError().databaseText());
         closeDB();
         return false;
@@ -123,7 +140,7 @@ bool DbDriver::execSQL()
 
 bool DbDriver::execSQL(const QString &sql)
 {
-    if (prepare(sql)) {
+    if(prepare(sql)) {
         return execSQL();
     } else {
         return false;
@@ -137,17 +154,19 @@ bool DbDriver::next()
 
 QSqlRecord DbDriver::record()
 {
-    if (!m_query)
+    if(!m_query)
         return QSqlRecord();
+
     return m_query->record();
 }
 
 int DbDriver::genId(const QString &name)
 {
-    if (!m_query) {
+    if(!m_query) {
         return 0;
     }
-    if (execSQL("select gen_id(" + name + ",1) from rdb$database")) {
+
+    if(execSQL("select gen_id(" + name + ",1) from rdb$database")) {
         next();
         return v_int(0);
     } else {
@@ -177,43 +196,15 @@ double DbDriver::v_dbl(int index)
 
 QDateTime DbDriver::v_dateTime(int index)
 {
+#ifdef QT_DEBUG
+    qDebug() << m_query->value(index);
+#endif
     return m_query->value(index).toDateTime();
 }
 
 QDate DbDriver::v_date(int index)
 {
     return m_query->value(index).toDate();
-}
-
-QString DbDriver::lastQuery()
-{
-    QString sql = m_query->lastQuery();
-    QMapIterator<QString, QVariant> it(m_query->boundValues());
-    while (it.hasNext()) {
-        it.next();
-        QVariant value = it.value();
-        switch (it.value().type()) {
-        case QVariant::String:
-            value = QString("'%1'").arg(value.toString().replace("'", "''"));
-            break;
-        case QVariant::Date:
-            value = QString("'%1'").arg(value.toDate().toString(DATE_FORMAT));
-            break;
-        case QVariant::DateTime:
-            value = QString("'%1'").arg(value.toDateTime().toString(DATETIME_FORMAT));
-            break;
-        case QVariant::Double:
-            value = QString("%1").arg(value.toDouble());
-            break;
-        case QVariant::Int:
-            value = QString("%1").arg(value.toInt());
-            break;
-        default:
-            break;
-        }
-        sql.replace(it.key(), value.toString());
-    }
-    return sql;
 }
 
 void DbDriver::commit()
@@ -226,14 +217,17 @@ QDate DbDriver::serverDate()
     DbDriver db;
     db.configureDb(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
     QDate d;
-    if (db.openDB()) {
-        if (db.execSQL("select current_date from rdb$database")) {
-            if (db.next()) {
+
+    if(db.openDB()) {
+        if(db.execSQL("select current_date from rdb$database")) {
+            if(db.next()) {
                 d = db.v_date(0);
             }
+
             db.commit();
         }
     }
+
     Q_ASSERT(d.isValid());
     return d;
 }
@@ -243,15 +237,17 @@ QDateTime DbDriver::serverDateTime()
     DbDriver db;
     db.configureDb(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
     QDateTime d;
-    if (db.openDB()) {
-        if (db.execSQL("select current_timestamp from rdb$database")) {
-            if (db.next()) {
+
+    if(db.openDB()) {
+        if(db.execSQL("select CAST(current_timestamp as TIMESTAMP) from rdb$database")) {
+            if(db.next()) {
                 d = db.v_dateTime(0);
             }
+
             db.commit();
         }
     }
+
     Q_ASSERT(d.isValid());
     return d;
 }
-

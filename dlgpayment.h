@@ -3,9 +3,9 @@
 
 #include <QDialog>
 #include "orderdrv/od_drv.h"
-#include "mptcpsocket.h"
 
-namespace Ui {
+namespace Ui
+{
 class DlgPayment;
 }
 
@@ -28,27 +28,18 @@ private slots:
     void on_btnVISA_clicked();
     void on_btnMAESTRO_clicked();
     void on_btnIDRAM_clicked();
-    void on_btnJazzveGift_clicked();
     void on_btnCancel_clicked();
     void on_btnPrepaymentCash_clicked();
     void on_btnPrepaymentNoCash_clicked();
-    void on_leCash_textChanged(const QString &arg1);
-    void on_leCard_textChanged(const QString &arg1);
-    void on_btnClearCash_clicked();
-    void on_btnClearCard_clicked();
-    void on_btnSetCash_clicked();
     void on_btnCard_clicked();
     void on_btnComplimentary_clicked();
-
-    void on_btnPrepaymentCash_2_clicked();
-
     void on_btnChange_clicked();
+    void on_btnFiscalCancel_clicked();
 
 private:
-    Ui::DlgPayment *ui;
-    OD_Drv *fDrv;
-    MPTcpSocket fTcpSocket;
-    double fGift;
+    Ui::DlgPayment* ui;
+    OD_Drv* fDrv;
+    FF_User* fUser;
     void payment(quint8 mode);
     void receipt(int mode);
 };

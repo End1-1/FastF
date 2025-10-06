@@ -5,11 +5,12 @@
 #include <QSettings>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QHostInfo>
 
 #define HOSTNAME QHostInfo().hostName()
 #define SETTINGS(x, y) QSettings("MOBILEPOINT", "MOBILEPOINT").setValue(x, y);
 #define SETVALUE(x) QSettings("MOBILEPOINT", "MOBILEPOINT").value(x)
-#define float_str(value, f) QString::number(value, 'f', f).remove(QRegExp("\\.0+$")).remove(QRegExp("\\.$"))
+#define float_str(value, f) QString::number(value, 'f', f).remove(QRegularExpression("\\.0+$")).remove(QRegularExpression("\\.$"))
 
 #define DISH_STATE_NORMAL 1
 #define DISH_STATE_REMOVED_NORMAL 2
@@ -64,6 +65,6 @@ public:
     Classes();
 };
 
-extern QList<ReceiptPrinter*> __RECEPT_PRINTERS;
+extern QList < ReceiptPrinter* > __RECEPT_PRINTERS;
 
 #endif // CLASSES_H

@@ -1,24 +1,26 @@
 #ifndef DLGFACE_H
 #define DLGFACE_H
 
-#include <QDialog>
+#include "fastfdialog.h"
 #include <QItemDelegate>
 #include "ff_halldrv.h"
 #include <QTimer>
-#include "dlgorder.h"
 
-namespace Ui {
+namespace Ui
+{
 class DlgFace;
 }
 
-class ReadyDishDelegate : public QItemDelegate {
+class ReadyDishDelegate : public QItemDelegate
+{
 protected:
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 };
 
-class HallItemDelegate : public QItemDelegate {
+class HallItemDelegate : public QItemDelegate
+{
 private:
-    FF_HallDrv *m_hallDrv;
+    FF_HallDrv* m_hallDrv;
 
 public:
     HallItemDelegate(FF_HallDrv *hallDrv);
@@ -27,7 +29,7 @@ protected:
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 };
 
-class DlgFace : public QDialog
+class DlgFace : public FastfDialog
 {
     Q_OBJECT
 
@@ -50,30 +52,24 @@ private slots:
     void on_btnFilter_clicked();
     void on_lstReminder_clicked(const QModelIndex &index);
     void on_btnFilterUsedTables_clicked();
-    void on_btnLockStations_clicked();
     void onlineUpReply(const QString &data, bool isError);
     void on_btnConfigMobile_clicked();
-
     void on_btnRegisterCard_clicked();
-
     void on_btnIn_clicked();
-
     void on_btnOut_clicked();
-
     void on_btnListOfWorkers_clicked();
 
 private:
     int m_timeout;
     int m_filterHall;
     bool m_filterUsedTables;
-    Ui::DlgFace *ui;
-    FF_HallDrv *m_hallDrv;
+    Ui::DlgFace* ui;
+    FF_HallDrv* m_hallDrv;
     QTimer m_timer;
     void configHallGrid();
     void initFace();
     void loadReadyDishes();
     void correctTime();
-    void onlineUp();
     void startService();
 };
 

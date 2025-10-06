@@ -1,0 +1,55 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/minus.png</file>
+        <file>res/plus.png</file>
+        <file>res/preview.png</file>
+        <file>res/print.png</file>
+        <file>res/save.png</file>
+        <file>res/magic.png</file>
+        <file>res/zoom_in.png</file>
+        <file>res/zoom_out.png</file>
+        <file>res/delete.png</file>
+        <file>res/refresh.png</file>
+        <file>res/edit.png</file>
+        <file>res/excel.png</file>
+        <file>res/filter.png</file>
+        <file>res/new.png</file>
+        <file>res/ok.png</file>
+        <file>res/cancel.png</file>
+        <file>res/clear.png</file>
+        <file>res/app.png</file>
+        <file>res/exit.png</file>
+        <file>res/recipe.png</file>
+        <file>res/total.png</file>
+        <file>res/saveas.png</file>
+        <file>res/paste.png</file>
+        <file>res/copy.png</file>
+        <file>res/CafeV4.qm</file>
+        <file>res/ahuni.ttf</file>
+        <file>res/permission.png</file>
+        <file>res/Lock.png</file>
+        <file>res/balance.png</file>
+        <file>res/list.png</file>
+        <file>res/control.png</file>
+        <file>res/reload.png</file>
+        <file>res/go_previous.png</file>
+        <file>res/go_next.png</file>
+        <file>CafeV4.qm</file>
+        <file>res/hall.png</file>
+        <file>res/printpreview.png</file>
+        <file>res/cash.png</file>
+        <file>res/app.ico</file>
+        <file>res/up.png</file>
+        <file>res/down.png</file>
+        <file>res/search.png</file>
+        <file>res/dollar.png</file>
+        <file>res/password.png</file>
+        <file>res/add-key-icon.png</file>
+        <file>res/remove-key-icon.png</file>
+        <file>res/checked.png</file>
+        <file>res/unchecked.png</file>
+        <file>res/history.png</file>
+        <file>res/eye.png</file>
+    </qresource>
+    <qresource prefix="/qt/etc"/>
+</RCC>

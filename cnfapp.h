@@ -9,7 +9,7 @@
 #define PaymentVisa 4
 #define PaymentMaestro 5
 #define PaymentIdram 6
-#define PaymentJazzveGift 7
+#define PaymentComplimentary 7
 
 #define PaymentServiceDiscount 1
 #define PaymentNoServiceDiscount 2
@@ -18,7 +18,7 @@ class CnfApp
 {
     static QMap<QString, QString> fData;
 public:
-    CnfApp();    
+    CnfApp();
     static QString path();
     static QString taxIP();
     static int taxPort();

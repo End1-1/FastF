@@ -34,7 +34,7 @@ void LogThread::logDiscountFailureThread(int user, const QString &code)
 {
     LogThread *log = new LogThread(0);
     log->fLogMode = logDiscountFailure;
-    log->fUser = user;
+    log->fUser = "user";
     log->fData = code;
     log->start();
 }
@@ -44,7 +44,8 @@ void LogThread::run()
     DbDriver d;
     d.configureDb(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
     d.openDB();
-    switch (fLogMode) {
+
+    switch(fLogMode) {
     case logOrder:
         d.prepare("insert into o_tr(fcomp, fuser, forder, fbody, ftr, fdata) values (:fcomp, :fuser, :forder, :fbody, :ftr, :fdata)");
         d.bindValue(":fcomp", QSystem::hostInfo());
@@ -54,14 +55,15 @@ void LogThread::run()
         d.bindValue(":ftr", fAction);
         d.bindValue(":fdata", fData);
         break;
+
     case logDiscountFailure:
         d.prepare("insert into o_disc_code_failure (f_user, f_code) values (:f_user, :f_code)");
         d.bindValue(":f_user", fUser);
         d.bindValue(":f_code", fData);
         break;
     }
+
     d.execSQL();
     d.closeDB();
     quit();
-
 }

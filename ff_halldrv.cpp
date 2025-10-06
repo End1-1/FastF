@@ -4,7 +4,7 @@
 #include <QHeaderView>
 
 QItemDelegate *FF_HallDrv::m_itemDelegate = 0;
-#define float_str(value, f) QString::number(value, 'f', f).remove(QRegExp("\\.0+$")).remove(QRegExp("\\.$"))
+#define float_str(value, f) QString::number(value, 'f', f).remove(QRegularExpression("\\.0+$")).remove(QRegularExpression("\\.$"))
 
 void FF_HallDrv::loadHall()
 {

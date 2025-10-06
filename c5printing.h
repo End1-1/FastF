@@ -7,14 +7,17 @@
 #include <QJsonArray>
 #include <QMap>
 
-class C5Printing
+class C5Printing : public QObject
 {
+    Q_OBJECT
 public:
     C5Printing();
 
     ~C5Printing();
 
-    void setSceneParams(qreal width, qreal height, QPrinter::Orientation orientation);
+    void newPage();
+
+    void setSceneParams(qreal width, qreal height, QPageLayout::Orientation orientation);
 
     void setFont(const QFont &font);
 
@@ -22,7 +25,11 @@ public:
 
     void setFontItalic(bool italic);
 
+    void setFontStrike(bool strike);
+
     void setFontSize(int size);
+
+    void setPen(const QPen &p);
 
     void line(qreal x1, qreal y1, qreal x2, qreal y2, int lineWidth = -1);
 
@@ -30,9 +37,15 @@ public:
 
     void tableText(const QList<qreal> &points, const QStringList &vals, int rowHeight);
 
-    void ltext(const QString &text, qreal x);
+    void ltext(const QString &text, qreal x, qreal textWidth = -1);
+
+    void lrtext(const QString &leftText, const QString &rightText, qreal textWidth = -1);
+
+    void ltext90(const QString &text, qreal x);
 
     void ctext(const QString &text);
+
+    void ctextof(const QString &text, qreal x);
 
     void rtext(const QString text);
 
@@ -50,9 +63,11 @@ public:
 
     int pageCount();
 
-    QPrinter::Orientation orientation(int index);
+    QPageLayout::Orientation orientation(int index);
 
-    void print(const QString &printername, QPagedPaintDevice::PageSize pageSize);
+    bool print(const QString &printername, QPageSize pageSize, bool rotate90 = false);
+
+    void print(QPainter *p);
 
     qreal fTop;
 
@@ -64,12 +79,16 @@ public:
 
     QJsonArray jsonData();
 
+    bool fNoNewPage;
+
+    QString fErrorString;
+
 private:
     qreal fTempTop;
 
     QGraphicsScene *fCanvas;
 
-    QList<QGraphicsScene*> fCanvasList;
+    QList<QGraphicsScene *> fCanvasList;
 
     QPen fLinePen;
 
@@ -77,11 +96,11 @@ private:
 
     int fCurrentPageIndex;
 
-    QMap<QGraphicsScene*, QPrinter::Orientation> fCanvasOrientation;
+    QMap<QGraphicsScene *, QPageLayout::Orientation> fCanvasOrientation;
 
     void setLineHeight();
 
-    void setTemptop(QGraphicsTextItem *item);
+    void setTemptop(QGraphicsTextItem *item, qreal textwidth);
 
     QJsonArray fJsonData;
 };

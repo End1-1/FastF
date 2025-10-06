@@ -1,5 +1,5 @@
 #include "dlgcorrection.h"
-#include "printing.h"
+#include "c5printing.h"
 #include "ui_dlgcorrection.h"
 #include "od_dish.h"
 #include "dlgmessage.h"
@@ -20,7 +20,6 @@ DlgCorrection::DlgCorrection(OD_Drv *drv, OD_Dish *d, QWidget *parent) :
     ui(new Ui::DlgCorrection)
 {
     ui->setupUi(this);
-
     ui->tblLetter->setVisible(false);
     adjustSize();
     ui->tblLetter->setItemDelegate(new DlgDishComment::QLetterDelegate());
@@ -35,14 +34,16 @@ DlgCorrection::DlgCorrection(OD_Drv *drv, OD_Dish *d, QWidget *parent) :
     fLetters.insert(2, row3);
     fLetters.insert(3, row4);
     fLetters.insert(4, row5);
-
     int col = 0, row = 0;
-    for (QMap<int,QStringList>::const_iterator it = fLetters.begin(); it != fLetters.end(); it++) {
+
+    for(QMap<int, QStringList>::const_iterator it = fLetters.begin(); it != fLetters.end(); it++) {
         col = 0;
         ui->tblLetter->setRowCount(it.key() + 1);
         ui->tblLetter->setColumnCount(it.value().count() > ui->tblLetter->columnCount() ? it.value().count() : ui->tblLetter->columnCount());
-        for (QStringList::const_iterator jt = it.value().constBegin(); jt != it.value().constEnd(); jt++)
+
+        for(QStringList::const_iterator jt = it.value().constBegin(); jt != it.value().constEnd(); jt++)
             ui->tblLetter->setItem(it.key(), col++, new QTableWidgetItem(*jt));
+
         row++;
     }
 
@@ -50,12 +51,13 @@ DlgCorrection::DlgCorrection(OD_Drv *drv, OD_Dish *d, QWidget *parent) :
     m_ord = drv;
     ui->lbDishName->setText(d->f_dishName);
     ui->lbQty->setText(double_str(d->f_totalQty));
-
     ui->lbl1->setEnabled(true);
-    if (fDish->f_printedQty > 0.01) {
+
+    if(fDish->f_printedQty > 0.01) {
         ui->lbl2->setEnabled(true);
         ui->lbl3->setEnabled(true);
     }
+
     ui->ptReason->setPlainText(fDish->f_removeReason);
     ui->lbAproved->setVisible(fDish->f_cancelrequest == 2);
 }
@@ -68,54 +70,44 @@ DlgCorrection::~DlgCorrection()
 void DlgCorrection::printRemoved(double qty)
 {
     QStringList prn;
-    if (!fDish->f_print1.isEmpty()) {
+
+    if(!fDish->f_print1.isEmpty()) {
         prn << fDish->f_print1;
     }
-    if (!fDish->f_print2.isEmpty()) {
+
+    if(!fDish->f_print2.isEmpty()) {
         prn << fDish->f_print2;
     }
-    for (QStringList::const_iterator it = prn.constBegin(); it != prn.constEnd(); it++) {
-        if (!___printerInfo->printerExists(*it))
-            continue;
-        SizeMetrics sm(___printerInfo->resolution(*it));
-        XmlPrintMaker xp(&sm);
-        int top = 3;
 
-        xp.setFontName(qApp->font().family());
-        xp.setFontSize(8);
-
-        xp.text(tr("Removed from order"), 1, top);
-        top += xp.lastTextHeight() + 1;
-        xp.text(tr("Order number"), 1, top);
-        xp.textRightAlign(m_ord->m_header.f_id, page_width, top);
-        top += xp.lastTextHeight() + 1;
-        xp.text(tr("Table"), 1, top);
-        xp.textRightAlign(m_ord->m_header.f_tableName, page_width, top);
-        top += xp.lastTextHeight() + 1;
-        xp.text(tr("Staff"), 1, top);
-        xp.textRightAlign(m_ord->m_header.f_currStaffName, page_width, top);
-        top += xp.lastTextHeight() + 1;
-        xp.text(tr("Date"), 1, top);
-        xp.textRightAlign(QDateTime::currentDateTime().toString(DATETIME_FORMAT), page_width, top);
-        top += xp.lastTextHeight() + 1;
-        top ++;
-        xp.line(1, top, page_width, top);
-        top ++;
-        xp.text(fDish->f_dishName, 1, top);
-        top += xp.lastTextHeight() + 1;
-        xp.textRightAlign(double_str(qty), page_width, top);
-        top += xp.lastTextHeight() + 2;
-        xp.text(ui->ptReason->toPlainText(), 1, top);
-        top += xp.lastTextHeight() + 1;
-        top ++;
-        xp.line(1, top, page_width, top);
-        top ++;
-        top ++;
-        xp.text(".", 1, top);
-        xp.finishPage();
-
-        ThreadPrinter *tp = new ThreadPrinter(*it, sm, xp);
-        tp->start();
+    for(QStringList::const_iterator it = prn.constBegin(); it != prn.constEnd(); it++) {
+        QFont font(qApp->font());
+        font.setPointSize(20);
+        C5Printing xp;
+        QSize paperSize(1950, 2800);
+        xp.setFont(font);
+        xp.ctext(tr("Removed from order"));
+        xp.br();
+        xp.ltext(tr("Order number"), 0);
+        xp.rtext(m_ord->m_header.f_id);
+        xp.br();
+        xp.lrtext(tr("Table"), m_ord->m_header.f_tableName);
+        xp.br();
+        xp.lrtext(tr("Staff"), m_ord->m_header.f_currStaffName);
+        xp.br();
+        xp.lrtext(tr("Date"), QDateTime::currentDateTime().toString(DATETIME_FORMAT));
+        xp.br();
+        xp.line();
+        xp.br();
+        xp.ltext(fDish->f_dishName, 1);
+        xp.br();
+        xp.rtext(double_str(qty));
+        xp.br();
+        xp.ltext(ui->ptReason->toPlainText(), 0);
+        xp.br();
+        xp.line(1);
+        xp.br();
+        xp.ltext(".", 1);
+        xp.print(*it, QPageSize::Custom);
     }
 }
 
@@ -124,7 +116,7 @@ void DlgCorrection::requestForCorrection(double qty)
     setEnabledWidget(false);
     m_ord->prepare("update o_dishes set f_removereason=:f_removereason, cancelrequest=:cancelrequest where id=:id");
     m_ord->bindValue(":id", fDish->f_id);
-    m_ord->bindValue(":cancelrequest",1);
+    m_ord->bindValue(":cancelrequest", 1);
     m_ord->bindValue(":f_removereason", ui->ptReason->toPlainText());
     m_ord->execSQL();
     m_ord->closeDB();
@@ -139,29 +131,31 @@ void DlgCorrection::on_btnReject_clicked()
 
 void DlgCorrection::on_btnOk_clicked()
 {
-    if (fDish->f_cancelrequest == 1) {
+    if(fDish->f_cancelrequest == 1) {
         return;
     }
-    if (!ui->btnLossYes->isChecked() && !ui->btnLossNo->isChecked()) {
+
+    if(!ui->btnLossYes->isChecked() && !ui->btnLossNo->isChecked()) {
         DlgMessage::Msg(tr("No one of loss option was seLlected"));
         return;
     }
-    if (ui->ptReason->toPlainText().trimmed().isEmpty()) {
+
+    if(ui->ptReason->toPlainText().trimmed().isEmpty()) {
         DlgMessage::Msg(tr("Reason cannot be empty"));
         return;
     }
-    if (fDish->f_cancelrequest == 0) {
+
+    if(fDish->f_cancelrequest == 0) {
         requestForCorrection(fDish->f_totalQty);
         return;
     }
 
     fDish->f_stateId = DISH_STATE_REMOVED_PRINTED;
     LogThread::logOrderThread(m_ord->m_header.f_currStaffName, m_ord->m_header.f_id,
-                                      QString::number(fDish->f_id), tr("Removed with print "),
-                                      fDish->f_dishName + ": " + double_str(fDish->f_totalQty)
-                                          + ", " + ui->ptReason->toPlainText());
+                              QString::number(fDish->f_id), tr("Removed with print "),
+                              fDish->f_dishName + ": " + double_str(fDish->f_totalQty)
+                              + ", " + ui->ptReason->toPlainText());
     printRemoved(fDish->f_totalQty);
-
     m_ord->prepare("update o_dishes set state_id=:state_id, qty=:qty, "
                    "f_removereason=:f_removereason, f_storestate=:f_storestate, "
                    "printed_qty=:printed_qty, emarks=null where id=:id");
@@ -172,21 +166,22 @@ void DlgCorrection::on_btnOk_clicked()
     m_ord->bindValue(":f_removereason", ui->ptReason->toPlainText());
     m_ord->bindValue(":id", fDish->f_id);
     m_ord->execSQL();
-
-
     accept();
 }
 
 void DlgCorrection::on_btnRemoveReason_clicked()
 {
-    if (!m_ord->openDB())
+    if(!m_ord->openDB())
         return;
+
     m_ord->prepare("select id, name from o_remove_reason order by name");
     m_ord->execSQL();
     QMap<int, QString> rv;
-    while (m_ord->next()) {
+
+    while(m_ord->next()) {
         rv[m_ord->v_int(0)] = m_ord->v_str(1);
     }
+
     DlgRemoveReason *dlg = new DlgRemoveReason(rv, this);
     dlg->exec();
     QString reasonName = dlg->m_reasonName;
@@ -207,10 +202,11 @@ void DlgCorrection::on_btnKeyboard_clicked()
 
 void DlgCorrection::on_tblLetter_itemClicked(QTableWidgetItem *item)
 {
-    if (!item) {
+    if(!item) {
         return;
     }
-    if (item->text() == "<") {
+
+    if(item->text() == "<") {
         ui->ptReason->setPlainText(ui->ptReason->toPlainText().remove(ui->ptReason->toPlainText().length() - 1, 1));
     } else {
         ui->ptReason->setPlainText(ui->ptReason->toPlainText() + item->text());
@@ -228,13 +224,14 @@ void DlgCorrection::setWaitMode()
 
 void DlgCorrection::on_btnCheckResponse_clicked()
 {
-
     m_ord->prepare("select cancelrequest from o_dishes where id=:id");
     m_ord->bindValue(":id", fDish->f_id);
     m_ord->execSQL();
-    if (m_ord->next()) {
+
+    if(m_ord->next()) {
         int cancelrequest = m_ord->v_int(0);
-        if (cancelrequest != 2) {
+
+        if(cancelrequest != 2) {
             msg(tr("Your request wasnt approved"));
             return;
         }
@@ -246,7 +243,6 @@ void DlgCorrection::on_btnCheckResponse_clicked()
     ui->btnOk->setEnabled(true);
     ui->btnReject->setEnabled(true);
     on_btnOk_clicked();
-
 }
 void DlgCorrection::on_btnLossYes_clicked()
 {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>755</width>
-    <height>695</height>
+    <width>766</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,20 +71,20 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="1" column="1" colspan="3">
        <widget class="ELineEdit" name="leAmount">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>14</pointsize>
          </font>
         </property>
         <property name="maxLength">
@@ -92,214 +92,18 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2" colspan="2">
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>533</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
      </layout>
     </widget>
    </item>
    <item>
     <widget class="QFrame" name="frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QWidget" name="widget_3" native="true">
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="1" column="1">
-          <widget class="ELineEdit" name="leCash">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>18</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="font">
-            <font>
-             <pointsize>18</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Cash amount</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="font">
-            <font>
-             <pointsize>18</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>No cash amount</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="ELineEdit" name="leCard">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>18</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3">
-          <widget class="QToolButton" name="btnClearCard">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="Res.qrc">
-             <normaloff>:/res/cancel.png</normaloff>:/res/cancel.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3">
-          <widget class="QToolButton" name="btnClearCash">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="Res.qrc">
-             <normaloff>:/res/cancel.png</normaloff>:/res/cancel.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QToolButton" name="btnSetCash">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="Res.qrc">
-             <normaloff>:/res/calculator.png</normaloff>:/res/calculator.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QToolButton" name="btnCard">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="Res.qrc">
-             <normaloff>:/res/calculator.png</normaloff>:/res/calculator.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Print receipt</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="wGift" native="true">
-        <layout class="QGridLayout" name="gridLayout_4">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Gift</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>To pay</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="ELineEdit" name="leGift">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="ELineEdit" name="leToPay">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
       <item>
        <widget class="QWidget" name="widget_4" native="true">
         <property name="minimumSize">
@@ -314,7 +118,6 @@
            <property name="font">
             <font>
              <pointsize>12</pointsize>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -345,35 +148,12 @@
          </size>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::Shape::StyledPanel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QPushButton" name="btnComplimentary">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>50</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Complimentary</string>
-           </property>
-           <property name="icon">
-            <iconset resource="Res.qrc">
-             <normaloff>:/res/present.png</normaloff>:/res/present.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>48</width>
-             <height>48</height>
-            </size>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="QPushButton" name="btnPrepaymentCash">
            <property name="minimumSize">
@@ -398,7 +178,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnPrepaymentCash_2">
+          <widget class="QPushButton" name="btnFiscalCancel">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -449,13 +229,13 @@
       <item>
        <widget class="QFrame" name="frame_2">
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::Shape::StyledPanel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
+         <item row="0" column="1">
           <widget class="QPushButton" name="btnCash">
            <property name="minimumSize">
             <size>
@@ -464,7 +244,7 @@
             </size>
            </property>
            <property name="text">
-            <string>CLOSE ORDER WITH CASH OR CARD</string>
+            <string>CASH</string>
            </property>
            <property name="icon">
             <iconset resource="Res.qrc">
@@ -478,8 +258,8 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QPushButton" name="btnJazzveGift">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="btnCard">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -487,11 +267,11 @@
             </size>
            </property>
            <property name="text">
-            <string>CLOSE ORDER WITH JAZZVE GIFT</string>
+            <string>CARD</string>
            </property>
            <property name="icon">
             <iconset resource="Res.qrc">
-             <normaloff>:/res/gift.png</normaloff>:/res/gift.png</iconset>
+             <normaloff>:/res/mastercard.png</normaloff>:/res/mastercard.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -524,6 +304,29 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="btnComplimentary">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Complimentary</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Res.qrc">
+             <normaloff>:/res/present.png</normaloff>:/res/present.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -536,7 +339,7 @@
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -572,7 +375,7 @@
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>

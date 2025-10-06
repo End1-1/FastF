@@ -1,13 +1,12 @@
 #include "dlgreports.h"
 #include "ui_dlgreports.h"
 #include "ff_settingsdrv.h"
-#include "ff_orderdrv.h"
 #include "dlgreportfilter.h"
 #include "dlgmessage.h"
 #include "dlgorder.h"
-#include "printing.h"
+#include "c5printing.h"
 #include "qsqldb.h"
-#include "tableordersocket.h"
+#include "cnfapp.h"
 #include "dlgselecttaxreport.h"
 #include "mptcpsocket.h"
 #include "cnfmaindb.h"
@@ -20,13 +19,13 @@
 
 #define report_page_width 60
 
-typedef QString (*caption)();
-typedef QString (*sql)();
-typedef QStringList (*fields)();
-typedef QStringList (*totalFields)();
+typedef QString(*caption)();
+typedef QString(*sql)();
+typedef QStringList(*fields)();
+typedef QStringList(*totalFields)();
 
 dlgreports::dlgreports(FF_User *user, FF_HallDrv *hall, QWidget *parent) :
-    QDialog(parent, Qt::FramelessWindowHint),
+    FastfDialog(parent),
     ui(new Ui::dlgreports),
     m_user(user),
     m_hall(hall)
@@ -37,22 +36,24 @@ dlgreports::dlgreports(FF_User *user, FF_HallDrv *hall, QWidget *parent) :
     getOrdersList();
     m_filter["date1"] = FF_SettingsDrv::cashDate().toString(DATE_FORMAT);
     m_filter["date2"] = FF_SettingsDrv::cashDate().toString(DATE_FORMAT);
-
     QDir d(QSystem::appPath() + "/reports/");
     QStringList files = d.entryList();
-    for (QStringList::const_iterator i = files.begin(); i != files.end(); i++) {
-        if ((*i) == "." || (*i) == ".." )
+
+    for(QStringList::const_iterator i = files.begin(); i != files.end(); i++) {
+        if((*i) == "." || (*i) == "..")
             continue;
 
         QLibrary l(QSystem::appPath() + "/reports/" + (*i));
-        if (!l.load())
+
+        if(!l.load())
             continue;
 
         caption c = (caption) l.resolve("caption");
         sql s = (sql) l.resolve("sql");
         fields f = (fields) l.resolve("fields");
         totalFields tf = (totalFields) l.resolve("totalFields");
-        if (!c || !s || !f || !tf) {
+
+        if(!c || !s || !f || !tf) {
             l.unload();
             continue;
         }
@@ -63,6 +64,7 @@ dlgreports::dlgreports(FF_User *user, FF_HallDrv *hall, QWidget *parent) :
         m_totalFields[dllCaption] = tf();
         l.unload();
     }
+
     connect(ui->tblOrders->horizontalHeader(), SIGNAL(clicked(QModelIndex)), this, SLOT(ordersHeaderClicked(QModelIndex)));
     getOrdersList();
 }
@@ -78,11 +80,10 @@ void dlgreports::toError(const QString &msg)
     DlgMessage::Msg(msg);
 }
 
-void dlgreports::toTableLocked(int tableId)
+void dlgreports::toTableLocked(const QString &orderId, int tableId)
 {
-    TableOrderSocket *to = static_cast<TableOrderSocket*>(sender());
     dlgorder *d = new dlgorder(this);
-    d->setData(m_user, m_hall, tableId, to->fOrderId, to);
+    d->setData(m_user, m_hall, tableId, orderId);
     d->setCashMode();
     d->showFullScreen();
     d->exec();
@@ -92,7 +93,7 @@ void dlgreports::toTableLocked(int tableId)
 
 void dlgreports::ordersHeaderClicked(const QModelIndex &index)
 {
-    ui->tblOrders->sortByColumn(index.column());
+    ui->tblOrders->sortByColumn(index.column(), Qt::AscendingOrder);
 }
 
 void dlgreports::on_btnClose_clicked()
@@ -106,35 +107,41 @@ void dlgreports::getOrdersList()
     colWidths << 100 << 250 << 100 << 180 << 130;
     QStringList colCaptions;
     colCaptions << tr("ID") << tr("Staff") << tr("Table") << tr("Close date") << tr("Amount");
-
     m_sqlDrv->m_sql = "select oo.id, e.fname || ' ' || e.lname as staff_name, h.name as table_name, oo.date_close, oo.amount "
-                       "from o_order oo, employes e, h_table h "
-                        "where oo.table_id=h.id and oo.staff_id=e.id "
-                        "and oo.date_cash between :date1 and :date2 and oo.state_id=:state_id "
-                        "order by 2, 4";
-    if (!m_sqlDrv->prepare())
+                      "from o_order oo, employes e, h_table h "
+                      "where oo.table_id=h.id and oo.staff_id=e.id "
+                      "and oo.date_cash between :date1 and :date2 and oo.state_id=:state_id "
+                      "order by 2, 4";
+
+    if(!m_sqlDrv->prepare())
         return;
+
     m_sqlDrv->m_query->bindValue(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
     m_sqlDrv->m_query->bindValue(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
     m_sqlDrv->m_query->bindValue(":state_id", ORDER_STATE_CLOSED);
-    if (!m_sqlDrv->execSQL())
+
+    if(!m_sqlDrv->execSQL())
         return;
+
     m_sqlDrv->fillTableWidget(m_fields, ui->tblOrders);
     m_sqlDrv->close();
-
     ui->tblOrders->setHorizontalHeaderLabels(colCaptions);
-    for (int i = 0; i < colWidths.count(); i++)
+
+    for(int i = 0; i < colWidths.count(); i++)
         ui->tblOrders->setColumnWidth(i, colWidths.at(i));
 
     ui->tblTotal->clear();
     ui->tblTotal->setColumnCount(ui->tblOrders->columnCount());
     ui->tblTotal->setRowCount(1);
-    for (int i = 0; i < ui->tblTotal->columnCount(); i++)
+
+    for(int i = 0; i < ui->tblTotal->columnCount(); i++)
         ui->tblTotal->setColumnWidth(i, ui->tblOrders->columnWidth(i));
 
     double amount = 0;
-    for (int i = 0; i < ui->tblOrders->rowCount(); i++)
+
+    for(int i = 0; i < ui->tblOrders->rowCount(); i++)
         amount += ui->tblOrders->item(i, 4)->data(Qt::DisplayRole).toDouble();
+
     ui->tblTotal->setItem(0, 4, new QTableWidgetItem(QString::number(amount, 'f', 0)));
     ui->tblTotal->setItem(0, 3, new QTableWidgetItem(QString::number(ui->tblOrders->rowCount())));
 }
@@ -142,29 +149,17 @@ void dlgreports::getOrdersList()
 void dlgreports::on_btnOrderFilter_clicked()
 {
     DlgReportFilter *d = new DlgReportFilter(m_filter, this);
-    if (d->exec() == QDialog::Accepted) {
+
+    if(d->exec() == QDialog::Accepted) {
         getOrdersList();
     }
+
     delete d;
 }
 
 void dlgreports::on_pushButton_clicked()
 {
     getOrdersList();
-}
-
-void dlgreports::on_pushButton_2_clicked()
-{
-    QModelIndexList il = ui->tblOrders->selectionModel()->selectedRows();
-    if (!il.count()) {
-        DlgMessage::Msg(tr("No order is selected"));
-        return;
-    }
-
-    TableOrderSocket *to = new TableOrderSocket(ui->tblOrders->item(il.at(0).row(), 0)->text(), this);
-    connect(to, SIGNAL(err(QString)), this, SLOT(toError(QString)));
-    connect(to, SIGNAL(tableLocked(int)), this, SLOT(toTableLocked(int)));
-    to->begin();
 }
 
 void dlgreports::on_btnUp_clicked()
@@ -180,110 +175,84 @@ void dlgreports::on_btnDown_clicked()
 void dlgreports::on_btnPrint_clicked()
 {
     QVariant rep;
-    if (!DlgList::value(m_reports, rep, this))
+
+    if(!DlgList::value(m_reports, rep, this))
         return;
 
     QString title = m_reports.key(rep);
-
     QString checkPrinterName = FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString();
-    if(!___printerInfo->printerExists(checkPrinterName)) {
-        QString prns;
-        for (QList<QPrinterInfo>::const_iterator it = ___printerInfo->m_printers.constBegin(); it != ___printerInfo->m_printers.constEnd(); it++)
-            prns += it->printerName() + "\r\n";
-        DlgMessage::Msg(tr("Printer not exists") + " :" + checkPrinterName + "\r\n"
-                        + tr("Available printers are: ") + "\r\n"
-                        + prns);
-        checkPrinterName = "local";
-    }
+    C5Printing pm;
+    pm.setSceneParams(700, 3000, QPageLayout::Portrait);
+    pm.setFont(qApp->font());
+    pm.setFontSize(26);
 
-    SizeMetrics sm(___printerInfo->resolution(checkPrinterName));
-    XmlPrintMaker pm(&sm);
+    if(FF_SettingsDrv::value(SD_LOGO_FILENAME).toString().length())
+        pm.image(FF_SettingsDrv::value(SD_LOGO_FILENAME).toString(), Qt::AlignCenter);
 
-    pm.setFontName(qApp->font().family());
-    pm.setFontSize(10);
-    int top = 5;
-
-    if (FF_SettingsDrv::value(SD_LOGO_FILENAME).toString().length())
-        top += pm.imageCenter(FF_SettingsDrv::value(SD_LOGO_FILENAME).toString(), top, report_page_width) + 1;
-    pm.textCenterAlign(FF_SettingsDrv::value(SD_OBJECT_NAME).toString(), report_page_width, top);
-    top += pm.lastTextHeight() + 2;
-    pm.textCenterAlign(title, report_page_width, top);
-    top += pm.lastTextHeight() + 2;
-    pm.text(tr("Date range"), 1, top);
-    top += pm.lastTextHeight() + 2;
-    pm.text(m_filter["date1"] + " - " + m_filter["date2"], 1, top);
-    top += pm.lastTextHeight() + 2;
-    pm.line(1, top, report_page_width, top);
-    top++;
-
+    pm.br();
+    pm.ctext(FF_SettingsDrv::value(SD_OBJECT_NAME).toString());
+    pm.br();
+    pm.ctext(title);
+    pm.br();
+    pm.ltext(tr("Date range"), 1);
+    pm.br();
+    pm.ltext(m_filter["date1"] + " - " + m_filter["date2"], 1);
+    pm.br();
+    pm.line();
+    pm.br();
     m_sqlDrv->prepare(rep.toString());
     m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
     m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
     m_sqlDrv->execSQL();
-
     QStringList &repFields = m_repFields[title];
     QStringList &repTotal = m_totalFields[title];
     QMap<QString, float> totals;
-    for (QStringList::const_iterator i = repTotal.constBegin(); i != repTotal.constEnd(); i++)
+
+    for(QStringList::const_iterator i = repTotal.constBegin(); i != repTotal.constEnd(); i++)
         totals[*i] = 0;
 
-    while (m_sqlDrv->next()) {
-        for (QStringList::const_iterator i = repFields.constBegin(); i != repFields.constEnd(); i++) {
+    while(m_sqlDrv->next()) {
+        for(QStringList::const_iterator i = repFields.constBegin(); i != repFields.constEnd(); i++) {
             QVariant v = m_sqlDrv->val();
-            pm.text(*i, 1, top);
-            if (v.type() == QVariant::Double)
-                pm.textRightAlign(QString::number(v.toDouble(), 'f', 2), report_page_width, top);
+            pm.ltext(*i, 1);
+
+            if(v.type() == QVariant::Double)
+                pm.rtext(QString::number(v.toDouble(), 'f', 2));
             else
-                pm.textRightAlign(v.toString(), report_page_width, top);
-            top += pm.lastTextHeight() + 2;
-            if (totals.keys().contains(*i))
+                pm.rtext(v.toString());
+
+            pm.br();
+
+            if(totals.keys().contains(*i))
                 totals[*i] += v.toFloat();
         }
-        top += 3;
-        pm.line(0, top, report_page_width, top);
-        top++;
-        pm.checkForNewPage(top);
+
+        pm.line();
     }
 
     m_sqlDrv->close();
-
-    pm.checkForNewPage(top);
-    pm.line(0, top, report_page_width, top);
-    top++;
-    pm.setFontSize(12);
+    pm.line(0);
     pm.setFontBold(true);
-    pm.textCenterAlign(tr("Total"), report_page_width, top);
-    top += pm.lastTextHeight() + 2;
-    pm.checkForNewPage(top);
-    for (QMap<QString, float>::const_iterator i = totals.begin(); i != totals.end(); i++) {
-        pm.text(i.key(), 1, top);
-        pm.textRightAlign(dts(i.value()), report_page_width, top);
-        top += pm.lastTextHeight() + 2;
-        pm.checkForNewPage(top);
+    pm.ctext(tr("Total"));
+    pm.br();
+
+    for(QMap<QString, float>::const_iterator i = totals.begin(); i != totals.end(); i++) {
+        pm.ltext(i.key(), 1);
+        pm.rtext(dts(i.value()));
+        pm.br();
     }
 
-    pm.line(1, top, report_page_width, top);
-    top++;
-    pm.line(1, top, report_page_width, top);
-    top += 5;
-
-    pm.checkForNewPage(top);
-    pm.setFontSize(8);
+    pm.line();
+    pm.line();
     pm.setFontBold(false);
-    pm.text(QString("%1: %2")
-            .arg(tr("Printed"))
-            .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss")), 1, top);
-    top += pm.lastTextHeight() + 1;
-    pm.checkForNewPage(top);
-    pm.text(getHostName() + "/" + FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString(), 1, top);
-
-    top += 5;
-    pm.text(".", 1, top);
-    pm.finishPage();
-
-    ThreadPrinter *tp = new ThreadPrinter(FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString(), sm, pm);
-    tp->start();
-
+    pm.ltext(QString("%1: %2")
+             .arg(tr("Printed"))
+             .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss")), 1);
+    pm.br();
+    pm.ltext(getHostName() + "/" + FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString(), 1);
+    pm.br();
+    pm.ltext(".", 1);
+    pm.print(FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString(), QPageSize::Custom);
     QSqlLog::write(TABLE_HISTORY, tr("Print report"), "", m_user->fullName, 0);
 }
 
@@ -292,38 +261,39 @@ void dlgreports::on_btnDailySale_clicked()
     QMap<QString, double> twoGo;
     QMap<QString, double> idram;
     QMap<QString, double> other;
-    QMap<QString, double> icev;
     QMap<QString, double> twoGo_qty;
     QMap<QString, double> idram_qty;
     QMap<QString, double> other_qty;
-    QMap<QString, double> icev_qty;
-    QMap<QString, double> icev_qtyDish;
     QMap<QString, double> cash;
     QMap<QString, double> cash_qty;
     QMap<QString, double> card;
     QMap<QString, double> card_qty;
+    QMap<QString, double> complimentary;
+    QMap<QString, double> complimentary_qty;
     QStringList staff;
-
-
     m_sqlDrv->prepare("select e.lname || ' ' || e.fname as ename, "
-        "sum(cast(right(f.data, char_length(f.data) - position(':', f.data)) as decimal(9,2))) as amount, "
-        " count(o.id) as qty "
-        "from o_order o, employes e , o_order_flags f "
-        "where o.staff_id=e.id and o.state_id=2 and o.id=f.order_id  "
-        "and o.date_cash between :date1 and :date2 "
-        "group by 1 "
-        "order by 1");
+                      "sum(cast(right(f.data, char_length(f.data) - position(':', f.data)) as decimal(9,2))) as amount, "
+                      " count(o.id) as qty "
+                      "from o_order o, employes e , o_order_flags f "
+                      "where o.staff_id=e.id and o.state_id=2 and o.id=f.order_id  "
+                      "and o.date_cash between :date1 and :date2 "
+                      "group by 1 "
+                      "order by 1");
     m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
     m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
     m_sqlDrv->execSQL();
-    while (m_sqlDrv->next()) {
+
+    while(m_sqlDrv->next()) {
         idram[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("amount");
         idram_qty[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("qty");
     }
 
     m_sqlDrv->prepare("select e.lname || ' ' || e.fname as ename, count(o.id) as qty, "
                       "sum(o.amount)+sum(COALESCE(oc.FAMOUNT, 0)) as amount, "
-                      "sum(ot.fcash) as cash, sum(ot.fcard) as card "
+                      "sum(ot.fcash) as cash, "
+                      "sum(ot.fcard) as card, "
+                      "sum(ot.fidram) as idram, "
+                      "sum(ot.fcomplimentary) as complimentary "
                       "from o_order o "
                       "left join o_tax ot on ot.fid=o.id "
                       "LEFT JOIN employes e on o.staff_id=e.id "
@@ -334,210 +304,162 @@ void dlgreports::on_btnDailySale_clicked()
     m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
     m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
     m_sqlDrv->execSQL();
-    while (m_sqlDrv->next()) {
+
+    while(m_sqlDrv->next()) {
         cash[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("cash");
         card[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("card");
         other[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("amount")
-                - twoGo[m_sqlDrv->valStr("ename")]
-                - idram[m_sqlDrv->valStr("ename")]
-                - icev[m_sqlDrv->valStr("ename")];
+                                           - twoGo[m_sqlDrv->valStr("ename")]
+                                           - idram[m_sqlDrv->valStr("ename")];
         other_qty[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("qty")
-                - twoGo_qty[m_sqlDrv->valStr("ename")]
-                - idram_qty[m_sqlDrv->valStr("ename")]
-                - icev_qty[m_sqlDrv->valStr("ename")];
+                                               - twoGo_qty[m_sqlDrv->valStr("ename")]
+                                               - idram_qty[m_sqlDrv->valStr("ename")];
+        idram[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("idram");
+        complimentary[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("complimentary");
     }
+
     m_sqlDrv->close();
 
-    for (QMap<QString, double>::const_iterator it = idram.begin(); it != idram.end(); it++)
-        if (!staff.contains(it.key()))
-                staff.append(it.key());
-    for (QMap<QString, double>::const_iterator it = other.begin(); it != other.end(); it++)
-        if (!staff.contains(it.key()))
-                staff.append(it.key());
-    qSort(staff);
+    for(QMap<QString, double>::const_iterator it = idram.begin(); it != idram.end(); it++)
+        if(!staff.contains(it.key()))
+            staff.append(it.key());
 
+    for(QMap<QString, double>::const_iterator it = other.begin(); it != other.end(); it++)
+        if(!staff.contains(it.key()))
+            staff.append(it.key());
+
+    std::sort(staff.begin(), staff.end());
     double gst = 0;
-    double gsq = 0;
     double total2Go = 0;
     double totalIdram = 0;
-    double totalIcev = 0;
-
     QString checkPrinterName = FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString();
-    SizeMetrics sm(___printerInfo->resolution(checkPrinterName));
-    XmlPrintMaker pm(&sm);
-
-    pm.setFontName(qApp->font().family());
-    pm.setFontSize(10);
-    int top = 5;
-
-    if (FF_SettingsDrv::value(SD_LOGO_FILENAME).toString().length())
-        top += pm.imageCenter(FF_SettingsDrv::value(SD_LOGO_FILENAME).toString(), top, report_page_width) + 1;
-    pm.textCenterAlign(FF_SettingsDrv::value(SD_OBJECT_NAME).toString(), report_page_width, top);
-    top += pm.lastTextHeight() + 2;
+    C5Printing pm;
+    pm.setSceneParams(700, 3000, QPageLayout::Portrait);
+    pm.setFont(qApp->font());
+    pm.setFontSize(24);
+    pm.image(__cnfapp.path() + "/logo_receipt.png", Qt::AlignHCenter);
+    pm.br();
+    pm.ctext(FF_SettingsDrv::value(SD_OBJECT_NAME).toString());
+    pm.br();
     pm.setFontBold(true);
-    pm.textCenterAlign(tr("Daily sale"), report_page_width, top);
+    pm.ctext(tr("Daily sale"));
     pm.setFontBold(false);
-    top += pm.lastTextHeight() + 2;
-    pm.text(tr("Date range"), 1, top);
-    top += pm.lastTextHeight() + 2;
-    pm.text(m_filter["date1"] + " - " + m_filter["date2"], 1, top);
-    top += pm.lastTextHeight() + 2;
-    pm.line(1, top, report_page_width, top);
-    top++;
+    pm.br();
+    pm.ltext(tr("Date range"), 1);
+    pm.br();
+    pm.ltext(m_filter["date1"] + " - " + m_filter["date2"], 1);
+    pm.br();
+    pm.line(2);
 
-    for (QStringList::const_iterator s = staff.constBegin(); s != staff.constEnd(); s++) {
-        if (!twoGo.contains(*s))
+    for(QStringList::const_iterator s = staff.constBegin(); s != staff.constEnd(); s++) {
+        if(!twoGo.contains(*s))
             twoGo[*s] = 0;
-        if (!twoGo_qty.contains(*s))
+
+        if(!twoGo_qty.contains(*s))
             twoGo_qty[*s]  = 0;
-        if (!idram.contains(*s))
+
+        if(!idram.contains(*s))
             idram[*s] = 0;
-        if (!idram_qty.contains(*s))
+
+        if(!idram_qty.contains(*s))
             idram_qty[*s] = 0;
-        if (!icev.contains(*s))
-            icev[*s] = 0;
-        if (!icev_qty[*s])
-            icev_qty[*s] = 0;
-        if (!icev_qtyDish.contains(*s))
-            icev_qtyDish[*s] = 0;
-        if (!other.contains(*s))
+
+        if(!other.contains(*s))
             other[*s] = 0;
-        if (!other_qty.contains(*s))
+
+        if(!other_qty.contains(*s))
             other_qty[*s] = 0;
-        double st = twoGo[*s] + idram[*s] + icev[*s] + other[*s];
-        double sq = twoGo_qty[*s] + idram_qty[*s] + icev_qty[*s] + other_qty[*s];
+
+        if(!complimentary.contains(*s))
+            complimentary[*s] = 0;
+
+        double st = twoGo[*s] + idram[*s] + other[*s];
+        double sq = twoGo_qty[*s] + idram_qty[*s] + other_qty[*s];
         gst += st;
-        gsq += sq;
         total2Go += twoGo[*s];
         totalIdram += idram[*s];
-        totalIcev += icev[*s];
         pm.setFontBold(true);
-        pm.text(*s, 2, top);
+        pm.ltext(*s, 2);
         pm.setFontBold(false);
-        top += pm.lastTextHeight();
-        pm.text(tr("Total"), 2, top);
-        pm.textRightAlign(QString("%1 / %2")
-                          .arg(QLocale().toString(st, 'f', 0))
-                          .arg(QString::number(sq, 'f', 0)),
-                           report_page_width, top);
-        top += pm.lastTextHeight();
-        pm.checkForNewPage(top);
-        if (twoGo[*s] > 1) {
-            pm.text("2Go", 2, top);
-            pm.textRightAlign(QString("%1 / %2")
-                              .arg(QString::number(twoGo[*s], 'f', 0))
-                              .arg(QString::number(twoGo_qty[*s], 'f', 0)),
-                              report_page_width, top);
-            top += pm.lastTextHeight();
-            pm.checkForNewPage(top);
+        pm.br();
+        pm.lrtext(tr("Total"), QString("%1 / %2")
+                  .arg(QLocale().toString(st, 'f', 0))
+                  .arg(QString::number(sq, 'f', 0)));
+        pm.br();
+
+        if(twoGo[*s] > 1) {
+            pm.lrtext("2Go", QString("%1 / %2")
+                      .arg(QString::number(twoGo[*s], 'f', 0))
+                      .arg(QString::number(twoGo_qty[*s], 'f', 0)));
+            pm.br();
         }
-        if (cash[*s] > 1) {
-            pm.text(tr("Cash"), 2, top);
-            pm.textRightAlign(QString("%1")
-                                  .arg(QLocale().toString(cash[*s], 'f', 0)),
-                              report_page_width, top);
-            top += pm.lastTextHeight();
-            pm.checkForNewPage(top);
+
+        if(cash[*s] > 1) {
+            pm.lrtext(tr("Cash"),  QString("%1")
+                      .arg(QLocale().toString(cash[*s], 'f', 0)));
+            pm.br();
         }
-        if (card[*s] > 1) {
-            pm.text(tr("Card"), 2, top);
-            pm.textRightAlign(QString("%1")
-                                  .arg(QLocale().toString(card[*s], 'f', 0)),
-                              report_page_width, top);
-            top += pm.lastTextHeight();
-            pm.checkForNewPage(top);
+
+        if(card[*s] > 1) {
+            pm.lrtext(tr("Card"),  QString("%1")
+                      .arg(QLocale().toString(card[*s], 'f', 0)));
+            pm.br();
         }
-        if (idram[*s] > 1) {
-            pm.text("IDram", 2, top);
-            pm.textRightAlign(QString("%1 / %2")
-                              .arg(QString::number(idram[*s], 'f', 0))
-                              .arg(QString::number(idram_qty[*s], 'f', 0)),
-                              report_page_width, top);
-            top += pm.lastTextHeight();
-            pm.checkForNewPage(top);
+
+        if(complimentary[*s] > 1) {
+            pm.lrtext("Complimentary",  QString("%1")
+                      .arg(QString::number(complimentary[*s], 'f', 0)));
+            pm.br();
         }
-        if (icev[*s] > 1) {
-            pm.text("ICE-V", 2, top);
-            pm.textRightAlign(QString("%1 / %2 (%3)")
-                              .arg(QString::number(icev[*s], 'f', 0))
-                              .arg(QString::number(icev_qty[*s], 'f', 0))
-                                .arg(QString::number(icev_qtyDish[*s], 'f', 0)),
-                              report_page_width, top);
-            top += pm.lastTextHeight();
-            pm.checkForNewPage(top);
+
+        if(idram[*s] > 1) {
+            pm.lrtext("IDram",  QString("%1")
+                      .arg(QString::number(idram[*s], 'f', 0)));
+            pm.br();
         }
-        top ++;
-        pm.line(0, top, report_page_width, top);
-        top ++;
+
+        pm.line(2);
+        pm.br();
     }
 
-    top ++;
-    pm.checkForNewPage(top);
-    pm.line(0, top, report_page_width, top);
-    top ++;
-    pm.line(0, top, report_page_width, top);
-    top += 2;
+    pm.line(2);
     pm.setFontBold(true);
-    pm.setFontSize(12);
-    pm.text(tr("Total"), 2, top);
-    pm.textRightAlign(QString::number(gst, 'f', 0), report_page_width, top);
-    top += pm.lastTextHeight() + 2;
+    pm.lrtext(tr("Total"), QString::number(gst, 'f', 0));
+    pm.br();
 
-    if (total2Go > 1 || totalIdram > 1 || totalIcev > 1) {
+    if(total2Go > 1 || totalIdram > 1) {
         pm.setFontBold(false);
-        pm.setFontSize(10);
-        pm.text(tr("Included"), 2, top);
-        if (total2Go > 1) {
-            top += pm.lastTextHeight();
-            pm.text("2Go", 2, top);
-            pm.textRightAlign(QString::number(total2Go, 'f', 0), report_page_width, top);
+        pm.ltext(tr("Included"), 2);
+
+        if(total2Go > 1) {
+            pm.br();
+            pm.lrtext("2Go",  QString::number(total2Go, 'f', 0));
         }
-        if (totalIdram > 1) {
-            top += pm.lastTextHeight();
-            pm.text("IDram", 2, top);
-            pm.textRightAlign(QString::number(totalIdram, 'f', 0), report_page_width, top);
+
+        if(totalIdram > 1) {
+            pm.br();
+            pm.lrtext("IDram",  QString::number(totalIdram, 'f', 0));
         }
-        if (totalIcev > 1) {
-            top += pm.lastTextHeight();
-            pm.text("ICE-V", 2, top);
-            pm.textRightAlign(QString::number(totalIcev, 'f', 0), report_page_width, top);
-        }
-        top += pm.lastTextHeight() + 2;
+
+        pm.br();
     }
 
     pm.setFontBold(false);
-    pm.setFontSize(10);
-    top += 40;
-    pm.checkForNewPage(top);
-    pm.line(2, top, report_page_width, top);
-    top++;
-    pm.setFontSize(20);
-    pm.text("Coffee2Go", 2, top);
-    top += pm.lastTextHeight();
-    top += pm.lastTextHeight() + 2;
+    pm.line(2);
+    pm.ltext("Coffee2Go", 2);
+    pm.br();
+    pm.br();
     pm.setFontBold(false);
-    pm.setFontSize(10);
-    pm.text("ICE-V", 2, top);
-    top += pm.lastTextHeight();
-    top += pm.lastTextHeight() + 2;
     pm.setFontBold(false);
-    pm.setFontSize(10);
-
-    top += 20;
-    pm.checkForNewPage(top);
-    pm.setFontSize(8);
-    pm.text(QString("%1: %2").arg(tr("Printed"), QDateTime::currentDateTime().toString(DATETIME_FORMAT)), 2, top);
-    top += pm.lastTextHeight() + 2;
-    pm.text(".", 1, top);
-    pm.finishPage();
-
-    ThreadPrinter *tp = new ThreadPrinter(FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString(), sm, pm);
-    tp->start();
+    pm.ltext(QString("%1: %2").arg(tr("Printed"), QDateTime::currentDateTime().toString(DATETIME_FORMAT)), 2);
+    pm.br();
+    pm.ltext(".", 1);
+    pm.print(FF_SettingsDrv::value(SD_CHECK_PRINTER_NAME).toString(), QPageSize::Custom);
 }
 
 void dlgreports::on_btnPrintTaxReport_clicked()
 {
-    if (int t = DlgSelectTaxReport::getReportType()) {
+    if(int t = DlgSelectTaxReport::getReportType()) {
         MPTcpSocket fTcpSocket;
         fTcpSocket.setServerIP(__cnfmaindb.fServerIP);
         fTcpSocket.setValue("session", SESSIONID);
@@ -546,7 +468,8 @@ void dlgreports::on_btnPrintTaxReport_clicked()
         fTcpSocket.setValue("d1", m_filter["date1"] + " 00:00:00");
         fTcpSocket.setValue("d2", m_filter["date2"] + " 00:00:00");
         QJsonObject o = fTcpSocket.sendData();
-        if (o["reply"].toString() == "ok") {
+
+        if(o["reply"].toString() == "ok") {
             msg(tr("Printed"));
         } else {
             msg(o["reply"].toString());
@@ -557,13 +480,15 @@ void dlgreports::on_btnPrintTaxReport_clicked()
 void dlgreports::on_btnTaxBack_clicked()
 {
     QModelIndexList il = ui->tblOrders->selectionModel()->selectedRows();
-    if (!il.count()) {
+
+    if(!il.count()) {
         DlgMessage::Msg(tr("No order is selected"));
         return;
     }
+
     QString ord = ui->tblOrders->item(il.at(0).row(), 0)->text();
 
-    if (DlgMessage::Msg(QString("%1 %2").arg(tr("Confirm to cancel fiscal"), ord)) != QDialog::Accepted) {
+    if(DlgMessage::Msg(QString("%1 %2").arg(tr("Confirm to cancel fiscal"), ord)) != QDialog::Accepted) {
         return;
     }
 
@@ -573,9 +498,26 @@ void dlgreports::on_btnTaxBack_clicked()
     fTcpSocket.setValue("query", "taxcancel");
     fTcpSocket.setValue("order", ord);
     QJsonObject o = fTcpSocket.sendData();
-    if (o["reply"].toString() == "ok") {
+
+    if(o["reply"].toString() == "ok") {
         msg(tr("Fiscal canceled"));
     } else {
         msg(o["reply"].toString());
     }
+}
+
+void dlgreports::on_btnOrderDetails_clicked()
+{
+    QModelIndexList il = ui->tblOrders->selectionModel()->selectedRows();
+
+    if(!il.count()) {
+        DlgMessage::Msg(tr("No order is selected"));
+        return;
+    }
+
+    dlgorder d(this);
+    d.setData(m_user, m_hall, 0, ui->tblOrders->item(il.at(0).row(), 0)->text());
+    d.setCashMode();
+    d.showFullScreen();
+    d.exec();
 }

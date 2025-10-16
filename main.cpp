@@ -1,5 +1,5 @@
 #include "dlgface.h"
-#include "qsqldrv.h"
+#include "idram.h"
 #include "qsystem.h"
 #include "dlgconnection.h"
 #include "qsqldb.h"
@@ -15,18 +15,23 @@
 #include <QSqlDatabase>
 #include <QScreen>
 #include <QDesktopServices>
+#include <QSslSocket>
 
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
-    qDebug() << QSqlDatabase::drivers();
 #ifndef QT_DEBUG
-    QStringList libPath;
-    libPath << "./";
-    libPath << "./platforms";
-    libPath << "./sqldrivers";
+    QStringList libPath = QCoreApplication::libraryPaths();
+    libPath << a.applicationDirPath();
+    libPath << a.applicationDirPath() + "/platforms";
+    libPath << a.applicationDirPath() + "/sqldrivers";
+    libPath << a.applicationDirPath() + "/printsupport";
+    libPath << a.applicationDirPath() + "/imageformats";
     QCoreApplication::setLibraryPaths(libPath);
 #endif
+    LOG(QSslSocket::supportsSsl() ? "SSL: true" : "SSL: false");
+    LOG("Support SSL version:  "  + QSslSocket::sslLibraryBuildVersionString());
+    LOG("Supper runtime: " + QSslSocket::sslLibraryVersionString());
     QFont f = a.font();
     int fontId = QFontDatabase::addApplicationFont(a.applicationDirPath() + "/ahuni.ttf");
 
@@ -89,6 +94,7 @@ int main(int argc, char* argv[])
     CnfApp::init(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword, "FASTF");
     MSqlDatabase::setConnectionParams(__cnfmaindb.fHost, __cnfmaindb.fDatabase, __cnfmaindb.fUser, __cnfmaindb.fPassword);
     auto w = new DlgFace();
+    auto *idram = new IDram(w);
 
     for(const QString &s : std::as_const(args)) {
         if(s.startsWith("/monitor")) {

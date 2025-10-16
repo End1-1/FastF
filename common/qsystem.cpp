@@ -1,6 +1,7 @@
 #include "qsystem.h"
 #include <QCoreApplication>
 #include <QDir>
+#include <QStandardPaths>
 #include <QDate>
 
 #ifdef WIN32
@@ -24,29 +25,29 @@ QStringList QSystem::m_monthShort;
 QString QSystem::WebUrl;
 QString QSystem::WebPass;
 
-QSystem::QSystem(char **argv, const QString &appName)
+QSystem::QSystem(char** argv, const QString &appName)
 {
     m_appPath = argv[0];
     m_appPath = m_appPath.mid(0, m_appPath.lastIndexOf("\\"));
     QStringList paths = QCoreApplication::libraryPaths();
     paths.append(m_appPath);
     QCoreApplication::setLibraryPaths(paths);
-
     QDir dir;
     m_homePath = dir.homePath() + "/" + appName;
-    if (!dir.exists(m_homePath))
-        dir.mkdir(m_homePath);
-    m_homePath += "/";
 
+    if(!dir.exists(m_homePath))
+        dir.mkdir(m_homePath);
+
+    m_homePath += "/";
     m_monthShort.clear();
     m_monthShort << "jan" << "feb" << "mar" << "apr" << "may" << "jun" << "jul" << "aug" << "sep" << "oct" << "nov" << "dec";
     /*
-#ifdef MANAGER_EXE
+    #ifdef MANAGER_EXE
     if (!dir.exists(repDefaultPath()))
         if (!dir.mkpath(repDefaultPath()))
             return;
              TODO log("Cannot create default report directory: " + repDefaultPath(), false);
-#endif
+    #endif
     */
 }
 
@@ -61,15 +62,21 @@ QString QSystem::appPath()
 
 QString QSystem::homePath()
 {
-    return m_homePath;
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    path += "/" +  qApp->applicationName();
+    QDir().mkpath(path);
+    m_homePath = path;
+    return path;
 }
 
 QString QSystem::hostUserName()
 {
     QString username = getenv("USER");
-    if (username.isEmpty()) {
+
+    if(username.isEmpty()) {
         username = getenv("USERNAME");
     }
+
     return username;
 }
 
@@ -95,9 +102,10 @@ QString QSystem::objectName()
 
 void QSystem::setUserData(const QString &username, const QString &userid)
 {
-    if (username.length())
+    if(username.length())
         m_userName = username;
-    if (userid.length())
+
+    if(userid.length())
         m_userId = userid;
 }
 
@@ -131,22 +139,24 @@ int QSystem::dbGroupId()
     return m_dbGroup;
 }
 
-
-
 QString QSystem::repDefaultPath()
 {
     QDate d = QDate::currentDate();
     int year = d.year(), month = d.month() - 1;
-    if (!month) {
+
+    if(!month) {
         month = 11;
         year--;
     } else
         month--;
+
     QString path = QString("c:\\reports\\%1\\%2").arg(year).arg(m_monthShort.at(month));
     QDir dir;
-    if (!dir.exists(path)) {
+
+    if(!dir.exists(path)) {
         dir.mkpath(path);
     }
+
     return path;
 }
 
@@ -159,7 +169,8 @@ QString QSystem::shortMonth(QDate d)
 void QSystem::Log(const QString &msg)
 {
     QFile f(homePath() + "/prg.log");
-    if (f.open(QIODevice::Append)) {
+
+    if(f.open(QIODevice::Append)) {
         f.write(QDateTime::currentDateTime().toString(DATETIME_FORMAT).toLatin1());
         f.write(": ");
         f.write(msg.toLatin1());
@@ -173,9 +184,9 @@ QString getVersionString(QString fName)
 // first of all, GetFileVersionInfoSize
     DWORD dwHandle;
     DWORD dwLen = GetFileVersionInfoSize(fName.toStdWString().c_str(), &dwHandle);
-
     // GetFileVersionInfo
     BYTE *lpData = new BYTE[dwLen];
+
     if(!GetFileVersionInfo(fName.toStdWString().c_str(), dwHandle, dwLen, lpData)) {
         delete [] lpData;
         return "";
@@ -184,13 +195,14 @@ QString getVersionString(QString fName)
     // VerQueryValue
     VS_FIXEDFILEINFO *lpBuffer = NULL;
     UINT uLen;
+
     if(VerQueryValue(lpData, QString("\\").toStdWString().c_str(), (LPVOID*)&lpBuffer, &uLen)) {
         return
             QString::number((lpBuffer->dwFileVersionMS >> 16) & 0xffff) + "." +
-            QString::number((lpBuffer->dwFileVersionMS) & 0xffff ) + "." +
-            QString::number((lpBuffer->dwFileVersionLS >> 16 ) & 0xffff ) + "." +
-            QString::number((lpBuffer->dwFileVersionLS) & 0xffff );
+            QString::number((lpBuffer->dwFileVersionMS) & 0xffff) + "." +
+            QString::number((lpBuffer->dwFileVersionLS >> 16) & 0xffff) + "." +
+            QString::number((lpBuffer->dwFileVersionLS) & 0xffff);
     }
+
     return "";
 }
-

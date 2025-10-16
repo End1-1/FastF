@@ -42,6 +42,7 @@ private:
     FF_User* fUser;
     void payment(quint8 mode);
     void receipt(int mode);
+    void printPrecheck(const QString &qr);
 };
 
 #endif // DLGPAYMENT_H

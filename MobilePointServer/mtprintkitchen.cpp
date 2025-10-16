@@ -17,12 +17,13 @@
 
 MTPrintKitchen::MTPrintKitchen(const QMap<QString, QString>& data,
                                const QList<QMap<QString, QString> >& dishes,
-                               bool kitchen, QObject *parent) :
+                               bool kitchen, const QString &qr, QObject *parent) :
     QObject(parent)
 {
     fDishes = dishes;
     fData = data;
     fKitchen = kitchen;
+    fQr = qr;
 }
 
 MTPrintKitchen::~MTPrintKitchen()
@@ -260,40 +261,44 @@ void MTPrintKitchen::printReceipt()
     p.br();
     p.ctext(tr("Payment avaiable with IDram"));
     p.br();
-    int levelIndex = 1;
-    int versionIndex = 0;
-    bool bExtent = true;
-    int maskIndex = -1;
-    QString encodeString = QString("%1;%2;%3;%4|%5;%6;")
-                           .arg("Jazzve")
-                           .arg(__set_val("idramid").toString()) //IDram ID
-                           .arg(fData["amount"])
-                           .arg(fData["order"])
-                           .arg(__set_val("idramphone").toString())
-                           .arg("1");
-    CQR_Encode qrEncode;
-    bool successfulEncoding = qrEncode.EncodeData(levelIndex, versionIndex, bExtent, maskIndex, encodeString.toUtf8().data());
 
-    if(!successfulEncoding) {
-        fLog.append("Cannot encode qr image");
-    }
+    if(!fQr.isEmpty()) {
+        int levelIndex = 1;
+        int versionIndex = 0;
+        bool bExtent = true;
+        int maskIndex = -1;
+        // QString encodeString = QString("%1;%2;%3;%4|%5;%6;")
+        //                        .arg("Jazzve")
+        //                        .arg(__set_val("idramid").toString()) //IDram ID
+        //                        .arg(fData["amount"])
+        //                        .arg(fData["order"])
+        //                        .arg(__set_val("idramphone").toString())
+        //                        .arg("1");
+        CQR_Encode qrEncode;
+        bool successfulEncoding = qrEncode.EncodeData(levelIndex, versionIndex, bExtent, maskIndex, fQr.toUtf8().data());
 
-    int qrImageSize = qrEncode.m_nSymbleSize;
-    int encodeImageSize = qrImageSize + (QR_MARGIN * 2);
-    QImage encodeImage(encodeImageSize, encodeImageSize, QImage::Format_Mono);
-    encodeImage.fill(1);
+        if(!successfulEncoding) {
+            fLog.append("Cannot encode qr image");
+        }
 
-    for(int i = 0; i < qrImageSize; i++) {
-        for(int j = 0; j < qrImageSize; j++) {
-            if(qrEncode.m_byModuleData[i][j]) {
-                encodeImage.setPixel(i + QR_MARGIN, j + QR_MARGIN, 0);
+        int qrImageSize = qrEncode.m_nSymbleSize;
+        int encodeImageSize = qrImageSize + (QR_MARGIN * 2);
+        QImage encodeImage(encodeImageSize, encodeImageSize, QImage::Format_Mono);
+        encodeImage.fill(1);
+
+        for(int i = 0; i < qrImageSize; i++) {
+            for(int j = 0; j < qrImageSize; j++) {
+                if(qrEncode.m_byModuleData[i][j]) {
+                    encodeImage.setPixel(i + QR_MARGIN, j + QR_MARGIN, 0);
+                }
             }
         }
+
+        QPixmap pix = QPixmap::fromImage(encodeImage);
+        pix = pix.scaled(300, 300);
+        p.image(pix, Qt::AlignHCenter);
     }
 
-    QPixmap pix = QPixmap::fromImage(encodeImage);
-    pix = pix.scaled(300, 300);
-    p.image(pix, Qt::AlignHCenter);
     p.br();
     /* End QRCode */
     p.setFontSize(16);

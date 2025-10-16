@@ -11,6 +11,8 @@ TEMPLATE = app
 
 RC_FILE = res/res.rc
 
+include(c:/projects/IDramAPI/Idram.pri)
+
 INCLUDEPATH += C:/projects/NewTax/Src
 INCLUDEPATH += C:/Soft/OpenSSLWin64/include
 INCLUDEPATH += C:/Soft/OpenSSLWin64/include/openssl

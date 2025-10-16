@@ -8,7 +8,7 @@ class MTPrintKitchen : public QObject
 {
     Q_OBJECT
 public:
-    MTPrintKitchen(const QMap<QString, QString>& data, const QList<QMap<QString, QString> >& dishes, bool kitchen, QObject *parent = nullptr);
+    MTPrintKitchen(const QMap<QString, QString>& data, const QList<QMap<QString, QString> >& dishes, bool kitchen, const QString &qr, QObject *parent = nullptr);
     ~MTPrintKitchen();
     void run();
 
@@ -19,6 +19,7 @@ protected:
 
 private:
     bool fKitchen;
+    QString fQr;
     QStringList fLog;
     QMap<QString, QString> fData;
     QList<QMap<QString, QString> > fDishes;

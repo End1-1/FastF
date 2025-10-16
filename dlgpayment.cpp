@@ -8,6 +8,7 @@
 #include "mdefined.h"
 #include "dlgmessage.h"
 #include "mtprintkitchen.h"
+#include "idram.h"
 #include "ff_settingsdrv.h"
 #include "dlggetpassword.h"
 #include "dlgcalcchange.h"
@@ -156,39 +157,8 @@ void DlgPayment::receipt(int mode)
     msg(o["reply"].toString());
 }
 
-void DlgPayment::on_btnARCA_clicked()
+void DlgPayment::printPrecheck(const QString &qr)
 {
-    payment(PaymentArca);
-}
-
-void DlgPayment::on_btnMASTER_clicked()
-{
-    payment(PaymentMaster);
-}
-
-void DlgPayment::on_btnVISA_clicked()
-{
-    payment(PaymentVisa);
-}
-
-void DlgPayment::on_btnMAESTRO_clicked()
-{
-    payment(PaymentMaestro);
-}
-
-void DlgPayment::on_btnIDRAM_clicked()
-{
-    payment(PaymentIdram);
-}
-
-void DlgPayment::on_btnCancel_clicked()
-{
-    reject();
-}
-
-void DlgPayment::on_btnPrepaymentCash_clicked()
-{
-    //receipt(1);
     QString order = fDrv->m_header.f_id;
 
     if(order.isEmpty()) {
@@ -313,8 +283,85 @@ void DlgPayment::on_btnPrepaymentCash_clicked()
     v[":id"] = order;
     fDb.select("update o_order set print_qty=abs(print_qty)+1 where id=:id", v, dr, false);
     fDrv->m_header.f_printQty = abs(fDrv->m_header.f_printQty) + 1;
-    MTPrintKitchen m(data, dishes, false, nullptr);
+    MTPrintKitchen m(data, dishes, false, qr, nullptr);
     m.run();
+}
+
+void DlgPayment::on_btnARCA_clicked()
+{
+    payment(PaymentArca);
+}
+
+void DlgPayment::on_btnMASTER_clicked()
+{
+    payment(PaymentMaster);
+}
+
+void DlgPayment::on_btnVISA_clicked()
+{
+    payment(PaymentVisa);
+}
+
+void DlgPayment::on_btnMAESTRO_clicked()
+{
+    payment(PaymentMaestro);
+}
+
+void DlgPayment::on_btnIDRAM_clicked()
+{
+    fDrv->openDB();
+    fDrv->prepare("select * from o_idram where fid=:fid");
+    fDrv->bindValue(":fid", fDrv->m_header.f_id);
+    fDrv->execSQL();
+
+    if(fDrv->next()) {
+        auto idramOrder = fDrv->v_str(1);
+        auto *idram = new IDram(this);
+        idram->requestToken([this, idram, idramOrder] {
+            idram->requestCheckPayment(idramOrder, [this, idram](const QJsonObject & jo) {
+                QJsonObject jp = jo["value"].toObject();
+
+                if(jp["paymentStatusId"].toInt() == 8) {
+                    payment(PaymentIdram);
+                } else {
+                    msg(tr("Payment not complited"));
+                }
+
+                idram->deleteLater();
+            });
+
+        });
+    }
+}
+
+void DlgPayment::on_btnCancel_clicked()
+{
+    reject();
+}
+
+void DlgPayment::on_btnPrepaymentCash_clicked()
+{
+    fDrv->openDB();
+    fDrv->prepare("select * from o_idram where fid=:fid");
+    fDrv->bindValue(":fid", fDrv->m_header.f_id);
+    fDrv->execSQL();
+
+    if(fDrv->next()) {
+        printPrecheck(fDrv->v_str(2));
+    } else {
+        auto *idram = new IDram(this);
+        idram->requestToken([this, idram] {
+            idram->requestQr(ui->leAmount->text().toDouble(), [this, idram](const QString & idramOrder, const QString & qrContent) {
+                fDrv->prepare("insert into  o_idram(fid, fidram, fqr) values (:fid, :fidram, :fqr)");
+                fDrv->bindValue(":fid", fDrv->m_header.f_id);
+                fDrv->bindValue(":fidram", idramOrder);
+                fDrv->bindValue(":fqr", qrContent);
+                fDrv->execSQL();
+                printPrecheck(qrContent);
+                idram->deleteLater();
+            });
+        });
+    }
 }
 
 void DlgPayment::on_btnPrepaymentNoCash_clicked()

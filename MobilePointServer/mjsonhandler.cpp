@@ -396,7 +396,7 @@ QJsonObject MJsonHandler::handlePrintKitchen(const QJsonObject &o)
         }
 
         if(dishes.count() > 0) {
-            MTPrintKitchen *p = new MTPrintKitchen(data, dishes, true);
+            MTPrintKitchen *p = new MTPrintKitchen(data, dishes, true, "");
             p->run();
         }
     }

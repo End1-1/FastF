@@ -271,23 +271,21 @@ void dlgreports::on_btnDailySale_clicked()
     QMap<QString, double> complimentary;
     QMap<QString, double> complimentary_qty;
     QStringList staff;
-    m_sqlDrv->prepare("select e.lname || ' ' || e.fname as ename, "
-                      "sum(cast(right(f.data, char_length(f.data) - position(':', f.data)) as decimal(9,2))) as amount, "
-                      " count(o.id) as qty "
-                      "from o_order o, employes e , o_order_flags f "
-                      "where o.staff_id=e.id and o.state_id=2 and o.id=f.order_id  "
-                      "and o.date_cash between :date1 and :date2 "
-                      "group by 1 "
-                      "order by 1");
-    m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
-    m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
-    m_sqlDrv->execSQL();
-
-    while(m_sqlDrv->next()) {
-        idram[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("amount");
-        idram_qty[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("qty");
-    }
-
+    // m_sqlDrv->prepare("select e.lname || ' ' || e.fname as ename, "
+    //                   "sum(cast(right(f.data, char_length(f.data) - position(':', f.data)) as decimal(9,2))) as amount, "
+    //                   " count(o.id) as qty "
+    //                   "from o_order o, employes e , o_order_flags f "
+    //                   "where o.staff_id=e.id and o.state_id=2 and o.id=f.order_id  "
+    //                   "and o.date_cash between :date1 and :date2 "
+    //                   "group by 1 "
+    //                   "order by 1");
+    // m_sqlDrv->bind(":date1", QDate::fromString(m_filter["date1"], DATE_FORMAT));
+    // m_sqlDrv->bind(":date2", QDate::fromString(m_filter["date2"], DATE_FORMAT));
+    // m_sqlDrv->execSQL();
+    // while(m_sqlDrv->next()) {
+    //     idram[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("amount");
+    //     idram_qty[m_sqlDrv->valStr("ename")] = m_sqlDrv->valFloat("qty");
+    // }
     m_sqlDrv->prepare("select e.lname || ' ' || e.fname as ename, count(o.id) as qty, "
                       "sum(o.amount)+sum(COALESCE(oc.FAMOUNT, 0)) as amount, "
                       "sum(ot.fcash) as cash, "
@@ -373,8 +371,8 @@ void dlgreports::on_btnDailySale_clicked()
         if(!complimentary.contains(*s))
             complimentary[*s] = 0;
 
-        double st = twoGo[*s] + idram[*s] + other[*s];
-        double sq = twoGo_qty[*s] + idram_qty[*s] + other_qty[*s];
+        double st = twoGo[*s]  + other[*s];
+        double sq = twoGo_qty[*s]  + other_qty[*s];
         gst += st;
         total2Go += twoGo[*s];
         totalIdram += idram[*s];

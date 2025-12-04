@@ -213,6 +213,9 @@ bool MSqlDatabase::insert(const QString &table, QMap<QString, QVariant>& bindVal
         return false;
     }
 
+#ifdef QT_DEBUG
+    qDebug() << sql;
+#endif
     return true;
 }
 

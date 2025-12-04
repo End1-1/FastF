@@ -317,7 +317,7 @@ void DlgPayment::on_btnIDRAM_clicked()
     if(fDrv->next()) {
         auto idramOrder = fDrv->v_str(1);
         auto *idram = new IDram(this);
-        idram->requestToken([this, idram, idramOrder] {
+        idram->requestToken([this, idram, idramOrder]() {
             idram->requestCheckPayment(idramOrder, [this, idram](const QJsonObject & jo) {
                 QJsonObject jp = jo["value"].toObject();
 
@@ -329,7 +329,8 @@ void DlgPayment::on_btnIDRAM_clicked()
 
                 idram->deleteLater();
             });
-
+        }, [](const QString & e) {
+            msg(e);
         });
     }
 }
@@ -350,7 +351,7 @@ void DlgPayment::on_btnPrepaymentCash_clicked()
         printPrecheck(fDrv->v_str(2));
     } else {
         auto *idram = new IDram(this);
-        idram->requestToken([this, idram] {
+        idram->requestToken([this, idram]() {
             idram->requestQr(ui->leAmount->text().toDouble(), [this, idram](const QString & idramOrder, const QString & qrContent) {
                 fDrv->prepare("insert into  o_idram(fid, fidram, fqr) values (:fid, :fidram, :fqr)");
                 fDrv->bindValue(":fid", fDrv->m_header.f_id);
@@ -359,7 +360,13 @@ void DlgPayment::on_btnPrepaymentCash_clicked()
                 fDrv->execSQL();
                 printPrecheck(qrContent);
                 idram->deleteLater();
+            }, [this](const QString & e) {
+                msg(e);
+                printPrecheck("");
             });
+        }, [this](const QString & e) {
+            msg(e);
+            printPrecheck("");
         });
     }
 }

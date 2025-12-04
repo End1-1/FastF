@@ -733,8 +733,11 @@ QJsonObject MJsonHandler::handleCloseOrder(const QJsonObject &o)
         return jsonError(tr("Incorrect order number"));
     }
 
+    bool correctPaymentType =  false;
+
     if(dr.value("STATE_ID").toInt() != ORDER_STATE_OPEN) {
-        return jsonError(tr("Order is not opened"));
+        correctPaymentType = true;
+        //return jsonError(tr("Order is not opened"));
     }
 
     if(dr.value("PRINT_QTY").toInt() < 1) {
@@ -746,14 +749,26 @@ QJsonObject MJsonHandler::handleCloseOrder(const QJsonObject &o)
     if(userId == 0) {
         if(o.contains("staff")) {
             if(dr.value("STAFF_ID").toInt() != o["staff"].toString().toInt()) {
-                return jsonError(tr("You are not owner of this order"));
+                if(correctPaymentType) {
+                    o["staff"] = dr.value("STAFF_ID").toInt();
+                } else {
+                    return jsonError(tr("You are not owner of this order"));
+                }
             }
         } else {
-            return jsonError(tr("You are not owner of this order"));
+            if(correctPaymentType) {
+                o["staff"] = dr.value("STAFF_ID").toInt();
+            } else {
+                return jsonError(tr("You are not owner of this order"));
+            }
         }
     } else {
         if(userId != dr.value("STAFF_ID").toInt()) {
-            return jsonError(tr("You are not owner of this order"));
+            if(correctPaymentType) {
+                o["staff"] = dr.value("STAFF_ID").toInt();
+            } else {
+                return jsonError(tr("You are not owner of this order"));
+            }
         }
     }
 
@@ -906,6 +921,12 @@ QJsonObject MJsonHandler::handleTaxCancel(const QJsonObject &o)
     QMap<QString, QVariant> bv;
     bv[":fid"] = o["order"].toString();
     DatabaseResult dr;
+
+    if(!fDb.open()) {
+        jReply["reply"] = fDb.lastError();
+        return jReply;
+    }
+
     fDb.select("select json from o_tax where fid=:fid", bv, dr, false);
 
     if(dr.rowCount() == 0) {
@@ -944,7 +965,6 @@ QJsonObject MJsonHandler::handleTaxCancel(const QJsonObject &o)
     v[":fresult"] = result;
     fDb.open();
     fDb.insert("o_tax_log", v);
-    fDb.close();
 
     if(result == pt_err_ok) {
         v.clear();
@@ -952,6 +972,7 @@ QJsonObject MJsonHandler::handleTaxCancel(const QJsonObject &o)
         fDb.select("delete from o_tax where fid=:fid", v, dr, false);
     }
 
+    fDb.close();
     return jReply;
 }
 

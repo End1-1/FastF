@@ -37,16 +37,20 @@ void MTFileLog::run()
 {
     QMutexLocker m(&ml);
     QDir dir;
-    if (!dir.exists("logs")) {
-        dir.mkdir("logs");
+
+    if(!dir.exists("c:/temp/logs")) {
+        dir.mkdir("c:/temp/logs");
     }
-    QFile file("logs/" + fLogFile + ".log");
+
+    QFile file("c:/temp/logs/" + fLogFile + ".log");
     file.open(QIODevice::Append);
     QString begin = QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss --- ");
     file.write(begin.toUtf8());
-    foreach (QString s, fLogList) {
+
+    foreach(QString s, fLogList) {
         file.write(s.toUtf8());
         file.write("\r\n");
     }
+
     file.close();
 }

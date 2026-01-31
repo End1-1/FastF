@@ -947,10 +947,10 @@ QJsonObject MJsonHandler::handleTaxCancel(const QJsonObject &o)
     PrintTaxN pt(__cnfapp.taxIP(), __cnfapp.taxPort(), __cnfapp.taxPassword(), "true", "3", "3", this);
     DatabaseResult em;
     bv[":order_id"] = o["order"].toString();
-    fDb.select("select emarks from o_dishes where order_id=:order_id and CHAR_LENGTH(emarks)>0", bv, em);
+    fDb.select("select emarks from o_dishes where order_id=:order_id and CHAR_LENGTH(emarks)>0 and state_id=1", bv, em);
 
     for(int i = 0; i < em.rowCount(); i++) {
-        pt.fEmarks.append(em.value("emarks").toString());
+        pt.fEmarks.append(em.value(i, "emarks").toString());
     }
 
     int result = pt.printTaxback(rseq, crn, in, out, err);

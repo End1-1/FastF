@@ -36,15 +36,16 @@ DbDriver::DbDriver()
 
 DbDriver::~DbDriver()
 {
+    if(m_query) {
+        delete m_query;
+        m_query = nullptr;
+    }
+
     if(m_db.isOpen()) {
         m_db.close();
     }
 
-    m_db = QSqlDatabase::addDatabase("QIBASE");
-
-    if(m_query)
-        delete m_query;
-
+    m_db = QSqlDatabase();
     QSqlDatabase::removeDatabase(QString::number(m_dbnumber));
 }
 
@@ -228,7 +229,6 @@ QDate DbDriver::serverDate()
         }
     }
 
-    Q_ASSERT(d.isValid());
     return d;
 }
 
@@ -248,6 +248,5 @@ QDateTime DbDriver::serverDateTime()
         }
     }
 
-    Q_ASSERT(d.isValid());
     return d;
 }

@@ -32,7 +32,9 @@
 
 DlgFace::DlgFace(QWidget *parent) :
     FastfDialog(parent),
-    ui(new Ui::DlgFace)
+    ui(new Ui::DlgFace),
+    m_hallDrv(nullptr),
+    m_serviceStarted(false)
 {
     ui->setupUi(this);
     ui->lbTime->setText("--");
@@ -49,7 +51,6 @@ DlgFace::DlgFace(QWidget *parent) :
     ui->tblHall->setButtons(ui->btnUp, ui->btnDown);
     m_filterUsedTables = false;
     m_filterHall = FF_SettingsDrv::value(SD_DEFAULT_HALL_ID).toInt();
-    m_hallDrv = nullptr;
     initFace();
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(timer()));
     m_timeout = 0;
@@ -60,6 +61,8 @@ DlgFace::DlgFace(QWidget *parent) :
 
 DlgFace::~DlgFace()
 {
+    m_timer.stop();
+    delete m_hallDrv;
     delete ui;
 }
 
@@ -123,7 +126,10 @@ void DlgFace::toTableLocked(int tableId)
 
 void DlgFace::timer()
 {
-    startService();
+    if(!m_serviceStarted) {
+        startService();
+        m_serviceStarted = true;
+    }
 
     if(!__cnfmaindb.fOk) {
         return;
@@ -135,14 +141,19 @@ void DlgFace::timer()
     if(!(m_timeout % UPDATE_TIME_DEVIDER))
         correctTime();
 
-    ui->lbTime->setText(DbDriver::serverDateTime().toString("dd.MM.yyyy HH:mm"));
+    const QDateTime serverTime = DbDriver::serverDateTime();
+    if(serverTime.isValid())
+        ui->lbTime->setText(serverTime.toString("dd.MM.yyyy HH:mm"));
+
+    const int prevProxyCount = m_hallDrv->m_proxyTables.count();
     m_hallDrv->refresh();
     ui->lbOrders->setText(m_hallDrv->total());
     loadReadyDishes();
 
-    for(int i = 0; i < ui->tblHall->rowCount(); i++)
-        for(int j = 0; j < ui->tblHall->columnCount(); j++)
-            ui->tblHall->update(ui->tblHall->model()->index(i, j));
+    if(m_hallDrv->m_proxyTables.count() != prevProxyCount)
+        m_hallDrv->configGrid(ui->tblHall, nullptr);
+    else
+        ui->tblHall->viewport()->update();
 }
 
 void DlgFace::sqlError(const QString &msg)

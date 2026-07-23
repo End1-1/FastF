@@ -11,11 +11,11 @@ TEMPLATE = app
 
 RC_FILE = res/res.rc
 
-include(c:/projects/IDramAPI/Idram.pri)
+include(c:/development/projects/IDramAPI/Idram.pri)
 
-INCLUDEPATH += C:/projects/NewTax/Src
-INCLUDEPATH += C:/Soft/OpenSSLWin64/include
-INCLUDEPATH += C:/Soft/OpenSSLWin64/include/openssl
+INCLUDEPATH += C:/development/projects/NewTax/Src
+INCLUDEPATH += C:/development/OpenSSL-Win64/include
+INCLUDEPATH += C:/development/OpenSSL-Win64/include/openssl
 INCLUDEPATH += ./common
 INCLUDEPATH += ./orderdrv
 INCLUDEPATH += ./MobilePointServer
@@ -93,7 +93,7 @@ SOURCES += main.cpp\
     MobilePointServer/mjsonhandler.cpp \
     MobilePointServer/databaseresult.cpp \
     MobilePointServer/mtprintkitchen.cpp \
-    ../NewTax/Src/printtaxn.cpp \
+    C:/development/projects/NewTax/Src/printtaxn.cpp \
     MobilePointServer/pimage.cpp \
     MobilePointServer/ptextrect.cpp \
     MobilePointServer/mtfilelog.cpp \
@@ -189,7 +189,7 @@ HEADERS  += \
     MobilePointServer/mjsonhandler.h \
     MobilePointServer/databaseresult.h \
     MobilePointServer/mtprintkitchen.h \
-    ../NewTax/Src/printtaxn.h \
+    C:/development/projects/NewTax/Src/printtaxn.h \
     MobilePointServer/pimage.h \
     MobilePointServer/ptextrect.h \
     MobilePointServer/mtfilelog.h \
@@ -244,7 +244,7 @@ DEFINES += _MODULE_=\\\"FASTf\\\"
 
 LIBS += -lVersion
 
-LIBS += -LC:/soft/OpenSSLWin64/lib/VC/x64/MD
+LIBS += -LC:/development/OpenSSL-Win64/lib/VC/x64/MD
 LIBS += -lopenssl
 LIBS += -llibcrypto
 LIBS += -ladvapi32

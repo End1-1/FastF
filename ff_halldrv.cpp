@@ -185,7 +185,11 @@ void FF_HallDrv::configGrid(QTableWidget *t, QItemDelegate *itemDelegate)
 {
     t->clearContents();
     int colWidth = t->horizontalHeader()->defaultSectionSize();
+    if(colWidth < 1)
+        colWidth = 1;
     int colCount = (t->width() - 5) / colWidth;
+    if(colCount < 1)
+        colCount = 1;
     int colWidthDelta = ((t->width() - 5) - (colCount * colWidth)) / colCount;
     colWidth += colWidthDelta;
     int rowCount = m_proxyTables.count() / colCount;
@@ -204,7 +208,10 @@ void FF_HallDrv::configGrid(QTableWidget *t, QItemDelegate *itemDelegate)
     t->setRowCount(rowCount);
     int col = 0, row = 0;
     for (int i = 0; i < m_proxyTables.count(); i++) {
-        QTableWidgetItem *item = new QTableWidgetItem(QString::number(table(m_proxyTables.at(i))->id));
+        Table *tableItem = table(m_proxyTables.at(i));
+        if (!tableItem)
+            continue;
+        QTableWidgetItem *item = new QTableWidgetItem(QString::number(tableItem->id));
         item->setData(Qt::UserRole, m_proxyTables.at(i));
         t->setItem(row, col, item);
         col++;

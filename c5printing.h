@@ -102,6 +102,10 @@ private:
 
     void setTemptop(QGraphicsTextItem *item, qreal textwidth);
 
+    void ensureSpace(qreal neededHeight);
+
+    void startNewPage();
+
     QJsonArray fJsonData;
 };
 

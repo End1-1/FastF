@@ -35,15 +35,39 @@ C5Printing::~C5Printing()
 
 void C5Printing::newPage()
 {
+    startNewPage();
+    QJsonObject ob;
+    ob["cmd"] = "newpage";
+    fJsonData.append(ob);
+}
+
+void C5Printing::startNewPage()
+{
     fTop = 0;
+    fTempTop = 0;
     QPageLayout::Orientation o = fCanvasOrientation[fCanvas];
     fCanvas = new QGraphicsScene();
     fCanvasList.append(fCanvas);
     setSceneParams(fNormalWidth, fNormalHeight, o);
     fCurrentPageIndex++;
-    QJsonObject ob;
-    ob["cmd"] = "newpage";
-    fJsonData.append(ob);
+}
+
+void C5Printing::ensureSpace(qreal neededHeight)
+{
+    if(fNoNewPage)
+        return;
+
+    if(neededHeight <= 0)
+        neededHeight = fLineHeight;
+
+    // Start a new page before drawing if the next block would be clipped
+    // at the bottom of the current scene (those lines were previously lost).
+    if(fTop > 0 && fTop + neededHeight > fNormalHeight) {
+        QJsonObject ob;
+        ob["cmd"] = "newpage";
+        fJsonData.append(ob);
+        startNewPage();
+    }
 }
 
 void C5Printing::setSceneParams(qreal width, qreal height, QPageLayout::Orientation orientation)
@@ -135,6 +159,7 @@ void C5Printing::line(qreal x1, qreal y1, qreal x2, qreal y2, int lineWidth)
 
 void C5Printing::line(int lineWidth)
 {
+    ensureSpace(fLineHeight);
     line(0, fTop, fNormalWidth, fTop, lineWidth);
     QJsonObject o;
     o["cmd"] = "line2";
@@ -147,6 +172,7 @@ void C5Printing::tableText(const QList<qreal> &points, const QStringList &vals, 
     if (points.count() < 2) {
         return;
     }
+    ensureSpace(rowHeight > 0 ? rowHeight : fLineHeight);
     qreal totalWidth = 0.0;
     foreach (qreal w, points) {
         totalWidth += w;
@@ -171,6 +197,7 @@ void C5Printing::tableText(const QList<qreal> &points, const QStringList &vals, 
 
 void C5Printing::ltext(const QString &text, qreal x, qreal textWidth)
 {
+    ensureSpace(fLineHeight);
     QGraphicsTextItem *item = fCanvas->addText(text, fFont);
     item->moveBy(x, fTop);
     setTemptop(item, textWidth);
@@ -190,6 +217,7 @@ void C5Printing::lrtext(const QString &leftText, const QString &rightText, qreal
 
 void C5Printing::ltext90(const QString &text, qreal x)
 {
+    ensureSpace(fLineHeight);
     QGraphicsTextItem *item = fCanvas->addText(text, fFont);
     item->moveBy(x, fTop);
     item->setRotation(90);
@@ -203,6 +231,7 @@ void C5Printing::ltext90(const QString &text, qreal x)
 
 void C5Printing::ctext(const QString &text)
 {
+    ensureSpace(fLineHeight);
     QGraphicsTextItem *item = fCanvas->addText(text, fFont);
     QTextOption op;
     op.setAlignment(Qt::AlignHCenter);
@@ -217,6 +246,7 @@ void C5Printing::ctext(const QString &text)
 
 void C5Printing::ctextof(const QString &text, qreal x)
 {
+    ensureSpace(fLineHeight);
     QGraphicsTextItem *item = fCanvas->addText(text, fFont);
     int textwidth = item->boundingRect().width() / 2;
     item->moveBy(x - textwidth, fTop);
@@ -230,12 +260,7 @@ void C5Printing::ctextof(const QString &text, qreal x)
 
 void C5Printing::rtext(const QString text)
 {
-    //    QGraphicsTextItem *item = fCanvas->addText(text, fFont);
-    //    QTextOption op;
-    //    op.setAlignment(Qt::AlignRight);
-    //    item->document()->setDefaultTextOption(op);
-    //    item->moveBy(0, fTop);
-    //    setTemptop(item, -1);
+    ensureSpace(fLineHeight);
     QGraphicsTextItem *item = fCanvas->addText(text, fFont);
     int textwidth = item->boundingRect().width() + 25;
     item->moveBy(fNormalWidth - textwidth, fTop);
@@ -255,6 +280,7 @@ void C5Printing::image(const QString &fileName, Qt::Alignment align)
 void C5Printing::image(const QPixmap &image, Qt::Alignment align)
 {
     QPixmap p(image);
+    ensureSpace(p.height() > 0 ? p.height() : fLineHeight);
     //p = p.scaled(image.width(), p.height());
     fTempTop = fTempTop < (p.height()) ? (p.height()) : fTempTop;
     QGraphicsPixmapItem *pi = fCanvas->addPixmap(p);
@@ -284,20 +310,19 @@ bool C5Printing::br(qreal height)
     if (height == 0) {
         height = fLineHeight;
     }
-    fTop += height + (fTempTop > 0 ? fTempTop - fLineHeight : 0);
+    const qreal blockHeight = height + (fTempTop > 0 ? fTempTop - fLineHeight : 0);
+    fTop += blockHeight;
     fTempTop = 0;
-    if (fTop > fNormalHeight) {
+    if (fTop >= fNormalHeight) {
         if (fNoNewPage) {
             QRectF rf = fCanvas->sceneRect();
             rf.setHeight(fTop);
             fCanvas->setSceneRect(rf);
         } else {
-            fTop = 0;
-            QPageLayout::Orientation o = fCanvasOrientation[fCanvas];
-            fCanvas = new QGraphicsScene();
-            fCanvasList.append(fCanvas);
-            setSceneParams(fNormalWidth, fNormalHeight, o);
-            fCurrentPageIndex++;
+            QJsonObject ob;
+            ob["cmd"] = "newpage";
+            fJsonData.append(ob);
+            startNewPage();
             return true;
         }
     }
@@ -414,9 +439,35 @@ void C5Printing::setLineHeight()
 void C5Printing::setTemptop(QGraphicsTextItem *item, qreal textwidth)
 {
     item->setTextWidth(textwidth == -1 ? fNormalWidth : textwidth);
-    int blocks = item->document()->documentLayout()->documentSize().height();
-    qreal h = blocks;
+    const qreal h = item->document()->documentLayout()->documentSize().height();
     if (h > fLineHeight) {
         fTempTop = h < fTempTop ? fTempTop : h;
+    }
+
+    // Wrapped/tall text drawn near the bottom would be clipped by sceneRect.
+    // Move the just-drawn item(s) at this fTop onto a new page.
+    const qreal blockHeight = fTempTop > 0 ? fTempTop : fLineHeight;
+    if(!fNoNewPage && fTop > 0 && fTop + blockHeight > fNormalHeight) {
+        const qreal oldTop = fTop;
+        QList<QGraphicsItem *> toMove;
+        const QList<QGraphicsItem *> items = fCanvas->items();
+        for(QGraphicsItem *gi : items) {
+            if(qAbs(gi->y() - oldTop) < 0.5)
+                toMove.append(gi);
+        }
+
+        QJsonObject ob;
+        ob["cmd"] = "newpage";
+        fJsonData.append(ob);
+        startNewPage();
+
+        for(QGraphicsItem *gi : toMove) {
+            const QPointF pos = gi->pos();
+            fCanvasList.at(fCanvasList.count() - 2)->removeItem(gi);
+            fCanvas->addItem(gi);
+            gi->setPos(pos.x(), pos.y() - oldTop);
+        }
+        fTop = 0;
+        fTempTop = blockHeight > fLineHeight ? blockHeight : 0;
     }
 }

@@ -63,6 +63,7 @@ private:
     int m_timeout;
     int m_filterHall;
     bool m_filterUsedTables;
+    bool m_serviceStarted;
     Ui::DlgFace* ui;
     FF_HallDrv* m_hallDrv;
     QTimer m_timer;

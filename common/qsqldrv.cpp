@@ -1,13 +1,14 @@
 #include "qsqldrv.h"
-#include "cnfmaindb.h"
-#include "qsqldb.h"
-#include "logwriter.h"
-#include <windows.h>
-#include <QMessageBox>
 #include <QDateTime>
-#include <QHeaderView>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QFile>
+#include <QHeaderView>
+#include <QMessageBox>
+#include <QTime>
+#include "cnfmaindb.h"
+#include "logwriter.h"
+#include "qsqldb.h"
+#include <windows.h>
 
 QHostInfo ___hostInfo;
 QMutex ___dbMutex;
@@ -174,7 +175,7 @@ int QSqlDrv::genId(const QString &name)
     if(!dbState)
         m_db.close();
 
-    QSqlLog::write(name, "", q.lastQuery(), m_username, t.elapsed());
+    QSqlLog::write(name, q.lastQuery(), "", m_username, t.elapsed());
     return id;
 }
 

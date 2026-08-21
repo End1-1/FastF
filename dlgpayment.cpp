@@ -283,6 +283,7 @@ void DlgPayment::printPrecheck(const QString &qr)
     v[":id"] = order;
     fDb.select("update o_order set print_qty=abs(print_qty)+1 where id=:id", v, dr, false);
     fDrv->m_header.f_printQty = abs(fDrv->m_header.f_printQty) + 1;
+    LogThread::logOrderThread(fDrv->m_header.f_currStaffName, fDrv->m_header.f_id, "", tr("Precheck"), "");
     MTPrintKitchen m(data, dishes, false, qr, nullptr);
     m.run();
 }

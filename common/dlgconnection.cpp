@@ -1,12 +1,11 @@
 #include "dlgconnection.h"
 #include "ui_dlgconnection.h"
-
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QMessageBox>
 #include <QFile>
 #include "qsystem.h"
-#include "cnfmaindb.h"
+#include "../cnfmaindb.h"
 
 #define buff_size 255 * 7
 

@@ -71,6 +71,11 @@ void DlgTableForMovement::on_tblHall_currentItemChanged(QTableWidgetItem *curren
         return;
     }
 
+    if(fNewTableId == m_currentTableId) {
+        err(tr("Cannot move to the same table"));
+        return;
+    }
+
     HTable t;
 
     if(!t.tryLock(fNewTableId)) {
@@ -83,6 +88,11 @@ void DlgTableForMovement::on_tblHall_currentItemChanged(QTableWidgetItem *curren
 
 void DlgTableForMovement::on_btnOK_clicked()
 {
+    if(fNewTableId <= 0 || fNewTableId == m_currentTableId) {
+        err(tr("Cannot move to the same table"));
+        return;
+    }
+
     accept();
 }
 

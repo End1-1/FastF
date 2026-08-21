@@ -1,7 +1,7 @@
 #ifndef OD_HEADER_H
 #define OD_HEADER_H
 
-#include "dbdriver.h"
+#include "../dbdriver.h"
 
 class OD_Header
 {

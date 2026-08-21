@@ -5,8 +5,8 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QTime>
-#include "cnfmaindb.h"
-#include "logwriter.h"
+#include "../cnfmaindb.h"
+#include "../logwriter.h"
 #include "qsqldb.h"
 #include <windows.h>
 

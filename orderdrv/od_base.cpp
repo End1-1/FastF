@@ -1,5 +1,5 @@
 #include "od_base.h"
-#include "cnfmaindb.h"
+#include "../cnfmaindb.h"
 
 OD_Base::OD_Base()
 {

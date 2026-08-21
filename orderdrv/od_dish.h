@@ -1,7 +1,7 @@
 #ifndef OD_DISH_H
 #define OD_DISH_H
 
-#include "dbdriver.h"
+#include "../dbdriver.h"
 
 class OD_Dish : public QObject
 {

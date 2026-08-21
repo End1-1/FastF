@@ -306,7 +306,9 @@ int dlgorder::dishIndexFromListWidget()
 int dlgorder::listIndexOfDish(OD_Dish *d)
 {
     for(int i = 0; i < ui->lstOrder->count(); i++) {
-        if(d == ui->lstOrder->item(i)->data(Qt::UserRole).value<OD_Dish*>()) {
+        const int idx = ui->lstOrder->item(i)->data(Qt::UserRole).toInt();
+
+        if(idx >= 0 && idx < m_ord->m_dishes.count() && m_ord->dish(idx) == d) {
             return i;
         }
     }
@@ -414,9 +416,15 @@ void dlgorder::moveDish(int index, int dtid, const QString &dtname)
 {
     int tableId = m_ord->m_header.f_tableId;
     QString tableName = m_ord->m_header.f_tableName;
+    const int srcTableId = m_ord->m_header.f_tableId;
 
     if(dtid == 0) {
         if(DlgTableForMovement::getTable(tableId, this, m_hallDrv) != QDialog::Accepted) {
+            return;
+        }
+
+        if(tableId == srcTableId) {
+            message(tr("Cannot move to the same table"));
             return;
         }
 
@@ -431,6 +439,11 @@ void dlgorder::moveDish(int index, int dtid, const QString &dtname)
         toTableLockedMove(index, tableName, dtid);
         t.tryLock(dtid);
     } else {
+        if(dtid == srcTableId) {
+            message(tr("Cannot move to the same table"));
+            return;
+        }
+
         tableId = dtid;
         tableName = dtname;
         moveOrderDish(index, tableId, tableName);
@@ -576,6 +589,11 @@ void dlgorder::moveOrderDish(int index, int tableId, QString tableName)
 {
     if(tableId == 0) {
         msg("Program error dlgorder::moveOrderDish. Table id = 0");
+        return;
+    }
+
+    if(tableId == m_ord->m_header.f_tableId) {
+        message(tr("Cannot move to the same table"));
         return;
     }
 
@@ -1528,15 +1546,77 @@ void dlgorder::on_btnRmDish_clicked()
                                       QString::number(d->f_id), tr("Removed without print "),
                                       d->f_dishName + ": " + double_str(d->f_totalQty));
         } else {
-            DlgCorrection *dc = new DlgCorrection(m_ord, d, this);
+            double removeQty = d->f_totalQty;
+            const bool wholeQty = qAbs(d->f_totalQty - qRound(d->f_totalQty)) < 0.001;
 
-            if(dc->exec() == QDialog::Accepted) {
-                if(d->f_totalQty < 0.001 || d->f_stateId != DISH_STATE_NORMAL) {
-                    delete ui->lstOrder->item(listIndexOfDish(d));
+            if(d->f_totalQty >= 1.999 && wholeQty) {
+                double qty = 0;
+                const int maxQty = qRound(d->f_totalQty);
+
+                if(!DlgQty::qty(qty, maxQty,
+                                tr("Remove qty") + QString(" (1-%1)").arg(maxQty), this)) {
+                    return;
                 }
+
+                if(qty < 0.999) {
+                    message(tr("Enter a whole quantity"));
+                    return;
+                }
+
+                removeQty = qMin(qRound(qty), maxQty);
             }
 
-            dc->deleteLater();
+            if(removeQty + 0.001 >= d->f_totalQty) {
+                DlgCorrection *dc = new DlgCorrection(m_ord, d, this);
+
+                if(dc->exec() == QDialog::Accepted) {
+                    if(d->f_totalQty < 0.001 || d->f_stateId != DISH_STATE_NORMAL) {
+                        const int listIdx = listIndexOfDish(d);
+
+                        if(listIdx >= 0) {
+                            delete ui->lstOrder->item(listIdx);
+                        }
+                    }
+                }
+
+                dc->deleteLater();
+            } else {
+                const double oldTotal = d->f_totalQty;
+                const double oldPrinted = d->f_printedQty;
+                OD_Dish *part = d->copy();
+                part->f_totalQty = removeQty;
+                part->f_printedQty = removeQty;
+                part->f_emarks = "";
+                part->f_cancelrequest = 0;
+                part->f_removeReason = "";
+
+                if(m_ord->appendDish(part) < 0) {
+                    delete part;
+                    message(tr("SQL error"));
+                    return;
+                }
+
+                d->f_totalQty = oldTotal - removeQty;
+                d->f_printedQty = qMax(0.0, oldPrinted - removeQty);
+                d->m_saved = false;
+                m_ord->saveAll();
+
+                DlgCorrection *dc = new DlgCorrection(m_ord, part, this);
+
+                if(dc->exec() == QDialog::Accepted) {
+                    makeDishesList();
+                } else {
+                    d->f_totalQty = oldTotal;
+                    d->f_printedQty = oldPrinted;
+                    d->m_saved = false;
+                    part->f_stateId = DISH_STATE_REMOVED_NORMAL;
+                    part->m_saved = false;
+                    m_ord->saveAll();
+                    makeDishesList();
+                }
+
+                dc->deleteLater();
+            }
         }
     }
 

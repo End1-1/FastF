@@ -1,5 +1,5 @@
 #include "od_dish.h"
-#include "classes.h"
+#include "../classes.h"
 
 OD_Dish::OD_Dish()
 {
@@ -113,7 +113,7 @@ bool OD_Dish::saveToDB(DbDriver &db)
     db.bindValue(":flag14", flag14);
     db.bindValue(":f_storestate", f_storestate);
     db.bindValue(":f_removereason", f_removeReason);
-    db.bindValue(":cancelrequest", f_cancelrequest);
+    db.bindValue(":f_cancelrequest", f_cancelrequest);
     db.bindValue(":emarks", f_emarks.isEmpty() ? QVariant() : f_emarks);
     db.bindValue(":qr", f_qr);
     if (!db.execSQL())

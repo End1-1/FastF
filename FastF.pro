@@ -13,12 +13,13 @@ RC_FILE = res/res.rc
 
 include(c:/development/projects/IDramAPI/Idram.pri)
 
+INCLUDEPATH += $$PWD
 INCLUDEPATH += C:/development/projects/NewTax/Src
-INCLUDEPATH += C:/development/OpenSSL-Win64/include
+INCLUDEPATH += C:/development/OpemeSSL-Win64/include
 INCLUDEPATH += C:/development/OpenSSL-Win64/include/openssl
-INCLUDEPATH += ./common
-INCLUDEPATH += ./orderdrv
-INCLUDEPATH += ./MobilePointServer
+INCLUDEPATH += $$PWD/common
+INCLUDEPATH += $$PWD/orderdrv
+INCLUDEPATH += $$PWD/MobilePointServer
 
 SOURCES += main.cpp\
     QRCodeGenerator.cpp \

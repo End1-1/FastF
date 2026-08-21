@@ -113,13 +113,17 @@ void DlgCorrection::printRemoved(double qty)
 
 void DlgCorrection::requestForCorrection(double qty)
 {
+    Q_UNUSED(qty);
     setEnabledWidget(false);
+    fDish->f_cancelrequest = 1;
+    fDish->f_removeReason = ui->ptReason->toPlainText();
     m_ord->prepare("update o_dishes set f_removereason=:f_removereason, cancelrequest=:cancelrequest where id=:id");
     m_ord->bindValue(":id", fDish->f_id);
     m_ord->bindValue(":cancelrequest", 1);
-    m_ord->bindValue(":f_removereason", ui->ptReason->toPlainText());
+    m_ord->bindValue(":f_removereason", fDish->f_removeReason);
     m_ord->execSQL();
     m_ord->closeDB();
+    fDish->m_saved = true;
     msg(tr("Your request was accepted"));
     accept();
 }
@@ -235,6 +239,8 @@ void DlgCorrection::on_btnCheckResponse_clicked()
             msg(tr("Your request wasnt approved"));
             return;
         }
+
+        fDish->f_cancelrequest = 2;
     }
 
     ui->wButtons->setEnabled(true);

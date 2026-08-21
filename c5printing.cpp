@@ -351,7 +351,16 @@ int C5Printing::pageCount()
 
 QPageLayout::Orientation C5Printing::orientation(int index)
 {
-    return fCanvasOrientation[fCanvasList.at(index)];
+    if(index < 0 || index >= fCanvasList.count()) {
+        return QPageLayout::Portrait;
+    }
+
+    QGraphicsScene *scene = fCanvasList.at(index);
+    if(!scene || !fCanvasOrientation.contains(scene)) {
+        return QPageLayout::Portrait;
+    }
+
+    return fCanvasOrientation.value(scene);
 }
 
 bool C5Printing::print(const QString &printername, QPageSize pageSize, bool rotate90)
@@ -388,40 +397,85 @@ bool C5Printing::print(const QString &printername, QPageSize pageSize, bool rota
         //        }
         //        return true;
     }
-    QPrinterInfo pi;
-    if (!pi.availablePrinterNames().contains(printername, Qt::CaseInsensitive)) {
-        fErrorString = QString("%1 not exists in the system").arg(printername);
+
+    const QString requestedName = printername.trimmed();
+    if(requestedName.isEmpty()) {
+        fErrorString = QString("Printer name is empty");
         return false;
     }
-    if (fCanvasList.count() > 0) {
-        QPrinter printer(QPrinter::PrinterResolution);
-        printer.setPrinterName(printername);
-        QPageLayout::Orientation o = fCanvasOrientation[fCanvasList.at(0)];
-        printer.setPageOrientation(o);
-        printer.setPageSize(pageSize);
-        QPainter painter( &printer);
-        if (rotate90) {
-            painter.rotate(90);
-            painter.translate(0, -painter.viewport().width());
+
+    QString exactName;
+    const QStringList printers = QPrinterInfo::availablePrinterNames();
+    for(const QString &name : printers) {
+        if(name.compare(requestedName, Qt::CaseInsensitive) == 0) {
+            exactName = name;
+            break;
         }
-        for (int i = 0; i < fCanvasList.count(); i++) {
-            if (i > 0) {
-                o = fCanvasOrientation[fCanvasList.at(i)];
-                printer.setPageOrientation(o);
-                printer.newPage();
-            }
-            fCanvasList.at(i)->render( &painter);
+    }
+    if(exactName.isEmpty()) {
+        fErrorString = QString("%1 not exists in the system").arg(requestedName);
+        return false;
+    }
+
+    const QPrinterInfo printerInfo = QPrinterInfo::printerInfo(exactName);
+    if(printerInfo.isNull()) {
+        fErrorString = QString("%1 is not available").arg(exactName);
+        return false;
+    }
+
+    if (fCanvasList.isEmpty()) {
+        fErrorString = QString("Nothing to print");
+        return false;
+    }
+
+    QGraphicsScene *firstScene = fCanvasList.at(0);
+    if(!firstScene) {
+        fErrorString = QString("Invalid print page");
+        return false;
+    }
+
+    QPrinter printer(printerInfo, QPrinter::PrinterResolution);
+    if(!printer.isValid()) {
+        fErrorString = QString("%1 is not valid").arg(exactName);
+        return false;
+    }
+
+    QPageLayout::Orientation o = fCanvasOrientation.value(firstScene, QPageLayout::Portrait);
+    printer.setPageOrientation(o);
+    printer.setPageSize(pageSize);
+    QPainter painter(&printer);
+    if(!painter.isActive()) {
+        fErrorString = QString("Not printed");
+        return false;
+    }
+    if (rotate90) {
+        painter.rotate(90);
+        painter.translate(0, -painter.viewport().width());
+    }
+    for (int i = 0; i < fCanvasList.count(); i++) {
+        QGraphicsScene *scene = fCanvasList.at(i);
+        if(!scene) {
+            continue;
         }
-        if (printer.printerState() == QPrinter::Error) {
-            fErrorString = QString("Not printed");
-            return false;
+        if (i > 0) {
+            o = fCanvasOrientation.value(scene, QPageLayout::Portrait);
+            printer.setPageOrientation(o);
+            printer.newPage();
         }
+        scene->render(&painter);
+    }
+    if (printer.printerState() == QPrinter::Error) {
+        fErrorString = QString("Not printed");
+        return false;
     }
     return true;
 }
 
 void C5Printing::print(QPainter *p)
 {
+    if(!p || fCanvasList.isEmpty() || !fCanvasList.at(0)) {
+        return;
+    }
     fCanvasList.at(0)->render(p);
 }
 

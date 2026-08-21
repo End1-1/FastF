@@ -1,5 +1,5 @@
 #include "od_drv.h"
-#include "logthread.h"
+#include "../logthread.h"
 
 OD_Drv::OD_Drv() :
     OD_Base()

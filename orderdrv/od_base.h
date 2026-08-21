@@ -1,7 +1,7 @@
 #ifndef OD_BASE_H
 #define OD_BASE_H
 
-#include "dbdriver.h"
+#include "../dbdriver.h"
 #include "od_config.h"
 #include <QObject>
 

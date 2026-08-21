@@ -1,9 +1,11 @@
 #include "dlgqty.h"
 #include "ui_dlgqty.h"
+#include <QPushButton>
 
 DlgQty::DlgQty(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DlgQty)
+    ui(new Ui::DlgQty),
+    m_max(0)
 {
     ui->setupUi(this);
 }
@@ -15,12 +17,33 @@ DlgQty::~DlgQty()
 
 bool DlgQty::qty(double &d, QWidget *parent)
 {
+    return qty(d, 0, QString(), parent);
+}
+
+bool DlgQty::qty(double &d, double max, const QString &caption, QWidget *parent)
+{
     DlgQty *dq = new DlgQty(parent);
+    dq->m_max = max;
+    if(!caption.isEmpty()) {
+        dq->setWindowTitle(caption);
+    }
     bool result = dq->exec() == QDialog::Accepted;
-    if (result) {
+    if(result) {
         d = dq->ui->leText->text().toDouble();
     }
+    delete dq;
     return result;
+}
+
+void DlgQty::applyMaxLimit()
+{
+    if(m_max <= 0) {
+        return;
+    }
+    const double v = ui->leText->text().toDouble();
+    if(v > m_max) {
+        ui->leText->setText(QString::number(qRound(m_max)));
+    }
 }
 
 void DlgQty::on_pushButton_clicked()
@@ -32,6 +55,7 @@ void DlgQty::setText(QObject *o)
 {
     QPushButton *b = static_cast<QPushButton*>(o);
     ui->leText->setText(ui->leText->text() + b->text());
+    applyMaxLimit();
 }
 
 void DlgQty::on_pushButton_11_clicked()
@@ -86,10 +110,16 @@ void DlgQty::on_pushButton_10_clicked()
 
 void DlgQty::on_pushButton_12_clicked()
 {
-    if (ui->leText->text().toDouble() < 0.001) {
+    applyMaxLimit();
+    const double v = ui->leText->text().toDouble();
+    if(v < 0.001) {
         return;
     }
-    if (ui->leText->text().toDouble() > 99) {
+    if(m_max > 0) {
+        if(v > m_max) {
+            ui->leText->setText(QString::number(qRound(m_max)));
+        }
+    } else if(v > 99) {
         return;
     }
     accept();

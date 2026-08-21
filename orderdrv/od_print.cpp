@@ -1,12 +1,12 @@
 #include "od_print.h"
 #include <QProcess>
-#include "qsystem.h"
+#include "../qsystem.h"
 #include <math.h>
 #include <QHostInfo>
 #include "od_drv.h"
-#include "ff_settingsdrv.h"
+#include "../ff_settingsdrv.h"
 #include <QMessageBox>
-#include "c5printing.h"
+#include "../c5printing.h"
 #include <QFile>
 #include <QPrinterInfo>
 #include <QApplication>

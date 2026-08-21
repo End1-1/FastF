@@ -15,6 +15,7 @@ public:
     explicit DlgQty(QWidget *parent = nullptr);
     ~DlgQty();
     static bool qty(double &d, QWidget *parent = nullptr);
+    static bool qty(double &d, double max, const QString &caption, QWidget *parent = nullptr);
 
 private slots:
     void on_pushButton_clicked();
@@ -32,7 +33,9 @@ private slots:
 
 private:
     Ui::DlgQty *ui;
+    double m_max;
     void setText(QObject *o);
+    void applyMaxLimit();
 };
 
 #endif // DLGQTY_H
